@@ -25,8 +25,7 @@ const starsDisplay = computed(() => {
       <div class="hp-bar">
         <div class="hp-fill" style="width: 100%"></div>
       </div>
-      <div class="name" :title="fuggler.name">{{ fuggler.name }}</div>
-      <div class="types">{{ fuggler.types.join('') }}</div>
+      <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="fuggler-image" />
     </div>
   </FugglerTooltip>
 </template>
@@ -88,29 +87,11 @@ const starsDisplay = computed(() => {
   background: var(--color-toxic);
   height: 100%;
 }
-.name {
-  font-family: var(--title-font);
-  font-size: 1.1rem;
-  text-align: center;
-  padding: 0 5%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 90%;
-  margin-top: 15px;
-  text-shadow: 2px 2px 0 #000;
-  letter-spacing: 1px;
-}
-.types {
-  position: absolute;
-  bottom: 8%;
-  font-size: 0.8rem;
-  color: #fff;
-  font-weight: bold;
-  background: var(--color-stitch);
-  border: 1px solid #000;
-  padding: 0 5px;
-  box-shadow: 2px 2px 0 #000;
-  transform: rotate(5deg);
+.fuggler-image {
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
+  z-index: 1;
+  filter: drop-shadow(2px 4px 6px black);
 }
 </style>

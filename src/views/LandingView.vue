@@ -36,6 +36,10 @@ const startGame = () => {
       <button class="start-btn" @click="startGame" :disabled="!username.trim()">
         Entrar a la Arena
       </button>
+
+      <button class="pedia-btn" @click="router.push('/pedia')">
+        Ir a FugglerPedia
+      </button>
     </div>
     
     <div class="background-decorations">
@@ -141,6 +145,26 @@ input:focus {
   color: #222;
   box-shadow: none;
   cursor: not-allowed;
+}
+.pedia-btn {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 15px;
+  background: #111;
+  color: #fff;
+  border: 3px dashed var(--color-stitch);
+  border-radius: 10px 2px 10px 3px;
+  font-family: var(--title-font);
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform 0.1s;
+  box-shadow: 4px 4px 0px #000;
+}
+.pedia-btn:hover {
+  transform: scale(1.02) rotate(-1deg);
+  background: #2a251f;
+  color: var(--color-toxic);
 }
 
 .background-decorations {

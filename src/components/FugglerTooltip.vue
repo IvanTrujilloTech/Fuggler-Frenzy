@@ -15,6 +15,7 @@ const isVisible = ref(false)
 
 const { floatingStyles } = useFloating(reference, floating, {
   placement: 'top',
+  strategy: 'fixed',
   middleware: [offset(10), flip(), shift({ padding: 10 })]
 })
 
@@ -31,25 +32,27 @@ const hide = () => isVisible.value = false
   >
     <slot></slot>
 
-    <div 
-      v-if="isVisible && fuggler" 
-      ref="floating" 
-      :style="floatingStyles" 
-      class="tooltip-content"
-    >
-      <div class="tt-header">
-        <strong>{{ fuggler.name }}</strong>
-        <span class="tt-tier">Tier {{ fuggler.tier }}</span>
-      </div>
-      <div class="tt-body">
-        <span class="tt-types">{{ fuggler.types.join(' & ') }}</span>
-        <div class="tt-stats">
-          <span>HP: {{ Math.floor(fuggler.stats.hp) }}</span>
-          <span>ATK: {{ Math.floor(fuggler.stats.damage) }}</span>
-          <span>AS: {{ fuggler.stats.attackSpeed }}</span>
+    <Teleport to="body">
+      <div 
+        v-if="isVisible && fuggler" 
+        ref="floating" 
+        :style="[floatingStyles, { position: 'fixed' }]" 
+        class="tooltip-content"
+      >
+        <div class="tt-header">
+          <strong>{{ fuggler.name }}</strong>
+          <span class="tt-tier">Tier {{ fuggler.tier }}</span>
+        </div>
+        <div class="tt-body">
+          <span class="tt-types">{{ fuggler.types.join(' & ') }}</span>
+          <div class="tt-stats">
+            <span>HP: {{ Math.floor(fuggler.stats.hp) }}</span>
+            <span>ATK: {{ Math.floor(fuggler.stats.damage) }}</span>
+            <span>AS: {{ fuggler.stats.attackSpeed }}</span>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 

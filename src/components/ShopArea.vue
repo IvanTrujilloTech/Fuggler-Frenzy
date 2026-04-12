@@ -22,6 +22,7 @@ const store = useGameStore()
       >
         <div v-if="fuggler" class="card-content">
           <div class="cost">{{ fuggler.cost }}G</div>
+          <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="shop-fuggler-image" />
           <div class="name">{{ fuggler.name }}</div>
           <div class="types">{{ fuggler.types.join(' | ') }}</div>
         </div>
@@ -129,10 +130,17 @@ const store = useGameStore()
   box-shadow: 3px 3px 0 var(--color-toxic);
   transform: rotate(5deg);
 }
+.shop-fuggler-image {
+  width: 75px;
+  height: 75px;
+  object-fit: contain;
+  margin-top: 10px;
+  filter: drop-shadow(2px 4px 6px black);
+}
 .name {
-  margin-top: 40px;
+  margin-top: 10px;
   font-family: var(--title-font);
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   letter-spacing: 1px;
 }
 .types {

@@ -18,66 +18,109 @@ const baseStats = (tier) => {
   }
 };
 
-const createFuggler = (id, name, types, tier, cost) => ({
+const createFuggler = (id, name, types, tier, cost, image = null) => ({
   id,
   name,
   types,
   tier,
   cost,
-  stats: baseStats(tier)
+  stats: baseStats(tier),
+  image
 });
 
-// FugglerPedia database (All 42)
+import imgAwelaBotones from '../assets/units/AwelaBotones.png';
+import imgGaptoothMcgoo from '../assets/units/GaptoothMcgoo.png';
+import imgGranSaqueador from '../assets/units/GranSaqueador.png';
+import imgIbai from '../assets/units/Ibai.png';
+import imgIndecisiveMonster from '../assets/units/IndecisiveMonster.png';
+import imgLudopatia from '../assets/units/Ludopatia.png';
+import imgMcNugget from '../assets/units/McNugget.png';
+import imgMordisquitosFelpa from '../assets/units/MordisquitosFelpa.png';
+import imgMunchMunch from '../assets/units/MunchMunch.png';
+import imgMunchMunchRC from '../assets/units/MunchMunchRC.png';
+import imgOldTooth from '../assets/units/OldTooth.png';
+import imgPatriarcaColmillo from '../assets/units/PatriarcaColmillo.png';
+import imgResiduo0 from '../assets/units/Residuo0.png';
+import imgReyDeLasCajas from '../assets/units/ReyDeLasCajas.png';
+import imgSasquoosh from '../assets/units/Sasquoosh.png';
+import imgSirSplodge from '../assets/units/SirSplodge.png';
+import imgSquidge from '../assets/units/Squidge.png';
+import imgVagabundo from '../assets/units/Vagabundo.png';
+import imgatomicfuggler from '../assets/units/atomicfuggler.png';
+import imgburundanga from '../assets/units/burundanga.png';
+import imgcalamardo from '../assets/units/calamardo.png';
+import imgcalsotetes from '../assets/units/calsotetes.png';
+import imgcesped from '../assets/units/cesped.png';
+import imgcharcaCharquez from '../assets/units/charcaCharquez.png';
+import imgcheto from '../assets/units/cheto.png';
+import imggenzqueen from '../assets/units/gen z queen.png';
+import imggoldidgger from '../assets/units/goldidgger.png';
+import imgjulio from '../assets/units/julio.png';
+import imgknight from '../assets/units/knight.png';
+import imgkosovo from '../assets/units/kosovo.png';
+import imglacobra from '../assets/units/lacobra.png';
+import imglanadelrey from '../assets/units/lanadelrey.png';
+import imglorena from '../assets/units/lorena.png';
+import imglorna from '../assets/units/lorna.png';
+import imgmanuela from '../assets/units/manuela.png';
+import imgmarsupial from '../assets/units/marsupial.png';
+import imgmelinda_gordon from '../assets/units/melinda_gordon.png';
+import imgoctavio from '../assets/units/octavio.png';
+import imgpepins from '../assets/units/pepins.png';
+import imgpetitsuisse from '../assets/units/petitsuisse.png';
+import imgpunchline from '../assets/units/punchline.png';
+import imgrallita from '../assets/units/rallita.png';
+
 export const FUGGLERS = [
   // 10 Comunes (Cost 1)
-  createFuggler('c1', 'Mordisquitos de Felpa', ['D', 'B'], 1, 1),
-  createFuggler('c2', 'Old Tooth', ['D', 'R'], 1, 1),
-  createFuggler('c3', 'Gaptooth Mcgoo', ['D', 'I'], 1, 1),
-  createFuggler('c4', 'Munch Munch C4', ['D', 'C'], 1, 1),
-  createFuggler('c5', 'Sasquoosh', ['B', 'R'], 1, 1),
-  createFuggler('c6', 'Sir Splodge-a-lot', ['B', 'I'], 1, 1),
-  createFuggler('c7', 'Indecisive Monster', ['B', 'C'], 1, 1),
-  createFuggler('c8', 'Squidge', ['R', 'I'], 1, 1),
-  createFuggler('c9', 'Munch Munch C9', ['R', 'C'], 1, 1),
-  createFuggler('c10', 'Vagabundo de Almacén', ['I', 'C'], 1, 1),
+  createFuggler('c1', 'Mordisquitos de Felpa', ['D', 'B'], 1, 1, imgMordisquitosFelpa),
+  createFuggler('c2', 'Old Tooth', ['D', 'R'], 1, 1, imgOldTooth),
+  createFuggler('c3', 'Gaptooth Mcgoo', ['D', 'I'], 1, 1, imgGaptoothMcgoo),
+  createFuggler('c4', 'Munch Munch', ['D', 'C'], 1, 1, imgMunchMunch),
+  createFuggler('c5', 'Sasquoosh', ['B', 'R'], 1, 1, imgSasquoosh),
+  createFuggler('c6', 'Sir Splodge-a-lot', ['B', 'I'], 1, 1, imgSirSplodge),
+  createFuggler('c7', 'Indecisive Monster', ['B', 'C'], 1, 1, imgIndecisiveMonster),
+  createFuggler('c8', 'Squidge', ['R', 'I'], 1, 1, imgSquidge),
+  createFuggler('c9', 'Munch Munch RC', ['R', 'C'], 1, 1, imgMunchMunchRC),
+  createFuggler('c10', 'Vagabundo de Almacén', ['I', 'C'], 1, 1, imgVagabundo),
 
-  // 15 Raros (Cost 2/3, we assume 2 for simplicity now)
-  createFuggler('r1', 'Raro DB', ['D', 'B'], 2, 2),
-  createFuggler('r2', 'Grin Grin', ['D', 'R'], 2, 2),
-  createFuggler('r3', 'Mccoo', ['D', 'I'], 2, 2),
-  createFuggler('r4', 'Raro DC', ['D', 'C'], 2, 2),
-  createFuggler('r5', 'Raro BR', ['B', 'R'], 2, 2),
-  createFuggler('r6', 'Raro BI', ['B', 'I'], 2, 2),
-  createFuggler('r7', 'Raro BC', ['B', 'C'], 2, 2),
-  createFuggler('r8', 'Raro RI', ['R', 'I'], 2, 2),
-  createFuggler('r9', 'Raro RC', ['R', 'C'], 2, 2),
-  createFuggler('r10', 'Raro IC', ['I', 'C'], 2, 2),
-  createFuggler('r11', 'Raro DB Repetido', ['D', 'B'], 2, 2),
-  createFuggler('r12', 'Raro DR Repetido', ['D', 'R'], 2, 2),
-  createFuggler('r13', 'Raro DI Repetido', ['D', 'I'], 2, 2),
-  createFuggler('r14', 'Raro DC Repetido', ['D', 'C'], 2, 2),
-  createFuggler('r15', 'Raro BR Repetido', ['B', 'R'], 2, 2),
+  // 15 Raros (Cost 2)
+  createFuggler('r1', 'Ibai', ['D', 'B'], 2, 2, imgIbai),
+  createFuggler('r2', 'Ludopatia', ['D', 'R'], 2, 2, imgLudopatia),
+  createFuggler('r3', 'McNugget', ['D', 'I'], 2, 2, imgMcNugget),
+  createFuggler('r4', 'Atomic Fuggler', ['D', 'C'], 2, 2, imgatomicfuggler),
+  createFuggler('r5', 'Burundanga', ['B', 'R'], 2, 2, imgburundanga),
+  createFuggler('r6', 'Calamardo', ['B', 'I'], 2, 2, imgcalamardo),
+  createFuggler('r7', 'Calsotetes', ['B', 'C'], 2, 2, imgcalsotetes),
+  createFuggler('r8', 'Cesped', ['R', 'I'], 2, 2, imgcesped),
+  createFuggler('r9', 'Charca Charquez', ['R', 'C'], 2, 2, imgcharcaCharquez),
+  createFuggler('r10', 'Cheto', ['I', 'C'], 2, 2, imgcheto),
+  createFuggler('r11', 'Gen Z Queen', ['D', 'B'], 2, 2, imggenzqueen),
+  createFuggler('r12', 'Gold Digger', ['D', 'R'], 2, 2, imggoldidgger),
+  createFuggler('r13', 'Julio', ['D', 'I'], 2, 2, imgjulio),
+  createFuggler('r14', 'Knight', ['D', 'C'], 2, 2, imgknight),
+  createFuggler('r15', 'Kosovo', ['B', 'R'], 2, 2, imgkosovo),
 
   // 12 Epicos (Cost 4)
-  createFuggler('e1', 'Epico DB', ['D', 'B'], 3, 4),
-  createFuggler('e2', 'Epico DR', ['D', 'R'], 3, 4),
-  createFuggler('e3', 'Epico DI', ['D', 'I'], 3, 4),
-  createFuggler('e4', 'Epico DC', ['D', 'C'], 3, 4),
-  createFuggler('e5', 'Epico BR', ['B', 'R'], 3, 4),
-  createFuggler('e6', 'Epico BI', ['B', 'I'], 3, 4),
-  createFuggler('e7', 'Epico BC', ['B', 'C'], 3, 4),
-  createFuggler('e8', 'Epico RI', ['R', 'I'], 3, 4),
-  createFuggler('e9', 'Epico RC', ['R', 'C'], 3, 4),
-  createFuggler('e10', 'Epico IC', ['I', 'C'], 3, 4),
-  createFuggler('e11', 'Epico BI Comodín', ['B', 'I'], 3, 4),
-  createFuggler('e12', 'Epico BC Comodín', ['B', 'C'], 3, 4),
+  createFuggler('e1', 'La Cobra', ['D', 'B'], 3, 4, imglacobra),
+  createFuggler('e2', 'Lana Del Rey', ['D', 'R'], 3, 4, imglanadelrey),
+  createFuggler('e3', 'Lorena', ['D', 'I'], 3, 4, imglorena),
+  createFuggler('e4', 'Lorna', ['D', 'C'], 3, 4, imglorna),
+  createFuggler('e5', 'Manuela', ['B', 'R'], 3, 4, imgmanuela),
+  createFuggler('e6', 'Marsupial', ['B', 'I'], 3, 4, imgmarsupial),
+  createFuggler('e7', 'Melinda Gordon', ['B', 'C'], 3, 4, imgmelinda_gordon),
+  createFuggler('e8', 'Octavio', ['R', 'I'], 3, 4, imgoctavio),
+  createFuggler('e9', 'Pepins', ['R', 'C'], 3, 4, imgpepins),
+  createFuggler('e10', 'Petit Suisse', ['I', 'C'], 3, 4, imgpetitsuisse),
+  createFuggler('e11', 'Punchline', ['B', 'I'], 3, 4, imgpunchline),
+  createFuggler('e12', 'Rallita', ['B', 'C'], 3, 4, imgrallita),
 
   // 5 Legendarios (Cost 5, Single Type)
-  createFuggler('l1', 'El Patriarca Colmillo', ['D'], 4, 5),
-  createFuggler('l2', 'La Abuela de los Botones', ['B'], 4, 5),
-  createFuggler('l3', 'El Residuo 0', ['R'], 4, 5),
-  createFuggler('l4', 'El Rey de las Cajas', ['I'], 4, 5),
-  createFuggler('l5', 'El Gran Saqueador', ['C'], 4, 5),
+  createFuggler('l1', 'El Patriarca Colmillo', ['D'], 4, 5, imgPatriarcaColmillo),
+  createFuggler('l2', 'La Abuela de los Botones', ['B'], 4, 5, imgAwelaBotones),
+  createFuggler('l3', 'El Residuo 0', ['R'], 4, 5, imgResiduo0),
+  createFuggler('l4', 'El Rey de las Cajas', ['I'], 4, 5, imgReyDeLasCajas),
+  createFuggler('l5', 'El Gran Saqueador', ['C'], 4, 5, imgGranSaqueador),
 ];
 
 // Calcula probabilidad por ronda, ejemplo básico (ajustable):
