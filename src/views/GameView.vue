@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useGameStore } from '../stores/gameStore'
 import ShopArea from '../components/ShopArea.vue'
 import BoardArea from '../components/BoardArea.vue'
+import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
 
 const store = useGameStore()
 const router = useRouter()
@@ -31,7 +32,10 @@ onUnmounted(() => {
           <span class="timer">{{ store.timeLeft }}s</span>
         </div>
         <div class="hud-item round-info">Ronda: {{ store.round }}</div>
-        <div class="hud-item gold-info">Oro: {{ store.gold }}</div>
+        <div class="hud-item gold-info">
+          <img :src="iconCoin" class="coin-icon" alt="Oro" />
+          {{ store.gold }}
+        </div>
       </div>
     </header>
 
@@ -82,6 +86,15 @@ onUnmounted(() => {
   background: #d4af37;
   color: #000;
   transform: rotate(-1deg);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.coin-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
 }
 .hp-text {
   color: var(--color-toxic);

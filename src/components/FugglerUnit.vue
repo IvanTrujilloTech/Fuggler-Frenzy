@@ -6,6 +6,10 @@ const props = defineProps({
   fuggler: {
     type: Object,
     required: true
+  },
+  minimal: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -21,8 +25,8 @@ const starsDisplay = computed(() => {
 <template>
   <FugglerTooltip :fuggler="fuggler">
     <div class="fuggler-unit" :class="`tier-${fuggler.tier}`">
-      <div class="stars">{{ starsDisplay }}</div>
-      <div class="hp-bar">
+      <div v-if="!minimal" class="stars">{{ starsDisplay }}</div>
+      <div v-if="!minimal" class="hp-bar">
         <div class="hp-fill" style="width: 100%"></div>
       </div>
       <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="fuggler-image" />

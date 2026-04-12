@@ -1,10 +1,10 @@
 // Definición de tipos
 export const FUGGLER_TYPES = {
-  D: { id: 'D', name: 'Dientudos', color: '#B91C1C' }, // Rojo oscuro
-  B: { id: 'B', name: 'Botones', color: '#1D4ED8' },  // Azul
-  R: { id: 'R', name: 'Radioactivos', color: '#16A34A' }, // Verde Neon
-  I: { id: 'I', name: 'Inadaptados', color: '#9333EA' }, // Morado
-  C: { id: 'C', name: 'Cazadores', color: '#EAB308' }    // Amarillo
+  D: { id: 'D', name: 'Dientudos', color: '#618BB3' },   // Azul acero (del icono DIENTUDOS)
+  B: { id: 'B', name: 'Botones', color: '#61B361' },     // Verde (del icono BOTONES)
+  R: { id: 'R', name: 'Radioactivos', color: '#FFEC58' }, // Amarillo (del icono RADIOACTIVOS)
+  I: { id: 'I', name: 'Inadaptados', color: '#AA3B3D' }, // Rojo oscuro (del icono INADAPTADOS)
+  C: { id: 'C', name: 'Cazadores', color: '#9261B3' }    // Morado (del icono CAZADORES)
 };
 
 // Utilidad para crear stats base

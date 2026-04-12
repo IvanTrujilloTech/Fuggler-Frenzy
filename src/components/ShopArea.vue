@@ -1,5 +1,19 @@
 <script setup>
 import { useGameStore } from '../stores/gameStore'
+import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
+import iconDientudos from '../assets/HUD/SINERGYS/DIENTUDOS.svg'
+import iconBotones from '../assets/HUD/SINERGYS/BOTONES.svg'
+import iconRadioactivos from '../assets/HUD/SINERGYS/RADIOACTIVOS.svg'
+import iconInadaptados from '../assets/HUD/SINERGYS/INADAPTADOS.svg'
+import iconCazadores from '../assets/HUD/SINERGYS/CAZADORES.svg'
+
+const SYNERGY_ICONS = {
+  D: iconDientudos,
+  B: iconBotones,
+  R: iconRadioactivos,
+  I: iconInadaptados,
+  C: iconCazadores,
+}
 
 const store = useGameStore()
 </script>
@@ -7,9 +21,13 @@ const store = useGameStore()
 <template>
   <div class="shop-container">
     <div class="shop-info">
-      <h3>Tienda (Oro: {{ store.gold }})</h3>
+      <h3>
+        Tienda
+        <img :src="iconCoin" class="coin-icon-shop" alt="Oro" />
+        {{ store.gold }}
+      </h3>
       <button class="btn-reroll" @click="store.rollShop(false)" :disabled="store.gold < 2">
-        Reroll (2G)
+        Reroll (2 <img :src="iconCoin" class="coin-icon-shop" alt="Oro" />)
       </button>
     </div>
     <div class="shop-cards">
@@ -21,10 +39,21 @@ const store = useGameStore()
         @click="store.buyUnit(index)"
       >
         <div v-if="fuggler" class="card-content">
-          <div class="cost">{{ fuggler.cost }}G</div>
+          <div class="cost">
+            {{ fuggler.cost }}
+            <img :src="iconCoin" class="coin-icon-cost" alt="Oro" />
+          </div>
           <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="shop-fuggler-image" />
           <div class="name">{{ fuggler.name }}</div>
-          <div class="types">{{ fuggler.types.join(' | ') }}</div>
+          <div class="types">
+            <img
+              v-for="typeKey in fuggler.types"
+              :key="typeKey"
+              :src="SYNERGY_ICONS[typeKey]"
+              class="type-icon-shop"
+              :alt="typeKey"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -120,15 +149,31 @@ const store = useGameStore()
   background: #000;
   color: var(--color-toxic);
   border: 3px solid #000;
-  width: 35px;
+  min-width: 35px;
   height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 2px;
   font-family: var(--number-font);
   font-size: 1rem;
   box-shadow: 3px 3px 0 var(--color-toxic);
   transform: rotate(5deg);
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+.coin-icon-shop {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+.coin-icon-cost {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5));
 }
 .shop-fuggler-image {
   width: 75px;
@@ -145,11 +190,18 @@ const store = useGameStore()
 }
 .types {
   margin-top: auto;
-  font-size: 1rem;
-  color: #fff;
-  background: var(--color-blood);
-  padding: 2px 8px;
-  border: 2px solid #000;
-  transform: rotate(-3deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: rgba(0,0,0,0.5);
+  border-top: 2px solid #000;
+}
+.type-icon-shop {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7));
 }
 </style>

@@ -5,6 +5,20 @@ import { FUGGLERS, FUGGLER_TYPES } from '../data/fugglerPedia'
 import { ITEM_COMPONENTS, ARTIFACT_RECIPES } from '../data/items'
 import FugglerUnit from '../components/FugglerUnit.vue'
 import ItemTooltip from '../components/ItemTooltip.vue'
+import iconDientudos from '../assets/HUD/SINERGYS/DIENTUDOS.svg'
+import iconBotones from '../assets/HUD/SINERGYS/BOTONES.svg'
+import iconRadioactivos from '../assets/HUD/SINERGYS/RADIOACTIVOS.svg'
+import iconInadaptados from '../assets/HUD/SINERGYS/INADAPTADOS.svg'
+import iconCazadores from '../assets/HUD/SINERGYS/CAZADORES.svg'
+import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
+
+const SYNERGY_ICONS = {
+  D: iconDientudos,
+  B: iconBotones,
+  R: iconRadioactivos,
+  I: iconInadaptados,
+  C: iconCazadores,
+}
 
 const router = useRouter()
 const activeTab = ref('fugglers')
@@ -55,12 +69,13 @@ const fugglersByType = computed(() => {
         <!-- FUGGLERS TAB -->
         <div v-if="activeTab === 'fugglers'" class="scroll-area flex-col">
           <div v-for="(fList, typeKey) in fugglersByType" :key="typeKey" class="type-section">
-            <h2 class="type-title" :style="{ backgroundColor: FUGGLER_TYPES[typeKey].color }">
+            <h2 class="type-title" :style="{ backgroundColor: FUGGLER_TYPES[typeKey].color, color: typeKey === 'R' ? '#000' : '#fff' }">
+              <img :src="SYNERGY_ICONS[typeKey]" class="synergy-icon" :alt="FUGGLER_TYPES[typeKey].name" />
               {{ FUGGLER_TYPES[typeKey].name }}
             </h2>
             <div class="fuggler-grid">
               <div class="fuggler-slot is-hex" v-for="fuggler in fList" :key="fuggler.id + '-' + typeKey">
-                <FugglerUnit :fuggler="fuggler" />
+                <FugglerUnit :fuggler="fuggler" :minimal="true" />
               </div>
             </div>
           </div>
@@ -287,6 +302,27 @@ const fugglersByType = computed(() => {
   padding: 10px;
   border-radius: 8px;
   border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  min-height: 60px;
+}
+
+.synergy-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8));
+}
+
+.coin-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
 }
 
 .item-info h3 {

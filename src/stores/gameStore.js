@@ -11,7 +11,7 @@ export const useGameStore = defineStore('game', {
     timeLeft: 30,
     timerInterval: null,
     shop: [null, null, null, null, null],
-    bench: Array.from({ length: 10 }, () => []), // 10 fixed slots, each empty or containing 1 unit
+    bench: Array.from({ length: 9 }, () => []), // 9 fixed slots, each empty or containing 1 unit
     board: Array.from({ length: 21 }, () => []), // 21 fixed slots (3x7 grid)
     boardEnemy: Array.from({ length: 21 }, () => []), // 21 slots
     inventory: [], // Items array

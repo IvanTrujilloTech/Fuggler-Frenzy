@@ -1,6 +1,20 @@
 <script setup>
 import { ref } from 'vue'
 import { useFloating, offset, flip, shift } from '@floating-ui/vue'
+import { FUGGLER_TYPES } from '../data/fugglerPedia'
+import iconDientudos from '../assets/HUD/SINERGYS/DIENTUDOS.svg'
+import iconBotones from '../assets/HUD/SINERGYS/BOTONES.svg'
+import iconRadioactivos from '../assets/HUD/SINERGYS/RADIOACTIVOS.svg'
+import iconInadaptados from '../assets/HUD/SINERGYS/INADAPTADOS.svg'
+import iconCazadores from '../assets/HUD/SINERGYS/CAZADORES.svg'
+
+const SYNERGY_ICONS = {
+  D: iconDientudos,
+  B: iconBotones,
+  R: iconRadioactivos,
+  I: iconInadaptados,
+  C: iconCazadores,
+}
 
 const props = defineProps({
   fuggler: {
@@ -44,7 +58,17 @@ const hide = () => isVisible.value = false
           <span class="tt-tier">Tier {{ fuggler.tier }}</span>
         </div>
         <div class="tt-body">
-          <span class="tt-types">{{ fuggler.types.join(' & ') }}</span>
+          <div class="tt-types">
+            <span
+              v-for="typeKey in fuggler.types"
+              :key="typeKey"
+              class="tt-type-badge"
+              :style="{ backgroundColor: FUGGLER_TYPES[typeKey].color, color: typeKey === 'R' ? '#000' : '#fff' }"
+            >
+              <img :src="SYNERGY_ICONS[typeKey]" class="type-icon" :alt="FUGGLER_TYPES[typeKey].name" />
+              {{ FUGGLER_TYPES[typeKey].name }}
+            </span>
+          </div>
           <div class="tt-stats">
             <span>HP: {{ Math.floor(fuggler.stats.hp) }}</span>
             <span>ATK: {{ Math.floor(fuggler.stats.damage) }}</span>
@@ -89,10 +113,27 @@ const hide = () => isVisible.value = false
   color: gold;
 }
 .tt-types {
-  display: block;
-  font-size: 0.85em;
-  color: #aaa;
+  display: flex;
+  gap: 6px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.tt-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+  padding: 2px 8px 2px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.type-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
 }
 .tt-stats {
   display: flex;
