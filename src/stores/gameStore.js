@@ -15,6 +15,7 @@ export const useGameStore = defineStore('game', {
     board: Array.from({ length: 21 }, () => []), // 21 fixed slots (3x7 grid)
     boardEnemy: Array.from({ length: 21 }, () => []), // 21 slots
     inventory: [], // Items array
+    isDraggingFuggler: false, // True while dragging a fuggler from board/bench
   }),
   getters: {
     activeBoardUnits: (state) => {
@@ -124,12 +125,39 @@ export const useGameStore = defineStore('game', {
       }
 
       if (unit) {
-        // GDD: Recuperar 50% de la inversión
-        const sellValue = Math.max(1, Math.floor(unit.cost / 2))
-        this.gold += sellValue
+        // Devolver el coste completo del fuggler al vender
+        this.gold += unit.cost
         // TODO: Handle Pelusa de Ombligo logic here if unit had items
       }
       this.checkUpgrades()
+    },
+
+    sellUnitByInstance(instanceId) {
+      if (this.phase !== 'PLANNING') return
+      // Search in bench
+      for (let i = 0; i < this.bench.length; i++) {
+        const slot = this.bench[i]
+        if (slot.length > 0 && slot[0].instanceId === instanceId) {
+          const unit = slot.pop()
+          this.gold += unit.cost
+          this.checkUpgrades()
+          return
+        }
+      }
+      // Search in board
+      for (let i = 0; i < this.board.length; i++) {
+        const slot = this.board[i]
+        if (slot.length > 0 && slot[0].instanceId === instanceId) {
+          const unit = slot.pop()
+          this.gold += unit.cost
+          this.checkUpgrades()
+          return
+        }
+      }
+    },
+
+    setDraggingFuggler(value) {
+      this.isDraggingFuggler = value
     },
 
     moveUnit(fromZone, toZone, fromIndex, toIndex) {

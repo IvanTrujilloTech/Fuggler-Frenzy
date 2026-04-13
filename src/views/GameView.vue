@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useGameStore } from '../stores/gameStore'
 import ShopArea from '../components/ShopArea.vue'
 import BoardArea from '../components/BoardArea.vue'
+import SellPanel from '../components/SellPanel.vue'
 import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
 
 const store = useGameStore()
@@ -41,6 +42,7 @@ onUnmounted(() => {
 
     <div class="game-content">
       <BoardArea />
+      <SellPanel />
     </div>
 
     <ShopArea />
@@ -126,7 +128,7 @@ onUnmounted(() => {
 .game-content {
   flex-grow: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   overflow: hidden;
 }
 </style>

@@ -69,7 +69,78 @@ const store = useGameStore()
   flex-direction: column;
   gap: 1rem;
   box-shadow: inset 0 10px 20px rgba(0,0,0,0.8);
+  position: relative;
+  overflow: hidden;
 }
+
+/* ── Sell zone ── */
+.sell-zone-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(3px);
+}
+.sell-zone {
+  width: 85%;
+  height: 80px;
+  border: 4px dashed var(--color-blood, #e63946);
+  border-radius: 6px 20px 5px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  animation: sell-pulse 1.2s ease-in-out infinite;
+  background: rgba(230, 57, 70, 0.08);
+  box-shadow: 0 0 20px rgba(230,57,70,0.3);
+  cursor: default;
+}
+.sell-zone--over {
+  border-color: #ff6b6b;
+  background: rgba(230, 57, 70, 0.25);
+  transform: scale(1.04);
+  box-shadow: 0 0 40px rgba(255, 107, 107, 0.7);
+  animation: none;
+}
+@keyframes sell-pulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(230,57,70,0.3); }
+  50%      { box-shadow: 0 0 32px rgba(230,57,70,0.7); }
+}
+.sell-zone-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  user-select: none;
+}
+.sell-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+}
+.sell-label {
+  font-family: var(--title-font);
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: #ff6b6b;
+  text-shadow: 2px 2px 0 #000;
+  text-transform: uppercase;
+}
+
+/* ── Sell fade transition ── */
+.sell-fade-enter-active,
+.sell-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.sell-fade-enter-from,
+.sell-fade-leave-to {
+  opacity: 0;
+}
+
 .shop-info {
   display: flex;
   justify-content: space-between;
