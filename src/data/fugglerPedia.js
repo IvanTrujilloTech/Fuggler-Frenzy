@@ -1,13 +1,13 @@
-// Definición de tipos
+// definicion de tipos de fuggler
 export const FUGGLER_TYPES = {
-  D: { id: 'D', name: 'Dientudos', color: '#618BB3' },   // Azul acero (del icono DIENTUDOS)
-  B: { id: 'B', name: 'Botones', color: '#61B361' },     // Verde (del icono BOTONES)
-  R: { id: 'R', name: 'Radioactivos', color: '#FFEC58' }, // Amarillo (del icono RADIOACTIVOS)
-  I: { id: 'I', name: 'Inadaptados', color: '#AA3B3D' }, // Rojo oscuro (del icono INADAPTADOS)
-  C: { id: 'C', name: 'Cazadores', color: '#9261B3' }    // Morado (del icono CAZADORES)
+  D: { id: 'D', name: 'Dientudos', color: '#618BB3' },   // azul acero (del icono DIENTUDOS)
+  B: { id: 'B', name: 'Botones', color: '#61B361' },     // verde (del icono BOTONES)
+  R: { id: 'R', name: 'Radioactivos', color: '#FFEC58' }, // amarillo (del icono RADIOACTIVOS)
+  I: { id: 'I', name: 'Inadaptados', color: '#AA3B3D' }, // rojo oscuro (del icono INADAPTADOS)
+  C: { id: 'C', name: 'Cazadores', color: '#9261B3' }    // morado (del icono CAZADORES)
 };
 
-// Utilidad para crear stats base
+// utilidad para crear estadisticas base segun el tier
 const baseStats = (tier) => {
   switch(tier) {
     case 1: return { hp: 500, damage: 50, attackSpeed: 1.0, armor: 20 };
@@ -72,7 +72,7 @@ import imgpunchline from '../assets/units/punchline.png';
 import imgrallita from '../assets/units/rallita.png';
 
 export const FUGGLERS = [
-  // 10 Comunes (Cost 1)
+  // 10 comunes (coste 1)
   createFuggler('c1', 'Mordisquitos de Felpa', ['D', 'B'], 1, 1, imgMordisquitosFelpa),
   createFuggler('c2', 'Old Tooth', ['D', 'R'], 1, 1, imgOldTooth),
   createFuggler('c3', 'Gaptooth Mcgoo', ['D', 'I'], 1, 1, imgGaptoothMcgoo),
@@ -84,7 +84,7 @@ export const FUGGLERS = [
   createFuggler('c9', 'Munch Munch RC', ['R', 'C'], 1, 1, imgMunchMunchRC),
   createFuggler('c10', 'Vagabundo de Almacén', ['I', 'C'], 1, 1, imgVagabundo),
 
-  // 15 Raros (Cost 2)
+  // 15 raros (coste 2)
   createFuggler('r1', 'Ibai', ['D', 'B'], 2, 2, imgIbai),
   createFuggler('r2', 'Ludopatia', ['D', 'R'], 2, 2, imgLudopatia),
   createFuggler('r3', 'McNugget', ['D', 'I'], 2, 2, imgMcNugget),
@@ -101,7 +101,7 @@ export const FUGGLERS = [
   createFuggler('r14', 'Knight', ['D', 'C'], 2, 2, imgknight),
   createFuggler('r15', 'Kosovo', ['B', 'R'], 2, 2, imgkosovo),
 
-  // 12 Epicos (Cost 4)
+  // 12 epicos (coste 4)
   createFuggler('e1', 'La Cobra', ['D', 'B'], 3, 4, imglacobra),
   createFuggler('e2', 'Lana Del Rey', ['D', 'R'], 3, 4, imglanadelrey),
   createFuggler('e3', 'Lorena', ['D', 'I'], 3, 4, imglorena),
@@ -115,7 +115,7 @@ export const FUGGLERS = [
   createFuggler('e11', 'Punchline', ['B', 'I'], 3, 4, imgpunchline),
   createFuggler('e12', 'Rallita', ['B', 'C'], 3, 4, imgrallita),
 
-  // 5 Legendarios (Cost 5, Single Type)
+  // 5 legendarios (coste 5, un solo tipo)
   createFuggler('l1', 'El Patriarca Colmillo', ['D'], 4, 5, imgPatriarcaColmillo),
   createFuggler('l2', 'La Abuela de los Botones', ['B'], 4, 5, imgAwelaBotones),
   createFuggler('l3', 'El Residuo 0', ['R'], 4, 5, imgResiduo0),
@@ -123,10 +123,10 @@ export const FUGGLERS = [
   createFuggler('l5', 'El Gran Saqueador', ['C'], 4, 5, imgGranSaqueador),
 ];
 
-// Calcula probabilidad por ronda, ejemplo básico (ajustable):
+// calcula la probabilidad de aparicion por tier segun la ronda (ajustable)
 export function getShopProbabilities(round) {
   if (round < 3) return { 1: 100, 2: 0, 3: 0, 4: 0 };
   if (round < 6) return { 1: 75, 2: 25, 3: 0, 4: 0 };
   if (round < 9) return { 1: 50, 2: 35, 3: 15, 4: 0 };
-  return { 1: 30, 2: 40, 3: 25, 4: 5 }; // Rondas avanzadas
+  return { 1: 30, 2: 40, 3: 25, 4: 5 }; // rondas avanzadas
 }

@@ -6,7 +6,6 @@
 </template>
 
 <style>
-/* Global styles updated */
 html, body {
   margin: 0;
   padding: 0;

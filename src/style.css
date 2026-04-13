@@ -12,7 +12,6 @@
   --color-felt: #2b2b2b;
 
   color-scheme: dark;
-  /* Muggy dark background */
   background-color: #1a1a1c;
   background-image: radial-gradient(circle at 50% 50%, #2b2b36 0%, #111 100%);
   color: #eeddcc;

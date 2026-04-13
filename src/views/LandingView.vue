@@ -65,7 +65,7 @@ const startGame = () => {
   z-index: 10;
   background: repeating-linear-gradient(45deg, #302b25, #302b25 10px, #2a251f 10px, #2a251f 20px);
   padding: 3rem;
-  border-radius: 4px 18px 3px 20px; /* Rough corner cut */
+  border-radius: 4px 18px 3px 20px; /* corte irregular de esquinas */
   border: 4px dashed var(--color-stitch);
   box-shadow: 10px 10px 0px rgba(0,0,0,0.8);
   text-align: center;

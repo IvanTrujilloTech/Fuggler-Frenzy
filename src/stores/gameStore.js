@@ -4,18 +4,19 @@ import { FUGGLERS, getShopProbabilities } from '../data/fugglerPedia'
 export const useGameStore = defineStore('game', {
   state: () => ({
     round: 0,
-    phase: 'IDLE', // IDLE, PLANNING, COMBAT, ROULETTE
+    phase: 'IDLE', // fases posibles: IDLE, PLANNING, COMBAT, ROULETTE
     gold: 10,
     hp: 100,
     username: '',
     timeLeft: 30,
     timerInterval: null,
     shop: [null, null, null, null, null],
-    bench: Array.from({ length: 9 }, () => []), // 9 fixed slots, each empty or containing 1 unit
-    board: Array.from({ length: 21 }, () => []), // 21 fixed slots (3x7 grid)
-    boardEnemy: Array.from({ length: 21 }, () => []), // 21 slots
-    inventory: [], // Items array
-    isDraggingFuggler: false, // True while dragging a fuggler from board/bench
+    bench: Array.from({ length: 9 }, () => []), // 9 slots fijos, cada uno vacio o con 1 unidad
+    board: Array.from({ length: 21 }, () => []), // 21 slots fijos (cuadricula 3x7)
+    boardEnemy: Array.from({ length: 21 }, () => []), // 21 slots del tablero enemigo
+    inventory: [], // array de objetos del jugador
+    isDraggingFuggler: false, // true mientras se arrastra un fuggler del tablero o banquillo
+    draggingUnit: null, // unidad que se esta arrastrando desde el banquillo
   }),
   getters: {
     activeBoardUnits: (state) => {
@@ -28,9 +29,9 @@ export const useGameStore = defineStore('game', {
     startNewRound() {
       this.round++
       this.phase = 'PLANNING'
-      this.timeLeft = 30 // 30 seconds for planning
-      // Ingreso pasivo
-      this.gold += 5 // Base gold per round
+      this.timeLeft = 30 // 30 segundos de fase de planificacion
+      // ingreso pasivo de oro al inicio de ronda
+      this.gold += 5 // oro base por ronda
       this.rollShop(true)
       this.startTimer()
     },
@@ -58,11 +59,11 @@ export const useGameStore = defineStore('game', {
 
     startCombat() {
       this.phase = 'COMBAT'
-      // TODO: Logic to spawn enemies and resolve combat automatically
+      // todo: logica para spawnear enemigos y resolver el combate automaticamente
     },
     
     rollShop(isFree = false) {
-      if (!isFree && this.gold < 2) return // Reroll cost = 2
+      if (!isFree && this.gold < 2) return // coste de reroll = 2 de oro
       if (!isFree) this.gold -= 2
 
       const probs = getShopProbabilities(this.round)
@@ -81,11 +82,11 @@ export const useGameStore = defineStore('game', {
           }
         }
         
-        // Filter fugglers by tier
+        // filtra fugglers por tier
         const pool = FUGGLERS.filter(f => f.tier === tierSelected)
         if (pool.length > 0) {
           const randomUnit = pool[Math.floor(Math.random() * pool.length)]
-          // We must clone the unit so each copy on board is unique!
+          // hay que clonar la unidad para que cada copia en el tablero sea unica
           newShop.push({ ...randomUnit, instanceId: crypto.randomUUID(), stars: 1, items: [] })
         } else {
           newShop.push(null)
@@ -95,18 +96,18 @@ export const useGameStore = defineStore('game', {
     },
 
     buyUnit(shopIndex) {
-      if (this.phase !== 'PLANNING') return // Cannot buy during combat
+      if (this.phase !== 'PLANNING') return // no se puede comprar durante el combate
       const unit = this.shop[shopIndex]
       if (!unit) return
       
       if (this.gold < unit.cost) return
       
-      // Find empty bench slot
+      // busca el primer slot vacio del banquillo
       const emptySlotIndex = this.bench.findIndex(slot => slot.length === 0)
-      if (emptySlotIndex === -1) return // Bench full
+      if (emptySlotIndex === -1) return // banquillo lleno
 
       this.gold -= unit.cost
-      // Remove positional ids from shop unit and grant a true instanceId
+      // asigna un instanceId unico a la unidad comprada
       this.bench[emptySlotIndex].push({...unit, instanceId: crypto.randomUUID()})
       this.shop[shopIndex] = null
       
@@ -125,16 +126,16 @@ export const useGameStore = defineStore('game', {
       }
 
       if (unit) {
-        // Devolver el coste completo del fuggler al vender
+        // devuelve el coste completo del fuggler al venderlo
         this.gold += unit.cost
-        // TODO: Handle Pelusa de Ombligo logic here if unit had items
+        // todo: gestionar la logica de pelusa de ombligo si la unidad tenia objetos
       }
       this.checkUpgrades()
     },
 
     sellUnitByInstance(instanceId) {
       if (this.phase !== 'PLANNING') return
-      // Search in bench
+      // busca en el banquillo
       for (let i = 0; i < this.bench.length; i++) {
         const slot = this.bench[i]
         if (slot.length > 0 && slot[0].instanceId === instanceId) {
@@ -144,7 +145,7 @@ export const useGameStore = defineStore('game', {
           return
         }
       }
-      // Search in board
+      // busca en el tablero
       for (let i = 0; i < this.board.length; i++) {
         const slot = this.board[i]
         if (slot.length > 0 && slot[0].instanceId === instanceId) {
@@ -161,7 +162,7 @@ export const useGameStore = defineStore('game', {
     },
 
     moveUnit(fromZone, toZone, fromIndex, toIndex) {
-      // Zone can be 'bench' or 'board'
+      // la zona puede ser 'bench' o 'board'
       const fromArray = fromZone === 'bench' ? this.bench : this.board
       const toArray = toZone === 'bench' ? this.bench : this.board
 
@@ -175,13 +176,13 @@ export const useGameStore = defineStore('game', {
     },
 
     checkUpgrades() {
-      // Check for 3 units of same id and same stars
-      // They can be on the board or bench.
+      // comprueba si hay 3 unidades con el mismo id y las mismas estrellas
+      // pueden estar en el tablero o en el banquillo
       const allUnits = []
       this.bench.forEach((slot, i) => { if (slot.length > 0) allUnits.push({ ...slot[0], loc: 'bench', idx: i }) })
       this.board.forEach((slot, i) => { if (slot.length > 0) allUnits.push({ ...slot[0], loc: 'board', idx: i }) })
 
-      // Only stars 1 and 2 can upgrade
+      // solo las estrellas 1 y 2 pueden subir de nivel
       for (let starLevel = 1; starLevel <= 2; starLevel++) {
         const groups = {}
         for (const unit of allUnits) {
@@ -205,13 +206,13 @@ export const useGameStore = defineStore('game', {
       const targetUnit = threeUnits[0]
       const otherUnits = [threeUnits[1], threeUnits[2]]
 
-      // Remove others using their specific loc and idx
+      // elimina las otras dos unidades usando su loc e idx especificos
       otherUnits.forEach(u => {
         if (u.loc === 'board') this.board[u.idx] = []
         if (u.loc === 'bench') this.bench[u.idx] = []
       })
 
-      // Upgrade target
+      // mejora la unidad objetivo
       const targetSlot = targetUnit.loc === 'board' ? this.board[targetUnit.idx] : this.bench[targetUnit.idx]
       if (targetSlot.length > 0) {
         targetSlot[0].stars += 1

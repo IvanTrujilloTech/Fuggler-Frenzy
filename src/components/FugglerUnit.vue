@@ -13,7 +13,7 @@ const props = defineProps({
   }
 })
 
-// Star symbol display
+// muestra el simbolo de estrellas de la unidad
 const starsDisplay = computed(() => {
   if (props.fuggler.stars === 1) return 'A'
   if (props.fuggler.stars === 2) return 'A+'
@@ -39,7 +39,7 @@ const starsDisplay = computed(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 4px 12px 3px 8px; /* Fallback si no es hex */
+  border-radius: 4px 12px 3px 8px; /* fallback si no es hexagono */
   background: var(--color-felt);
   display: flex;
   flex-direction: column;
@@ -51,7 +51,7 @@ const starsDisplay = computed(() => {
   transition: all 0.2s;
 }
 
-/* Para encajar en el hexágono */
+/* para encajar dentro del hexagono */
 .is-hex .fuggler-unit {
   border-radius: 0;
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
@@ -59,7 +59,7 @@ const starsDisplay = computed(() => {
   box-shadow: none;
 }
 
-/* Texturas rayadas por rareza */
+/* texturas rayadas segun la rareza */
 .tier-1 { background: repeating-linear-gradient(135deg, rgba(156,163,175,0.7), rgba(156,163,175,0.7) 4px, transparent 4px, transparent 8px), #374151; }
 .tier-2 { background: repeating-linear-gradient(135deg, rgba(59,130,246,0.7), rgba(59,130,246,0.7) 4px, transparent 4px, transparent 8px), #1e3a8a; }
 .tier-3 { background: repeating-linear-gradient(135deg, rgba(168,85,247,0.7), rgba(168,85,247,0.7) 4px, transparent 4px, transparent 8px), #581c87; }

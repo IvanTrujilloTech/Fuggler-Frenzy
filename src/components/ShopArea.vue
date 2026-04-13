@@ -73,7 +73,7 @@ const store = useGameStore()
   overflow: hidden;
 }
 
-/* ── Sell zone ── */
+/* zona de venta */
 .sell-zone-wrapper {
   position: absolute;
   inset: 0;
@@ -131,7 +131,7 @@ const store = useGameStore()
   text-transform: uppercase;
 }
 
-/* ── Sell fade transition ── */
+/* transicion de desvanecimiento de la zona de venta */
 .sell-fade-enter-active,
 .sell-fade-leave-active {
   transition: opacity 0.2s ease;

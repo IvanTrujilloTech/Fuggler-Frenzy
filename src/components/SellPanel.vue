@@ -1,22 +1,48 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useGameStore } from '../stores/gameStore'
-import draggable from 'vuedraggable'
-import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
+import Sortable from 'sortablejs'
 
 const store = useGameStore()
-
-const sellZone = ref([])
+const sellZoneEl = ref(null)
 const isDragOver = ref(false)
-// Counter to avoid false dragleave when moving over child elements
 let dragOverCounter = 0
 
-// Only accept drops from bench-slot elements (not from board hexagons)
-const sellGroup = {
-  name: 'fugglers',
-  put: (to, from) => from.el.classList.contains('bench-slot'),
-  pull: false,
-}
+onMounted(() => {
+  if (!sellZoneEl.value) return
+
+  // sortable crudo en vez del componente vuedraggable.
+  // motivo: el hook `updated` de vuedraggable se ejecuta DENTRO del ciclo de
+  // patch de vue e intenta escribir `__draggable_context` en nodos del dom que
+  // ya pueden haber sido eliminados por el desmontaje reactivo → crash.
+  // usar sortable directamente evita ese ciclo de vida por completo.
+  Sortable.create(sellZoneEl.value, {
+    group: {
+      name: 'fugglers',
+      // solo se aceptan drops que vengan de un bench-slot
+      put: (to, from) => from.el.classList.contains('bench-slot'),
+      pull: false,
+    },
+    onAdd(evt) {
+      // sortable ya ha sacado el elemento del sortable del banquillo.
+      // vuedraggable en el banquillo escucha el evento 'remove' de sortable
+      // y ya ha actualizado store.bench[idx] antes de que esto se ejecute.
+      const unit = store.draggingUnit
+
+      // elimina el nodo del dom de inmediato — no queremos que se quede en la zona de venta.
+      evt.item.remove()
+
+      if (unit) {
+        store.gold += unit.cost
+        store.checkUpgrades()
+      }
+
+      store.draggingUnit = null
+      isDragOver.value = false
+      dragOverCounter = 0 // reinicia el contador del drag
+    },
+  })
+})
 
 function onDragEnter() {
   dragOverCounter++
@@ -30,20 +56,6 @@ function onDragLeave() {
     isDragOver.value = false
   }
 }
-
-function onSellChange(evt) {
-  if (evt.added) {
-    const unit = evt.added.element
-    // vuedraggable already removed the unit from the bench before this fires.
-    // Use the element directly → no searching needed, no phase check issues.
-    store.gold += unit.cost
-    store.checkUpgrades()
-    isDragOver.value = false
-    dragOverCounter = 0
-    // Clear on nextTick so vuedraggable finishes its internal update first
-    nextTick(() => { sellZone.value = [] })
-  }
-}
 </script>
 
 <template>
@@ -53,23 +65,15 @@ function onSellChange(evt) {
       @dragenter="onDragEnter"
       @dragleave="onDragLeave"
     >
-      <draggable
-        v-model="sellZone"
-        :group="sellGroup"
-        item-key="instanceId"
+      <div
+        ref="sellZoneEl"
         class="sell-drop-zone"
         :class="{ 'sell-drop-zone--over': isDragOver }"
-        @change="onSellChange"
       >
-        <template #item="{}">
-          <span style="display:none"></span>
-        </template>
-        <template #header>
-          <div class="sell-drop-inner">
-            <span class="sell-label">{{ isDragOver ? '¡Suelta!' : 'Arrastra\naquí' }}</span>
-          </div>
-        </template>
-      </draggable>
+        <div class="sell-drop-inner">
+          <span class="sell-label">{{ isDragOver ? '¡Suelta!' : 'Arrastra\naquí' }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>

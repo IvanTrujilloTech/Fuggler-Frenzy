@@ -9,9 +9,9 @@ const getBoardGroupOptions = (index) => {
   return {
     name: 'fugglers',
     put: (to, from) => {
-      // Si la casilla ya tiene un fuggler, no se puede soltar
+      // si la casilla ya tiene un fuggler, no se puede soltar
       if (store.board[index].length >= 1) return false;
-      // Si viene del banquillo y ya hay 6 fugglers, bloquear
+      // si viene del banquillo y ya hay 6 fugglers en tablero, bloquear
       const isFromBench = from.el.classList.contains('bench-slot');
       if (isFromBench && store.activeBoardUnits >= 6) return false;
       return true;
@@ -22,6 +22,7 @@ const getBoardGroupOptions = (index) => {
 const getBenchGroupOptions = (index) => {
   return {
     name: 'fugglers',
+    // solo permite drop si el slot del banquillo esta vacio
     put: () => {
       return store.bench[index].length === 0;
     }
@@ -34,7 +35,7 @@ const getBenchGroupOptions = (index) => {
   <div class="board-area">
     <div class="hex-board enemy-board">
       <div class="hex-row" v-for="row in 3" :key="'e-row-'+row">
-        <!-- Enemy board is static for now -->
+        <!-- tablero enemigo estatico por ahora -->
         <div 
           class="hex-slot is-hex enemy-slot" 
           v-for="col in 7" 
@@ -73,6 +74,8 @@ const getBenchGroupOptions = (index) => {
           :group="getBenchGroupOptions(idx)"
           item-key="instanceId"
           class="bench-slot"
+          @start="() => { store.draggingUnit = store.bench[idx][0] ?? null }"
+          @end="store.draggingUnit = null"
         >
           <template #item="{ element }">
             <FugglerUnit :fuggler="element" />
@@ -121,9 +124,9 @@ const getBenchGroupOptions = (index) => {
 .hex-row {
   display: flex;
   justify-content: center;
-  margin-bottom: -22px; /* Superposición vertical para encajar hexagonos */
+  margin-bottom: -22px; /* superposicion vertical para encajar hexagonos */
 }
-/* Indentar las filas pares (o impares) para formar el panal */
+/* indentar las filas pares para formar el panal de hexagonos */
 .hex-row:nth-child(even) {
   margin-left: 85px; 
 }
@@ -146,7 +149,7 @@ const getBenchGroupOptions = (index) => {
   transform: scale(1.1);
 }
 
-/* Banquillo Normal (Cuadrado) */
+/* banquillo normal (cuadrado) */
 .bench-area {
   margin-top: auto;
   text-align: center;

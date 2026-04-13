@@ -23,7 +23,7 @@ const SYNERGY_ICONS = {
 const router = useRouter()
 const activeTab = ref('fugglers')
 
-// Group fugglers by their types
+// agrupa los fugglers por tipo
 const fugglersByType = computed(() => {
   const groups = {}
   Object.keys(FUGGLER_TYPES).forEach(typeKey => {
@@ -66,7 +66,7 @@ const fugglersByType = computed(() => {
       </div>
 
       <div class="content-area">
-        <!-- FUGGLERS TAB -->
+        <!-- pestana de fugglers -->
         <div v-if="activeTab === 'fugglers'" class="scroll-area flex-col">
           <div v-for="(fList, typeKey) in fugglersByType" :key="typeKey" class="type-section">
             <h2 class="type-title" :style="{ backgroundColor: FUGGLER_TYPES[typeKey].color, color: typeKey === 'R' ? '#000' : '#fff' }">
@@ -81,7 +81,7 @@ const fugglersByType = computed(() => {
           </div>
         </div>
 
-        <!-- ITEMS TAB -->
+        <!-- pestana de objetos -->
         <div v-if="activeTab === 'items'" class="scroll-area flex-col">
           <div class="type-section">
             <h2 class="type-title" style="background-color: #555;">Componentes Básicos</h2>
@@ -268,7 +268,7 @@ const fugglersByType = computed(() => {
   z-index: 10;
 }
 
-/* Items Grid */
+/* cuadricula de objetos */
 .items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
