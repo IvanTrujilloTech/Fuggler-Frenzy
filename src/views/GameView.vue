@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useGameStore } from '../stores/gameStore'
 import ShopArea from '../components/ShopArea.vue'
 import BoardArea from '../components/BoardArea.vue'
+import SynergyTracker from '../components/SynergyTracker.vue'
 import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
 
 const store = useGameStore()
@@ -40,6 +41,7 @@ onUnmounted(() => {
     </header>
 
     <div class="game-content">
+      <SynergyTracker />
       <BoardArea />
     </div>
 
@@ -82,19 +84,21 @@ onUnmounted(() => {
 .player-info {
   transform: rotate(-2deg);
 }
+.coin-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
 .gold-info {
   background: #d4af37;
   color: #000;
   transform: rotate(-1deg);
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-.coin-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  gap: 8px;
+  font-size: 1.25rem;
+  font-weight: bold;
 }
 .hp-text {
   color: var(--color-toxic);
@@ -126,7 +130,9 @@ onUnmounted(() => {
 .game-content {
   flex-grow: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   overflow: hidden;
+  padding: 1rem;
+  gap: 1rem;
 }
 </style>

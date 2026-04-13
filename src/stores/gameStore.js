@@ -21,6 +21,29 @@ export const useGameStore = defineStore('game', {
       let count = 0
       state.board.forEach(slot => { if (slot.length > 0) count++ })
       return count
+    },
+    activeSynergies: (state) => {
+      // Gather all unique units from board (ignore bench)
+      const uniqueUnits = new Set()
+      const allUnitsLocs = [...state.board]
+      const synergiesCount = {}
+      
+      allUnitsLocs.forEach(slot => {
+        if (slot.length > 0) {
+          const unit = slot[0]
+          if (!uniqueUnits.has(unit.id)) {
+            uniqueUnits.add(unit.id)
+            // Add to synergy count
+            if (unit.types) {
+              unit.types.forEach(synergy => {
+                synergiesCount[synergy] = (synergiesCount[synergy] || 0) + 1
+              })
+            }
+          }
+        }
+      })
+      
+      return synergiesCount
     }
   },
   actions: {
