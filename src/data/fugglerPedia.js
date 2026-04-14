@@ -90,6 +90,11 @@ import imgpepins from '../assets/units/pepins.png';
 import imgpetitsuisse from '../assets/units/petitsuisse.png';
 import imgpunchline from '../assets/units/punchline.png';
 import imgrallita from '../assets/units/rallita.png';
+import iconDientudos from '../assets/HUD/SINERGYS/DIENTUDOS.svg';
+import iconBotones from '../assets/HUD/SINERGYS/BOTONES.svg';
+import iconRadioactivos from '../assets/HUD/SINERGYS/RADIOACTIVOS.svg';
+import iconInadaptados from '../assets/HUD/SINERGYS/INADAPTADOS.svg';
+import iconCazadores from '../assets/HUD/SINERGYS/CAZADORES.svg';
 
 export const FUGGLERS = [
   // 10 comunes (coste 1)
