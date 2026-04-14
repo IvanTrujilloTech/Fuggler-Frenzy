@@ -70,7 +70,14 @@ const store = useGameStore()
   gap: 1rem;
   box-shadow: inset 0 10px 20px rgba(0,0,0,0.8);
   position: relative;
-  overflow: hidden;
+  overflow-y: auto; /* Permitir scroll vertical si el wrap es mucho */
+  min-height: 150px;
+}
+
+@media (max-width: 600px) {
+  .shop-container {
+    padding-bottom: 2rem;
+  }
 }
 
 /* zona de venta */
@@ -177,6 +184,13 @@ const store = useGameStore()
   display: flex;
   gap: 1.5rem;
   justify-content: center;
+  flex-wrap: wrap; /* Permitir que las cartas bajen de fila */
+}
+
+@media (max-width: 600px) {
+  .shop-cards {
+    gap: 0.5rem;
+  }
 }
 .shop-card {
   width: 140px;
@@ -198,6 +212,24 @@ const store = useGameStore()
 .shop-card:not(.empty):hover {
   transform: scale(1.05) translateY(-10px) rotate(3deg);
   box-shadow: 12px 12px 0 var(--color-toxic);
+}
+
+@media (max-width: 600px) {
+  .shop-card {
+    width: 90px;
+    height: 120px;
+    border-width: 2px;
+  }
+}
+
+@media (max-width: 450px) {
+  .shop-card {
+    width: 70px;
+    height: 100px;
+  }
+  .shop-cards {
+    gap: 0.2rem;
+  }
 }
 .shop-card.empty {
   background: rgba(0,0,0,0.3);
@@ -258,6 +290,32 @@ const store = useGameStore()
   font-family: var(--title-font);
   font-size: 1.1rem;
   letter-spacing: 1px;
+}
+
+@media (max-width: 600px) {
+  .name {
+    font-size: 0.8rem;
+    margin-top: 5px;
+  }
+  .shop-fuggler-image {
+    width: 45px;
+    height: 45px;
+    margin-top: 5px;
+  }
+  .cost {
+    min-width: 25px;
+    height: 25px;
+    font-size: 0.8rem;
+    top: -5px;
+    right: -5px;
+  }
+  .shop-info {
+    font-size: 1.1rem;
+  }
+  .btn-reroll {
+    font-size: 1rem;
+    padding: 0.3rem 0.8rem;
+  }
 }
 .types {
   margin-top: auto;

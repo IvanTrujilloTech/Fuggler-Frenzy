@@ -24,22 +24,23 @@ onUnmounted(() => {
 
 <template>
   <main class="game-container">
-    <header class="game-header">
-      <div class="hud">
-        <div class="hud-item player-info">
-          {{ store.username }} | HP: <span class="hp-text">{{ store.hp }}</span>
+    <div class="scale-wrapper">
+      <header class="game-header">
+        <div class="hud">
+          <div class="hud-item player-info">
+            {{ store.username }} | HP: <span class="hp-text">{{ store.hp }}</span>
+          </div>
+          <div class="hud-item timer-info" :class="{ 'warning': store.timeLeft <= 5 }">
+            <span class="phase">{{ store.phase }}</span>
+            <span class="timer">{{ store.timeLeft }}s</span>
+          </div>
+          <div class="hud-item round-info">Ronda: {{ store.round }}</div>
+          <div class="hud-item gold-info">
+            <img :src="iconCoin" class="coin-icon" alt="Oro" />
+            {{ store.gold }}
+          </div>
         </div>
-        <div class="hud-item timer-info" :class="{ 'warning': store.timeLeft <= 5 }">
-          <span class="phase">{{ store.phase }}</span>
-          <span class="timer">{{ store.timeLeft }}s</span>
-        </div>
-        <div class="hud-item round-info">Ronda: {{ store.round }}</div>
-        <div class="hud-item gold-info">
-          <img :src="iconCoin" class="coin-icon" alt="Oro" />
-          {{ store.gold }}
-        </div>
-      </div>
-    </header>
+      </header>
 
     <div class="game-content">
       <SynergyTracker />
@@ -47,17 +48,29 @@ onUnmounted(() => {
       <SellPanel />
     </div>
 
-    <ShopArea />
+      <ShopArea />
+    </div>
   </main>
 </template>
 
 <style scoped>
 .game-container {
   height: 100vh;
+  width: 100vw;
   background-color: transparent;
   color: #fff;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+.scale-wrapper {
+  transform: scale(0.8);
+  transform-origin: top center;
+  width: 125%;
+  height: 125%;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 }
 .game-header {
   padding: 1rem;
@@ -136,5 +149,87 @@ onUnmounted(() => {
   overflow: hidden;
   padding: 1rem;
   gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .hud {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    justify-items: center;
+  }
+  .hud-item {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    transform: none !important; /* Quitar rotaciones para ahorrar espacio */
+  }
+  .timer-info {
+    justify-content: center;
+    gap: 0.4rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .hud {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  .hud-item {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .game-content {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .hud {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    justify-items: center;
+  }
+  .hud-item {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    transform: none !important; /* Quitar rotaciones para ahorrar espacio */
+  }
+  .timer-info {
+    justify-content: center;
+    gap: 0.4rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .hud {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  .hud-item {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .game-content {
+    flex-direction: column;
+    overflow-y: auto;
+  }
 }
 </style>

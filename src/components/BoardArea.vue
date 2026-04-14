@@ -47,7 +47,7 @@ const getBenchGroupOptions = (index) => {
     </div>
 
     <div class="hex-board player-board">
-      <h2 class="board-title">Tablero Aliado ({{ store.activeBoardUnits }} / 6)</h2>
+      <h2 style="color: var(--color-toxic);">({{ store.activeBoardUnits }} / 6)</h2>
       <div class="hex-row" v-for="row in 3" :key="'p-row-'+row">
         <draggable
           v-for="col in 7"
@@ -65,7 +65,7 @@ const getBenchGroupOptions = (index) => {
     </div>
 
     <div class="bench-area">
-      <h2>Banquillo (Arrastra aquí)</h2>
+      <h2>Banquillo</h2>
       <div class="bench-grid">
         <draggable
           v-for="(slot, idx) in store.bench"
@@ -131,6 +131,15 @@ const getBenchGroupOptions = (index) => {
   margin-left: 85px; 
 }
 
+@media (max-width: 768px) {
+  .hex-row {
+    margin-bottom: -18px;
+  }
+  .hex-row:nth-child(even) {
+    margin-left: 65px;
+  }
+}
+
 .hex-slot {
   width: 80px;
   height: 92px;
@@ -141,6 +150,32 @@ const getBenchGroupOptions = (index) => {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+@media (max-width: 768px) {
+  .hex-slot {
+    width: 60px;
+    height: 69px;
+    margin: 0 3px;
+  }
+}
+
+@media (max-width: 450px) {
+  .hex-slot {
+    width: 38px;
+    height: 44px;
+    margin: 0 1px;
+  }
+  .hex-row {
+    margin-bottom: -10px;
+  }
+  .hex-row:nth-child(even) {
+    margin-left: 40px;
+  }
+  .board-title {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
 }
 .player-board .hex-slot {
   background: repeating-linear-gradient(45deg, #2b1f3c, #2b1f3c 5px, #36294a 5px, #36294a 10px);
@@ -184,5 +219,14 @@ const getBenchGroupOptions = (index) => {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+@media (max-width: 600px) {
+  .board-title {
+    font-size: 1.5rem;
+  }
+  .bench-slot {
+    width: 60px;
+    height: 60px;
+  }
 }
 </style>

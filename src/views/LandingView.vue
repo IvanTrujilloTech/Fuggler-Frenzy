@@ -69,7 +69,8 @@ const startGame = () => {
   border: 4px dashed var(--color-stitch);
   box-shadow: 10px 10px 0px rgba(0,0,0,0.8);
   text-align: center;
-  width: 400px;
+  width: 90%;
+  max-width: 400px;
   transform: rotate(-2deg);
 }
 .title {
@@ -187,5 +188,25 @@ input:focus {
   width: 300px; height: 500px;
   background: #3b82f6;
   bottom: -150px; right: -50px;
+}
+@media (max-width: 600px) {
+  .glass-card {
+    padding: 1.5rem;
+  }
+  .title {
+    font-size: 3.5rem;
+    letter-spacing: 2px;
+  }
+  .start-btn {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-height: 600px) {
+  .landing-container {
+    height: auto;
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
 }
 </style>

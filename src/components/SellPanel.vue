@@ -99,6 +99,18 @@ function onDragLeave() {
   box-shadow: -6px 0 20px rgba(230, 57, 70, 0.2);
 }
 
+@media (max-width: 768px) {
+  .sell-panel {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    flex-direction: row;
+    border-left: none;
+    border-top: 5px dashed #e63946;
+    padding: 0.5rem;
+  }
+}
+
 .sell-panel-title {
   font-family: var(--title-font);
   font-size: 1rem;
@@ -110,6 +122,13 @@ function onDragLeave() {
   margin-bottom: 0.5rem;
 }
 
+@media (max-width: 768px) {
+  .sell-panel-title {
+    transform: none;
+    margin-bottom: 0;
+  }
+}
+
 /* ── Drop zone wrapper: handles drag enter/leave for visual feedback ── */
 .sell-drop-wrapper {
   width: 84px;
@@ -117,6 +136,13 @@ function onDragLeave() {
   border-radius: 6px 18px 5px 14px;
   display: flex;
   align-items: stretch;
+}
+
+@media (max-width: 768px) {
+  .sell-drop-wrapper {
+    width: 100%;
+    height: 60px;
+  }
 }
 
 .sell-drop-zone {
@@ -131,6 +157,13 @@ function onDragLeave() {
   animation: pulse-sell 1.5s ease-in-out infinite;
   cursor: default;
   min-height: 140px;
+}
+
+@media (max-width: 768px) {
+  .sell-drop-zone {
+    min-height: 0;
+    height: 100%;
+  }
 }
 
 .sell-drop-zone--over {
