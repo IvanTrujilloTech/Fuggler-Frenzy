@@ -1,15 +1,35 @@
-// definicion de tipos de fuggler
+// Definición de tipos
 export const FUGGLER_TYPES = {
-  D: { id: 'D', name: 'Dientudos', color: '#618BB3' },   // azul acero (del icono DIENTUDOS)
-  B: { id: 'B', name: 'Botones', color: '#61B361' },     // verde (del icono BOTONES)
-  R: { id: 'R', name: 'Radioactivos', color: '#FFEC58' }, // amarillo (del icono RADIOACTIVOS)
-  I: { id: 'I', name: 'Inadaptados', color: '#AA3B3D' }, // rojo oscuro (del icono INADAPTADOS)
-  C: { id: 'C', name: 'Cazadores', color: '#9261B3' }    // morado (del icono CAZADORES)
+  D: {
+    id: 'D', name: 'Dientudos', color: '#618BB3', breakpoints: [2, 4, 6],
+    icon: iconDientudos,
+    bonuses: { 2: '+10% Daño', 4: '+25% Daño', 6: '+50% Daño' }
+  },
+  B: {
+    id: 'B', name: 'Botones', color: '#61B361', breakpoints: [3, 5, 6],
+    icon: iconBotones,
+    bonuses: { 3: '+200 Vida', 5: '+500 Vida', 6: '+1000 Vida' }
+  },
+  R: {
+    id: 'R', name: 'Radioactivos', color: '#FFEC58', breakpoints: [2, 4, 6],
+    icon: iconRadioactivos,
+    bonuses: { 2: '+10% Veneno', 4: '+30% Veneno', 6: '+70% Veneno' }
+  },
+  I: {
+    id: 'I', name: 'Inadaptados', color: '#AA3B3D', breakpoints: [3, 5, 6],
+    icon: iconInadaptados,
+    bonuses: { 3: '+15 Armadura', 5: '+40 Armadura', 6: '+100 Armadura' }
+  },
+  C: {
+    id: 'C', name: 'Cazadores', color: '#9261B3', breakpoints: [2, 4, 6],
+    icon: iconCazadores,
+    bonuses: { 2: '+15% Crit', 4: '+40% Crit', 6: '+80% Crit' }
+  }
 };
 
 // utilidad para crear estadisticas base segun el tier
 const baseStats = (tier) => {
-  switch(tier) {
+  switch (tier) {
     case 1: return { hp: 500, damage: 50, attackSpeed: 1.0, armor: 20 };
     case 2: return { hp: 700, damage: 70, attackSpeed: 1.05, armor: 25 };
     case 3: return { hp: 1000, damage: 100, attackSpeed: 1.1, armor: 30 };
