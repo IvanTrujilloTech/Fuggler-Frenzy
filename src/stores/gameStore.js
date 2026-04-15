@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { FUGGLERS, getShopProbabilities } from '../data/fugglerPedia'
+import { useMultiplayerStore } from './multiplayerStore'
 
 export const useGameStore = defineStore('game', {
   state: () => ({
@@ -25,7 +26,6 @@ export const useGameStore = defineStore('game', {
       return count
     },
     activeSynergies: (state) => {
-      // Gather all unique units from board (ignore bench)
       const uniqueUnits = new Set()
       const allUnitsLocs = [...state.board]
       const synergiesCount = {}
@@ -35,7 +35,6 @@ export const useGameStore = defineStore('game', {
           const unit = slot[0]
           if (!uniqueUnits.has(unit.id)) {
             uniqueUnits.add(unit.id)
-            // Add to synergy count
             if (unit.types) {
               unit.types.forEach(synergy => {
                 synergiesCount[synergy] = (synergiesCount[synergy] || 0) + 1
@@ -49,14 +48,27 @@ export const useGameStore = defineStore('game', {
     }
   },
   actions: {
+    async syncToFirebase() {
+      const multiStore = useMultiplayerStore()
+      if (multiStore.roomId) {
+        await multiStore.updatePlayerData({
+          board: this.board,
+          bench: this.bench,
+          hp: this.hp,
+          gold: this.gold,
+          username: this.username
+        })
+      }
+    },
+
     startNewRound() {
       this.round++
       this.phase = 'PLANNING'
-      this.timeLeft = 30 // 30 segundos de fase de planificacion
-      // ingreso pasivo de oro al inicio de ronda
-      this.gold += 5 // oro base por ronda
+      this.timeLeft = 30
+      this.gold += 5 
       this.rollShop(true)
       this.startTimer()
+      this.syncToFirebase()
     },
     
     startTimer() {
@@ -82,18 +94,18 @@ export const useGameStore = defineStore('game', {
 
     startCombat() {
       this.phase = 'COMBAT'
-      // todo: logica para spawnear enemigos y resolver el combate automaticamente
+      // La logica de combate se activará cuando ambos jugadores esten listos (sincronizado por Firebase)
+      this.syncToFirebase()
     },
     
     rollShop(isFree = false) {
-      if (!isFree && this.gold < 2) return // coste de reroll = 2 de oro
+      if (!isFree && this.gold < 2) return 
       if (!isFree) this.gold -= 2
 
       const probs = getShopProbabilities(this.round)
       const newShop = []
 
       for(let i=0; i<5; i++) {
-        // Simple random roll based on probs
         const roll = Math.random() * 100
         let tierSelected = 1
         let cumulative = 0
@@ -105,11 +117,9 @@ export const useGameStore = defineStore('game', {
           }
         }
         
-        // filtra fugglers por tier
         const pool = FUGGLERS.filter(f => f.tier === tierSelected)
         if (pool.length > 0) {
           const randomUnit = pool[Math.floor(Math.random() * pool.length)]
-          // hay que clonar la unidad para que cada copia en el tablero sea unica
           newShop.push({ ...randomUnit, instanceId: crypto.randomUUID(), stars: 1, items: [] })
         } else {
           newShop.push(null)
@@ -119,22 +129,21 @@ export const useGameStore = defineStore('game', {
     },
 
     buyUnit(shopIndex) {
-      if (this.phase !== 'PLANNING') return // no se puede comprar durante el combate
+      if (this.phase !== 'PLANNING') return 
       const unit = this.shop[shopIndex]
       if (!unit) return
       
       if (this.gold < unit.cost) return
       
-      // busca el primer slot vacio del banquillo
       const emptySlotIndex = this.bench.findIndex(slot => slot.length === 0)
-      if (emptySlotIndex === -1) return // banquillo lleno
+      if (emptySlotIndex === -1) return 
 
       this.gold -= unit.cost
-      // asigna un instanceId unico a la unidad comprada
       this.bench[emptySlotIndex].push({...unit, instanceId: crypto.randomUUID()})
       this.shop[shopIndex] = null
       
       this.checkUpgrades()
+      this.syncToFirebase()
     },
 
     sellUnit(location, index) {
@@ -149,32 +158,31 @@ export const useGameStore = defineStore('game', {
       }
 
       if (unit) {
-        // devuelve el coste completo del fuggler al venderlo
         this.gold += unit.cost
-        // todo: gestionar la logica de pelusa de ombligo si la unidad tenia objetos
       }
       this.checkUpgrades()
+      this.syncToFirebase()
     },
 
     sellUnitByInstance(instanceId) {
       if (this.phase !== 'PLANNING') return
-      // busca en el banquillo
       for (let i = 0; i < this.bench.length; i++) {
         const slot = this.bench[i]
         if (slot.length > 0 && slot[0].instanceId === instanceId) {
           const unit = slot.pop()
           this.gold += unit.cost
           this.checkUpgrades()
+          this.syncToFirebase()
           return
         }
       }
-      // busca en el tablero
       for (let i = 0; i < this.board.length; i++) {
         const slot = this.board[i]
         if (slot.length > 0 && slot[0].instanceId === instanceId) {
           const unit = slot.pop()
           this.gold += unit.cost
           this.checkUpgrades()
+          this.syncToFirebase()
           return
         }
       }
@@ -185,7 +193,6 @@ export const useGameStore = defineStore('game', {
     },
 
     moveUnit(fromZone, toZone, fromIndex, toIndex) {
-      // la zona puede ser 'bench' o 'board'
       const fromArray = fromZone === 'bench' ? this.bench : this.board
       const toArray = toZone === 'bench' ? this.bench : this.board
 
@@ -196,16 +203,14 @@ export const useGameStore = defineStore('game', {
       toArray[toIndex] = sourceUnit
       
       this.checkUpgrades()
+      this.syncToFirebase()
     },
 
     checkUpgrades() {
-      // comprueba si hay 3 unidades con el mismo id y las mismas estrellas
-      // pueden estar en el tablero o en el banquillo
       const allUnits = []
       this.bench.forEach((slot, i) => { if (slot.length > 0) allUnits.push({ ...slot[0], loc: 'bench', idx: i }) })
       this.board.forEach((slot, i) => { if (slot.length > 0) allUnits.push({ ...slot[0], loc: 'board', idx: i }) })
 
-      // solo las estrellas 1 y 2 pueden subir de nivel
       for (let starLevel = 1; starLevel <= 2; starLevel++) {
         const groups = {}
         for (const unit of allUnits) {
@@ -229,20 +234,18 @@ export const useGameStore = defineStore('game', {
       const targetUnit = threeUnits[0]
       const otherUnits = [threeUnits[1], threeUnits[2]]
 
-      // elimina las otras dos unidades usando su loc e idx especificos
       otherUnits.forEach(u => {
         if (u.loc === 'board') this.board[u.idx] = []
         if (u.loc === 'bench') this.bench[u.idx] = []
       })
 
-      // mejora la unidad objetivo
       const targetSlot = targetUnit.loc === 'board' ? this.board[targetUnit.idx] : this.bench[targetUnit.idx]
       if (targetSlot.length > 0) {
         targetSlot[0].stars += 1
         targetSlot[0].stats.hp *= 1.8
         targetSlot[0].stats.damage *= 1.8
       }
+      this.syncToFirebase()
     }
-
   }
 })

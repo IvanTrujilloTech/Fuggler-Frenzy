@@ -10,8 +10,7 @@ const username = ref('')
 const startGame = () => {
   if (username.value.trim() !== '') {
     store.username = username.value
-    store.startNewRound()
-    router.push('/game')
+    router.push('/lobby')
   }
 }
 </script>
