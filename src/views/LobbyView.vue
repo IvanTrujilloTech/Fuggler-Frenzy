@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMultiplayerStore } from '../stores/multiplayerStore'
 import { useGameStore } from '../stores/gameStore'
@@ -32,6 +32,15 @@ const handleStartGame = async () => {
   await multiplayerStore.startGame()
 }
 
+const handleBack = async () => {
+  await multiplayerStore.leaveRoom()
+  router.push('/')
+}
+
+const handleToggleReady = async () => {
+  await multiplayerStore.toggleReady()
+}
+
 // Watch for game start
 multiplayerStore.$subscribe((mutation, state) => {
   if (state.gameState.status === 'PLANNING') {
@@ -41,6 +50,10 @@ multiplayerStore.$subscribe((mutation, state) => {
 
 onMounted(async () => {
   await multiplayerStore.initialize()
+})
+
+onUnmounted(async () => {
+  await multiplayerStore.leaveRoom()
 })
 </script>
 
@@ -65,7 +78,12 @@ onMounted(async () => {
           
           <div class="input-group">
             <input v-model="pinInput" placeholder="Código PIN (6 dígitos)" maxlength="6" />
-            <button class="secondary-btn" @click="handleJoinRoom" :disabled="!username || !pinInput">
+            <button 
+              class="secondary-btn" 
+              @click="handleJoinRoom" 
+              :disabled="!username || pinInput.length !== 6"
+              :class="{ 'ready': pinInput.length === 6 }"
+            >
               Unirse a Sala
             </button>
           </div>
@@ -80,10 +98,13 @@ onMounted(async () => {
         </div>
 
         <div class="players-list">
-          <h3>Jugadores ({{ Object.keys(multiplayerStore.players).length }}/2)</h3>
+          <h3>Jugadores ({{ Object.keys(multiplayerStore.players).length }}/8)</h3>
           <ul>
-            <li v-for="player in multiplayerStore.players" :key="player.username">
-              {{ player.username }} <span v-if="player.isHost">(Host)</span>
+            <li v-for="player in multiplayerStore.players" :key="player.username" :class="{ 'is-ready': player.isReady }">
+              <span class="status-dot"></span>
+              {{ player.username }} 
+              <span v-if="player.isHost" class="badge">Host</span>
+              <span v-else-if="player.isReady" class="badge ready-badge">LISTO</span>
             </li>
           </ul>
         </div>
@@ -105,15 +126,27 @@ onMounted(async () => {
         </div>
 
         <div class="players-list">
-          <li v-for="player in multiplayerStore.players" :key="player.username">
-            {{ player.username }} <span v-if="player.isHost">(Host)</span>
-          </li>
+          <ul>
+            <li v-for="player in multiplayerStore.players" :key="player.username" :class="{ 'is-ready': player.isReady }">
+              <span class="status-dot"></span>
+              {{ player.username }} 
+              <span v-if="player.isHost" class="badge">Host</span>
+              <span v-else-if="player.isReady" class="badge ready-badge">LISTO</span>
+            </li>
+          </ul>
         </div>
+
+        <button 
+          :class="['ready-toggle-btn', { 'active': multiplayerStore.players[multiplayerStore.playerKey]?.isReady }]"
+          @click="handleToggleReady"
+        >
+          {{ multiplayerStore.players[multiplayerStore.playerKey]?.isReady ? '¡ESTOY LISTO!' : 'MARCAR COMO LISTO' }}
+        </button>
       </div>
 
       <p v-if="multiplayerStore.error" class="error-msg">{{ multiplayerStore.error }}</p>
       
-      <button class="back-btn" @click="router.push('/')">Volver</button>
+      <button class="back-btn" @click="handleBack">Volver</button>
     </div>
 
     <div class="background-decorations">
@@ -175,6 +208,7 @@ input {
   background: #eee;
   font-family: 'Patrick Hand', cursive;
   font-size: 1.2rem;
+  color: #000;
 }
 
 .primary-btn, .secondary-btn, .start-btn {
@@ -185,11 +219,28 @@ input {
   cursor: pointer;
   border: 3px solid #000;
   box-shadow: 4px 4px 0px #000;
-  transition: transform 0.1s;
+  transition: transform 0.1s, background 0.1s, color 0.1s;
 }
 
 .primary-btn { background: var(--color-toxic); color: #000; }
-.secondary-btn { background: #555; color: #fff; margin-top: 10px; }
+.primary-btn:not(:disabled):hover {
+  transform: scale(1.05) rotate(2deg);
+  background: #cbf066;
+}
+
+.secondary-btn { background: #555; color: #aaa; margin-top: 10px; cursor: not-allowed; box-shadow: none; border-color: #333; }
+.secondary-btn.ready { 
+  background: var(--color-toxic); 
+  color: #000; 
+  cursor: pointer; 
+  box-shadow: 4px 4px 0px #000;
+  border-color: #000;
+}
+.secondary-btn.ready:hover {
+  transform: scale(1.05) rotate(-2deg);
+  background: #cbf066;
+}
+
 .start-btn { background: var(--color-blood); color: #fff; margin-top: 2rem; font-size: 2rem; }
 
 .divider {
@@ -221,7 +272,63 @@ input {
 }
 
 .players-list h3 { color: #fff; margin-bottom: 10px; }
-.players-list li { color: #ccc; list-style: none; padding: 5px 0; border-bottom: 1px solid #333; }
+.players-list li { 
+  color: #ccc; 
+  list-style: none; 
+  padding: 8px 0; 
+  border-bottom: 1px solid #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  background: #ff4444;
+  border-radius: 50%;
+  box-shadow: 0 0 5px #ff4444;
+}
+
+.is-ready .status-dot {
+  background: var(--color-toxic);
+  box-shadow: 0 0 5px var(--color-toxic);
+}
+
+.badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  background: #444;
+  color: #fff;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.ready-badge {
+  background: var(--color-toxic);
+  color: #000;
+  font-weight: bold;
+}
+
+.ready-toggle-btn {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #222;
+  color: #888;
+  border: 3px solid #444;
+  font-family: var(--title-font);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ready-toggle-btn.active {
+  background: var(--color-toxic);
+  color: #000;
+  border-color: #000;
+  box-shadow: 4px 4px 0px #000;
+}
 
 .waiting-text {
   color: var(--color-toxic);
