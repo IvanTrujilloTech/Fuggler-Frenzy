@@ -1,0 +1,3 @@
+Ahora funciona bien, solo falta que los fugglers se muevan y se peguen que eso parece no funcionar. 
+Recuerda la persistencia de roomId. 
+Recuerda que hemos eliminado el tiempo de pelea pero que aparece como PELEANDO y pasa a idle. 
