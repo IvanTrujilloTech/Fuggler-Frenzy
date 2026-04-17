@@ -51,10 +51,6 @@ multiplayerStore.$subscribe((mutation, state) => {
 onMounted(async () => {
   await multiplayerStore.initialize()
 })
-
-onUnmounted(async () => {
-  await multiplayerStore.leaveRoom()
-})
 </script>
 
 <template>

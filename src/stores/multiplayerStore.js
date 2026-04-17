@@ -164,14 +164,19 @@ export const useMultiplayerStore = defineStore('multiplayer', {
           // Encontrar al oponente
           const opponentId = Object.keys(this.players).find(id => id !== this.playerKey)
           if (opponentId && this.players[opponentId]) {
-            // Actualizar el tablero enemigo en el gameStore
-            // Nota: El tablero enemigo debe verse invertido o tal cual, dependiendo de la logica de la UI
-            gameStore.boardEnemy = this.players[opponentId].board || Array.from({ length: 21 }, () => [])
+            // Normalizar el tablero enemigo (asegurar 21 slots)
+            const rawBoard = this.players[opponentId].board || []
+            const normalizedBoard = Array.from({ length: 21 }, (_, i) => rawBoard[i] || [])
+            gameStore.boardEnemy = normalizedBoard
           }
 
-          // Sincronizar fase de juego
-          if (this.gameState.status === 'PLANNING' && gameStore.phase === 'IDLE') {
+          // Sincronizar fase de juego (Round LifeCycle)
+          if (this.gameState.status === 'PLANNING' && gameStore.phase !== 'PLANNING') {
             gameStore.startNewRound()
+          }
+          
+          if (this.gameState.status === 'COMBAT' && gameStore.phase !== 'COMBAT') {
+            gameStore.startCombat()
           }
         } else {
           // Si el nodo de la sala desaparece, reseteamos localmente
@@ -200,6 +205,17 @@ export const useMultiplayerStore = defineStore('multiplayer', {
       if (!this.isHost || !this.roomId) return
       const stateRef = ref(db, `rooms/${this.roomId}/gameState`)
       await update(stateRef, { status: 'PLANNING', round: 1 })
+    },
+
+    async setReadyForCombat(ready = true) {
+      if (!this.roomId || !this.playerKey) return
+      await this.updatePlayerData({ isReadyForCombat: ready })
+    },
+
+    async updateRoomState(data) {
+      if (!this.isHost || !this.roomId) return
+      const stateRef = ref(db, `rooms/${this.roomId}/gameState`)
+      await update(stateRef, data)
     }
   }
 })
