@@ -155,3 +155,88 @@ export function getShopProbabilities(round) {
   if (round < 9) return { 1: 50, 2: 35, 3: 15, 4: 0 };
   return { 1: 30, 2: 40, 3: 25, 4: 5 }; // rondas avanzadas
 }
+import objAlfiletero from '../assets/HUD/OBJECTS/ALFILETERO 1.svg';
+import objBobina from '../assets/HUD/OBJECTS/BOBINA.svg';
+import objCalcetines from '../assets/HUD/OBJECTS/CALCETINES.svg';
+import objCanicas from '../assets/HUD/OBJECTS/CANICAS 1.svg';
+import objCollar from '../assets/HUD/OBJECTS/COLLAR BOTONES 1.svg';
+import objDentadura from '../assets/HUD/OBJECTS/DENTADURA.svg';
+import objDIENTE_LECHE from '../assets/HUD/OBJECTS/DIENTE_DE_LECHE.svg';
+import objImperdible from '../assets/HUD/OBJECTS/IMPERDIBLE.svg';
+import objJabon from '../assets/HUD/OBJECTS/JABON (1) 1.svg';
+import objJERSEY from '../assets/HUD/OBJECTS/JERSEY 1.svg';
+import objMando from '../assets/HUD/OBJECTS/MANDO 1.svg';
+import objPila from '../assets/HUD/OBJECTS/PILA_SULFATADA.svg';
+
+export const OBJECTS ={
+  'PILA SULFATADA': {
+    'img':objPila,
+    'enunciado': 'Aumenta tiempo de stun o ceguera en +1 segundo.',
+    
+  },
+  'PASTILLA DE JABON GASTADA': {
+    'img': objJabon,
+    'enunciado': 'Aumenta la resistencia a stun o ceguera en -1 segundo',
+    
+  },
+  'CALCETIN DESPAREJO': {
+    'img':objCalcetines,
+    'enunciado': 'Aumenta la probabilidad de crítico en 13%',
+  },
+  'IMPERDIBLE OXIDADO':{
+'img': objImperdible,
+'enunciado': 'Otorga 100 puntos de vida..'
+  },
+  'BOBINA DE HILO ENREDADO':{
+    'img': objBobina,
+    'enunciado': 'Aumenta la velocidad de ataque en un 10%'
+  },
+'DIENTE DE LECHE SUELTO':{
+  'img': objDIENTE_LECHE,
+  'enunciado': 'Aumenta daño de ataque en 10%'
+},
+}
+export const ARTEFACTOS ={
+  'DENTADURA POSTIZA REAL':{
+    'receta':{
+      'obj1': 'DIENTE',
+      'obj2': 'DIENTE',
+    },
+    'enunciado': 'Cada 3 ataques, el fuggler arranca un trozo de vida máxima al enemigo y se suma a la suya.'
+  },
+  'JERSEY DE LANA PICANTE':{
+    'receta': {
+      'obj1': 'CALCETIN',
+      'obj2':'HILO'
+    },
+    'enunciado':'El Fuggler se vuelve tan "incómodo" que devuelve el 20% del daño recibido a los atacantes (espinas).'
+  },
+  'MANGO A DISTANCIA PEGAJOSA':{
+    'receta': {
+      'obj1': 'PILA',
+      'obj2':'PILA'
+    },
+    'enunciado':'Al inicio del combate, aturde a un enemigo aleatorio durante 3 segundos.'
+  },
+  'ALFILETERO DE LA ABUELA':{
+    'receta':{
+      'obj1': 'IMPERDIBLE',
+      'obj2': 'HILO',
+    },
+    'enunciado': 'Al morir, el Fuggler explota y hace daño en area.'
+  },
+  'BOLSA DE CANICAS TRAGADAS':{
+    'receta':{
+      'obj1':'DIENTE',
+      'obj2':'PILA'
+    },
+    'enunciado':'Los ataques básicos rebotan en un enemigo adicional cercano.'
+  },
+  'COLLAR DE CANICAS TRAGADAS':{
+    'receta':{
+      'obj1': 'IMPERDIBLE',
+      'obj2':'JABON'
+    },
+    'enunciado':'El Fuggler gana un escudo por cada Fuggler enemigo eliminado.'
+  }
+}
