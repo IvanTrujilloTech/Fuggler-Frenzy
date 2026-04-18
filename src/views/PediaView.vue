@@ -88,7 +88,7 @@ const fugglersByType = computed(() => {
             <div class="items-grid">
               <ItemTooltip v-for="item in ITEM_COMPONENTS" :key="item.id" :item="item">
                 <div class="item-card">
-                  <div class="item-icon">📦</div>
+                  <img :src="item.img" class="item-icon" :alt="item.name" />
                   <div class="item-info">
                     <h3>{{ item.name }}</h3>
                     <p>{{ item.description }}</p>
@@ -103,7 +103,7 @@ const fugglersByType = computed(() => {
             <div class="items-grid">
               <ItemTooltip v-for="item in ARTIFACT_RECIPES" :key="item.id" :item="item">
                 <div class="item-card artifact">
-                  <div class="item-icon">✨</div>
+                  <img :src="item.img" class="item-icon" :alt="item.name" />
                   <div class="item-info">
                     <h3 style="color: #ffd700">{{ item.name }}</h3>
                     <p>{{ item.description }}</p>
@@ -297,16 +297,16 @@ const fugglersByType = computed(() => {
 }
 
 .item-icon {
-  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
   background: #111;
-  padding: 10px;
+  padding: 5px;
   border-radius: 8px;
   border: 2px solid #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 60px;
-  min-height: 60px;
 }
 
 .synergy-icon {
