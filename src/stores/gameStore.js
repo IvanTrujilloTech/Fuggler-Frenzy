@@ -70,7 +70,7 @@ export const useGameStore = defineStore('game', {
       this.startTimer()
       this.syncToFirebase()
     },
-    
+     
     startTimer() {
       this.clearTimer()
       this.timerInterval = setInterval(() => {
@@ -97,7 +97,7 @@ export const useGameStore = defineStore('game', {
       // La logica de combate se activará cuando ambos jugadores esten listos (sincronizado por Firebase)
       this.syncToFirebase()
     },
-    
+     
     rollShop(isFree = false) {
       if (!isFree && this.gold < 2) return 
       if (!isFree) this.gold -= 2
@@ -249,3 +249,78 @@ export const useGameStore = defineStore('game', {
     }
   }
 })
+
+// === Líneas nuevas para la ruleta (comentadas) ===
+// import { ITEM_COMPONENTS } from '../data/items'
+//
+// En state, añadir:
+//   rouletteItems: Object.values(ITEM_COMPONENTS),
+//   roulettePhase: false,
+//   rouletteTimer: 10,
+//   selectedRouletteItem: null,
+//   rouletteInterval: null,
+//
+// Modificar startNewRound:
+//   startNewRound() {
+//     this.round++
+//     if (this.round % 3 === 0) {
+//       this.startRoulettePhase()
+//     } else {
+//       this.phase = 'PLANNING'
+//       this.timeLeft = 30
+//       this.gold += 5 
+//       this.rollShop(true)
+//       this.startTimer()
+//     }
+//     this.syncToFirebase()
+//   },
+//
+// Modificar clearTimer:
+//   clearTimer() {
+//     if (this.timerInterval) {
+//       clearInterval(this.timerInterval)
+//       this.timerInterval = null
+//     }
+//     if (this.rouletteInterval) {
+//       clearInterval(this.rouletteInterval)
+//       this.rouletteInterval = null
+//     }
+//   },
+//
+// Agregar nuevas acciones:
+//   startRoulettePhase() {
+//     this.phase = 'ROULETTE'
+//     this.roulettePhase = true
+//     this.rouletteTimer = 10
+//     this.selectedRouletteItem = null
+//     this.rouletteInterval = setInterval(() => {
+//       this.rouletteTimer--
+//       if (this.rouletteTimer <= 0) {
+//         this.endRoulettePhase()
+//       }
+//     }, 1000)
+//     this.syncToFirebase()
+//   },
+// 
+//   selectRouletteItem(item) {
+//     if (!this.roulettePhase) return
+//     this.selectedRouletteItem = item
+//   },
+// 
+//   endRoulettePhase() {
+//     this.roulettePhase = false
+//     if (this.rouletteInterval) {
+//       clearInterval(this.rouletteInterval)
+//       this.rouletteInterval = null
+//     }
+//     if (this.selectedRouletteItem) {
+//       this.inventory.push({ ...this.selectedRouletteItem })
+//     }
+//     this.selectedRouletteItem = null
+//     this.phase = 'PLANNING'
+//     this.timeLeft = 30
+//     this.gold += 5
+//     this.rollShop(true)
+//     this.startTimer()
+//     this.syncToFirebase()
+//   }
