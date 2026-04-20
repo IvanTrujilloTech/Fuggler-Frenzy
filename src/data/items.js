@@ -10,7 +10,8 @@ import objJabon from "../assets/HUD/OBJECTS/JABON (1) 1.svg";
 import objJERSEY from "../assets/HUD/OBJECTS/JERSEY 1.svg";
 import objMando from "../assets/HUD/OBJECTS/MANDO 1.svg";
 import objPila from "../assets/HUD/OBJECTS/PILA_SULFATADA.svg";
-
+import ombligo from "../assets/HUD/OBJECTS/PELUSA DE OMBLIGO.svg";
+import { effect } from "vue";
 export const ITEM_COMPONENTS = {
   tooth: {
     id: "tooth",
@@ -117,6 +118,15 @@ export const ARTIFACT_RECIPES = {
     recipe: ["pin", "soap"],
     lore: "Un jabón atado miserablemente con imperdibles para que resbalen los golpes. Tan cochambroso que da más pena que daño.",
   },
+  ombligo_pelusa:{
+    id: "ombligo_pelusa",
+    img: ombligo,
+    name: "Pelusa de Ombligo",
+    description: " Es un objeto consumible. Si se lo das a un Fuggler, este gana un nivel de estrella instantáneamente (A -> A+).",
+    effects: ["fuggler_level_up"],
+    recipe: ["ombligo", "ombligo"],
+    lore: "Una bola de pelusa que se forma en el ombligo. Es tan asquerosa que puede hacer evolucionar a un Fuggler con solo tocarlo.",
+  }
 };
 
 export function combineItems(item1Id, item2Id) {
