@@ -132,7 +132,7 @@ function onDragLeave() {
 /* ── Drop zone wrapper: handles drag enter/leave for visual feedback ── */
 .sell-drop-wrapper {
   width: 204px;
-  height: 180px;
+  height: 90%;
   border-radius: 6px 18px 5px 14px;
   display: flex;
   align-items: stretch;
