@@ -80,14 +80,14 @@ function onDragLeave() {
 
 <style scoped>
 .sell-panel {
-  width: 110px;
+  width: 15%;
   min-width: 110px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 1rem 0.5rem;
+  padding: 1rem 0.2rem;
   background: repeating-linear-gradient(
     135deg,
     #1a0d0d,
@@ -131,7 +131,7 @@ function onDragLeave() {
 
 /* ── Drop zone wrapper: handles drag enter/leave for visual feedback ── */
 .sell-drop-wrapper {
-  width: 84px;
+  width: 204px;
   height: 180px;
   border-radius: 6px 18px 5px 14px;
   display: flex;
@@ -196,12 +196,13 @@ function onDragLeave() {
 }
 
 .sell-drop-zone--over .sell-icon {
+      align-items: stretch;
   transform: scale(1.3) rotate(-10deg);
 }
 
 .sell-label {
   font-family: var(--title-font);
-  font-size: 0.7rem;
+  font-size: 1.7rem;
   letter-spacing: 1px;
   color: #ff6b6b;
   text-shadow: 1px 1px 0 #000;
