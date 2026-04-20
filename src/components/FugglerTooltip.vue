@@ -1,13 +1,13 @@
 <script setup>
-import { computed, ref } from 'vue'
-import { useFloating, offset, flip, shift } from '@floating-ui/vue'
-import { FUGGLER_TYPES } from '../data/fugglerPedia'
-import { useGameStore } from '../stores/gameStore'
-import iconDientudos from '../assets/HUD/SINERGYS/DIENTUDOS.svg'
-import iconBotones from '../assets/HUD/SINERGYS/BOTONES.svg'
-import iconRadioactivos from '../assets/HUD/SINERGYS/RADIOACTIVOS.svg'
-import iconInadaptados from '../assets/HUD/SINERGYS/INADAPTADOS.svg'
-import iconCazadores from '../assets/HUD/SINERGYS/CAZADORES.svg'
+import { computed, ref } from "vue";
+import { useFloating, offset, flip, shift } from "@floating-ui/vue";
+import { FUGGLER_TYPES } from "../data/fugglerPedia";
+import { useGameStore } from "../stores/gameStore";
+import iconDientudos from "../assets/HUD/SINERGYS/DIENTUDOS.svg";
+import iconBotones from "../assets/HUD/SINERGYS/BOTONES.svg";
+import iconRadioactivos from "../assets/HUD/SINERGYS/RADIOACTIVOS.svg";
+import iconInadaptados from "../assets/HUD/SINERGYS/INADAPTADOS.svg";
+import iconCazadores from "../assets/HUD/SINERGYS/CAZADORES.svg";
 
 const SYNERGY_ICONS = {
   D: iconDientudos,
@@ -15,81 +15,92 @@ const SYNERGY_ICONS = {
   R: iconRadioactivos,
   I: iconInadaptados,
   C: iconCazadores,
-}
+};
 
 const props = defineProps({
   fuggler: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-const reference = ref(null)
-const floating = ref(null)
-const isVisible = ref(false)
+const reference = ref(null);
+const floating = ref(null);
+const isVisible = ref(false);
 
-const gameStore = useGameStore()
-const activeSynergies = computed(() => gameStore.activeSynergies)
-
+const gameStore = useGameStore();
+const activeSynergies = computed(() => gameStore.activeSynergies);
+const isOnBoard = computed(() => {
+  return gameStore.board.some(
+    (slot) => slot.length > 0 && slot[0].instanceId === props.fuggler.instanceId
+  );
+});
 const modifiedStats = computed(() => {
-  if (!props.fuggler) return null
-  const stats = { ...props.fuggler.stats }
-  const synergies = activeSynergies.value
-  
+  if (!props.fuggler) return null;
+  const stats = { ...props.fuggler.stats };
+  const types = props.fuggler.types || []
+  if (!isOnBoard.value) return stats;
+  const synergies = activeSynergies.value;
+
   // Apply Dientudos (D) - Damage
-  const dCount = synergies.D || 0
-  if (dCount >= 6) stats.damage *= 1.5
-  else if (dCount >= 4) stats.damage *= 1.25
-  else if (dCount >= 2) stats.damage *= 1.1
-
+  if (types.includes('D')) {
+    const dCount = synergies.D || 0
+    if (dCount >= 6) stats.damage *= 1.5
+    else if (dCount >= 4) stats.damage *= 1.25
+    else if (dCount >= 2) stats.damage *= 1.1
+  }
   // Apply Botones (B) - HP
-  const bCount = synergies.B || 0
-  if (bCount >= 6) stats.hp += 1000
-  else if (bCount >= 5) stats.hp += 500
-  else if (bCount >= 3) stats.hp += 200
-
+  if (types.includes('B')) {
+    const bCount = synergies.B || 0
+    if (bCount >= 6) stats.hp += 1000
+    else if (bCount >= 5) stats.hp += 500
+    else if (bCount >= 3) stats.hp += 200
+  }
   // Apply Inadaptados (I) - Armor
-  const iCount = synergies.I || 0
-  if (iCount >= 6) stats.armor += 100
-  else if (iCount >= 5) stats.armor += 40
-  else if (iCount >= 3) stats.armor += 15
-
+  if (types.includes('I')) {
+    const iCount = synergies.I || 0
+    if (iCount >= 6) stats.armor += 100
+    else if (iCount >= 5) stats.armor += 40
+    else if (iCount >= 3) stats.armor += 15
+  }
   // Cazadores (C) - Crit
-  const cCount = synergies.C || 0
-  stats.crit = 0
-  if (cCount >= 6) stats.crit = 80
-  else if (cCount >= 4) stats.crit = 40
-  else if (cCount >= 2) stats.crit = 15
-
+  if(types.includes('C')) {
+  const cCount = synergies.C || 0;
+  stats.crit = 0;
+  if (cCount >= 6) stats.crit = 80;
+  else if (cCount >= 4) stats.crit = 40;
+  else if (cCount >= 2) stats.crit = 15;
+  }
+  if(types.includes('R')) {
   // Radioactivos (R) - Veneno
-  const rCount = synergies.R || 0
-  stats.veneno = 0
-  if (rCount >= 6) stats.veneno = 70
-  else if (rCount >= 4) stats.veneno = 30
-  else if (rCount >= 2) stats.veneno = 10
-
-  return stats
-})
+  const rCount = synergies.R || 0;
+  stats.veneno = 0;
+  if (rCount >= 6) stats.veneno = 70;
+  else if (rCount >= 4) stats.veneno = 30;
+  else if (rCount >= 2) stats.veneno = 10;
+  }
+  return stats;
+});
 
 const isStatBoosted = (statName) => {
-  if (!modifiedStats.value) return false
-  const current = modifiedStats.value[statName]
-  const base = props.fuggler.stats[statName] || 0
-  return current > base
-}
+  if (!modifiedStats.value) return false;
+  const current = modifiedStats.value[statName];
+  const base = props.fuggler.stats[statName] || 0;
+  return current > base;
+};
 
 const { floatingStyles } = useFloating(reference, floating, {
-  placement: 'top',
-  strategy: 'fixed',
-  middleware: [offset(10), flip(), shift({ padding: 10 })]
-})
+  placement: "top",
+  strategy: "fixed",
+  middleware: [offset(10), flip(), shift({ padding: 10 })],
+});
 
-const show = () => isVisible.value = true
-const hide = () => isVisible.value = false
+const show = () => (isVisible.value = true);
+const hide = () => (isVisible.value = false);
 </script>
 
 <template>
-  <div 
+  <div
     class="tooltip-wrapper"
     ref="reference"
     @mouseenter="show"
@@ -98,10 +109,10 @@ const hide = () => isVisible.value = false
     <slot></slot>
 
     <Teleport to="body">
-      <div 
-        v-if="isVisible && fuggler" 
-        ref="floating" 
-        :style="[floatingStyles, { position: 'fixed' }]" 
+      <div
+        v-if="isVisible && fuggler"
+        ref="floating"
+        :style="[floatingStyles, { position: 'fixed' }]"
         class="tooltip-content"
       >
         <div class="tt-header">
@@ -114,9 +125,16 @@ const hide = () => isVisible.value = false
               v-for="typeKey in fuggler.types"
               :key="typeKey"
               class="tt-type-badge"
-              :style="{ backgroundColor: FUGGLER_TYPES[typeKey].color, color: typeKey === 'R' ? '#000' : '#fff' }"
+              :style="{
+                backgroundColor: FUGGLER_TYPES[typeKey].color,
+                color: typeKey === 'R' ? '#000' : '#fff',
+              }"
             >
-              <img :src="SYNERGY_ICONS[typeKey]" class="type-icon" :alt="FUGGLER_TYPES[typeKey].name" />
+              <img
+                :src="SYNERGY_ICONS[typeKey]"
+                class="type-icon"
+                :alt="FUGGLER_TYPES[typeKey].name"
+              />
               {{ FUGGLER_TYPES[typeKey].name }}
             </span>
           </div>
@@ -160,7 +178,7 @@ const hide = () => isVisible.value = false
   width: max-content;
   max-width: 250px;
   z-index: 1000;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
   pointer-events: none;
   font-family: sans-serif;
   backdrop-filter: blur(5px);
@@ -190,14 +208,14 @@ const hide = () => isVisible.value = false
   font-weight: bold;
   padding: 2px 8px 2px 4px;
   border-radius: 4px;
-  border: 1px solid rgba(0,0,0,0.4);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 .type-icon {
   width: 18px;
   height: 18px;
   object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 .tt-stats {
   display: grid;
