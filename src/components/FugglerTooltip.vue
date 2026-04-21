@@ -97,7 +97,8 @@ const modifiedCost = computed(() => {
   const base = props.fuggler.cost ?? 0;
   const stars = props.fuggler.stars ?? 1;
 
-  const scale = props.fuggler.costScale ?? {  1: 1,
+  const scale = props.fuggler.costScale ?? {  
+    1: 1,
   2: 3,
   3: 6,
   4: 9 };

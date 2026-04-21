@@ -33,7 +33,7 @@ onMounted(() => {
       evt.item.remove()
 
       if (unit) {
-        store.gold += unit.cost
+        store.gold += store.getRealCost(unit)
         store.checkUpgrades()
       }
 
