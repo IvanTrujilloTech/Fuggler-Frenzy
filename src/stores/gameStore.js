@@ -9,7 +9,7 @@ export const useGameStore = defineStore('game', {
     gold: 10,
     hp: 100,
     username: '',
-    timeLeft: 30,
+    timeLeft: 120,
     timerInterval: null,
     shop: [null, null, null, null, null],
     bench: Array.from({ length: 9 }, () => []), // 9 slots fijos, cada uno vacio o con 1 unidad
