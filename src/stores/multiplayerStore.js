@@ -161,13 +161,17 @@ export const useMultiplayerStore = defineStore('multiplayer', {
           this.players = data.players || {}
           this.gameState = data.gameState || {}
 
-          // Encontrar al oponente
-          const opponentId = Object.keys(this.players).find(id => id !== this.playerKey)
+          // Encontrar al oponente segun los matchups de la ronda
+          const matchups = this.gameState.matchups || {}
+          const opponentId = matchups[this.playerKey]
+          
           if (opponentId && this.players[opponentId]) {
             // Normalizar el tablero enemigo (asegurar 21 slots)
             const rawBoard = this.players[opponentId].board || []
             const normalizedBoard = Array.from({ length: 21 }, (_, i) => rawBoard[i] || [])
             gameStore.boardEnemy = normalizedBoard
+          } else {
+            gameStore.boardEnemy = Array.from({ length: 21 }, () => [])
           }
 
           // Sincronizar fase de juego (Round LifeCycle)
@@ -216,6 +220,62 @@ export const useMultiplayerStore = defineStore('multiplayer', {
       if (!this.isHost || !this.roomId) return
       const stateRef = ref(db, `rooms/${this.roomId}/gameState`)
       await update(stateRef, data)
+    },
+
+    async generateMatchups() {
+      if (!this.isHost || !this.roomId) return
+      
+      const playersList = Object.keys(this.players)
+      if (playersList.length < 2) return
+
+      // Obtener historial de enfrentamientos
+      const historyRef = ref(db, `rooms/${this.roomId}/matchupHistory`)
+      const historySnap = await get(historyRef)
+      const history = historySnap.exists() ? historySnap.val() : {}
+
+      // Mezclar jugadores aleatoriamente
+      const shuffled = [...playersList].sort(() => Math.random() - 0.5)
+      const pairs = {}
+      const used = new Set()
+
+      for (let i = 0; i < shuffled.length; i++) {
+        const p1 = shuffled[i]
+        if (used.has(p1)) continue
+
+        let bestOpponent = null
+        let minEncounters = Infinity
+
+        for (let j = i + 1; j < shuffled.length; j++) {
+          const p2 = shuffled[j]
+          if (used.has(p2)) continue
+
+          const pairId = [p1, p2].sort().join('_')
+          const encounters = history[pairId] || 0
+
+          if (encounters < minEncounters) {
+            minEncounters = encounters
+            bestOpponent = p2
+          }
+        }
+
+        if (bestOpponent) {
+          pairs[p1] = bestOpponent
+          pairs[bestOpponent] = p1
+          used.add(p1)
+          used.add(bestOpponent)
+
+          // Actualizar historial
+          const pairId = [p1, bestOpponent].sort().join('_')
+          history[pairId] = (history[pairId] || 0) + 1
+        }
+      }
+
+      // Si queda uno suelto (impar), se queda solo por ahora (o se le podria asignar un fantasma)
+      // Actualizar en Firebase
+      await update(ref(db, `rooms/${this.roomId}`), {
+        matchupHistory: history,
+        'gameState/matchups': pairs
+      })
     }
   }
 })

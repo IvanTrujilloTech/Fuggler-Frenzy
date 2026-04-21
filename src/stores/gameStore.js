@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { FUGGLERS, getShopProbabilities } from '../data/fugglerPedia'
+import { FUGGLERS, FUGGLER_TYPES, getShopProbabilities } from '../data/fugglerPedia'
 import { useMultiplayerStore } from './multiplayerStore'
 
 export const useGameStore = defineStore('game', {
@@ -21,7 +21,8 @@ export const useGameStore = defineStore('game', {
     
     // Estado de combate
     combatUnits: [], // unidades activas en combate {instanceId, fuggler, side, pos: {q, r}, hp, maxHp, stats, target, lastAttack}
-    combatInterval: null
+    combatInterval: null,
+    combatTick: 0
   }),
   getters: {
     activeBoardUnits: (state) => {
@@ -30,25 +31,7 @@ export const useGameStore = defineStore('game', {
       return count
     },
     activeSynergies: (state) => {
-      const uniqueUnits = new Set()
-      const allUnitsLocs = [...state.board]
-      const synergiesCount = {}
-      
-      allUnitsLocs.forEach(slot => {
-        if (slot.length > 0) {
-          const unit = slot[0]
-          if (!uniqueUnits.has(unit.id)) {
-            uniqueUnits.add(unit.id)
-            if (unit.types) {
-              unit.types.forEach(synergy => {
-                synergiesCount[synergy] = (synergiesCount[synergy] || 0) + 1
-              })
-            }
-          }
-        }
-      })
-      
-      return synergiesCount
+      return state.calculateSynergiesForBoard(state.board)
     }
   },
   actions: {
@@ -91,10 +74,18 @@ export const useGameStore = defineStore('game', {
           this.timeLeft--
         } else {
           this.clearTimer()
+          this.ensureUnitsOnBoard()
+          this.syncToFirebase()
+
           const multiStore = useMultiplayerStore()
           // En multijugador, el Host es el que dicta el cambio de fase oficial en Firebase
           if (multiStore.isHost && multiStore.gameState.status === 'PLANNING') {
-            multiStore.updateRoomState({ status: 'COMBAT' })
+            // Dar un pequeño margen para que la sincronización de tableros propage
+            setTimeout(() => {
+              multiStore.generateMatchups().then(() => {
+                multiStore.updateRoomState({ status: 'COMBAT' })
+              })
+            }, 1000)
           }
         }
       }, 1000)
@@ -109,8 +100,12 @@ export const useGameStore = defineStore('game', {
 
     startCombat() {
       if (this.phase === 'COMBAT') return // evitar doble inicio
+      
+      this.ensureUnitsOnBoard()
+      
       this.phase = 'COMBAT'
       this.timeLeft = 0 // Sin tiempo límite para el combate
+      this.combatTick = 0
       this.initCombat()
       this.syncToFirebase()
       
@@ -121,9 +116,32 @@ export const useGameStore = defineStore('game', {
       }, 500) // Un paso cada 0.5 segundos 
     },
 
+    ensureUnitsOnBoard() {
+      if (this.activeBoardUnits > 0) return
+
+      // Intentar mover del banquillo
+      const benchIndex = this.bench.findIndex(slot => slot.length > 0)
+      if (benchIndex !== -1) {
+        this.moveUnit('bench', 'board', benchIndex, 10) // Slot central
+        return
+      }
+
+      // Intentar comprar de la tienda
+      const shopIndex = this.shop.findIndex(unit => unit !== null)
+      if (shopIndex !== -1) {
+        this.buyUnit(shopIndex)
+        // La unidad comprada estara en un slot del banquillo (posiblemente el 0)
+        const newBenchIndex = this.bench.findIndex(slot => slot.length > 0)
+        if (newBenchIndex !== -1) {
+          this.moveUnit('bench', 'board', newBenchIndex, 10)
+        }
+      }
+    },
+
     initCombat() {
       const units = []
-      const synergies = this.activeSynergies
+      const playerSynergies = this.calculateSynergiesForBoard(this.board)
+      const enemySynergies = this.calculateSynergiesForBoard(this.boardEnemy)
       
       // Unidades del jugador (Slots 0-20 mapped to rows 3,4,5)
       this.board.forEach((slot, i) => {
@@ -131,7 +149,7 @@ export const useGameStore = defineStore('game', {
           const unit = slot[0]
           const row = 3 + Math.floor(i / 7)
           const col = i % 7
-          units.push(this.prepareCombatUnit(unit, 'player', row, col, synergies))
+          units.push(this.prepareCombatUnit(unit, 'player', row, col, playerSynergies))
         }
       })
 
@@ -145,10 +163,12 @@ export const useGameStore = defineStore('game', {
           // Y las columnas tambien? Generalmente en autochess se refleja.
           const row = 2 - Math.floor(i / 7)
           const col = 6 - (i % 7)
-          units.push(this.prepareCombatUnit(unit, 'enemy', row, col, {})) // Sinergias del enemigo vendran de su estado?
+          units.push(this.prepareCombatUnit(unit, 'enemy', row, col, enemySynergies))
         }
       })
 
+      // Ordenar unidades por instanceId para asegurar determinismo en el orden de procesamiento
+      units.sort((a, b) => a.instanceId.localeCompare(b.instanceId))
       this.combatUnits = units
     },
 
@@ -179,21 +199,42 @@ export const useGameStore = defineStore('game', {
         maxHp: stats.hp,
         stats,
         target: null,
-        lastAttack: 0,
+        lastAttack: -99, // Empezar listo para atacar
         isDead: false,
         image: unit.image
       }
     },
 
     getBreakpoint(typeId, count) {
-      const type = FUGGLERS.flatMap(f => f.types).includes(typeId) ? { breakpoints: [2,4,6] } : { breakpoints: [3,5,6] } // Fallback
-      // Usar constantes de fugglerPedia si es posible
-      const breakpoints = [2, 3, 4, 5, 6] // Simplificado
+      const type = FUGGLER_TYPES[typeId]
+      if (!type) return 0
+      
       let activeBp = 0
-      for (const bp of breakpoints) {
+      for (const bp of type.breakpoints) {
         if (count >= bp) activeBp = bp
       }
       return activeBp
+    },
+
+    calculateSynergiesForBoard(board) {
+      const uniqueUnits = new Set()
+      const synergiesCount = {}
+      
+      board.forEach(slot => {
+        if (slot.length > 0) {
+          const unit = slot[0]
+          if (!uniqueUnits.has(unit.id)) {
+            uniqueUnits.add(unit.id)
+            if (unit.types) {
+              unit.types.forEach(synergy => {
+                synergiesCount[synergy] = (synergiesCount[synergy] || 0) + 1
+              })
+            }
+          }
+        }
+      })
+      
+      return synergiesCount
     },
 
     combatStep() {
@@ -201,6 +242,8 @@ export const useGameStore = defineStore('game', {
         if (this.combatInterval) clearInterval(this.combatInterval)
         return
       }
+
+      this.combatTick++
 
       let playerAlive = false
       let enemyAlive = false
@@ -283,10 +326,11 @@ export const useGameStore = defineStore('game', {
     },
 
     executeAttack(unit, target) {
-      const time = Date.now()
-      if (time - unit.lastAttack < 1000 / unit.stats.attackSpeed) return
+      // Un tick es 0.5s. El cooldown en ticks es: (1 / attackSpeed) / 0.5 = 2 / attackSpeed
+      const cooldownTicks = 2 / unit.stats.attackSpeed
+      if (this.combatTick - unit.lastAttack < cooldownTicks) return
 
-      unit.lastAttack = time
+      unit.lastAttack = this.combatTick
       // Daño mitigado por armadura (formula basica: dmg * (100 / (100 + armor)))
       const damage = unit.stats.damage * (100 / (100 + target.stats.armor))
       target.hp -= damage
@@ -306,6 +350,7 @@ export const useGameStore = defineStore('game', {
       this.phase = 'IDLE' 
       if (winner === 'enemy') {
         this.hp -= 10 // Daño base por perder ronda (ajustar segun unidades vivas)
+        this.syncToFirebase()
       }
       
       if (this.combatInterval) {
@@ -355,7 +400,7 @@ export const useGameStore = defineStore('game', {
     },
 
     buyUnit(shopIndex) {
-      if (this.phase !== 'PLANNING') return 
+      if (this.phase !== 'PLANNING' && this.phase !== 'COMBAT') return 
       const unit = this.shop[shopIndex]
       if (!unit) return
       
@@ -373,7 +418,7 @@ export const useGameStore = defineStore('game', {
     },
 
     sellUnit(location, index) {
-      if (this.phase !== 'PLANNING') return
+      if (this.phase !== 'PLANNING' && this.phase !== 'COMBAT') return
       let unit = null
       if (location === 'bench') {
         const slot = this.bench[index]
@@ -391,7 +436,7 @@ export const useGameStore = defineStore('game', {
     },
 
     sellUnitByInstance(instanceId) {
-      if (this.phase !== 'PLANNING') return
+      if (this.phase !== 'PLANNING' && this.phase !== 'COMBAT') return
       for (let i = 0; i < this.bench.length; i++) {
         const slot = this.bench[i]
         if (slot.length > 0 && slot[0].instanceId === instanceId) {
@@ -419,6 +464,8 @@ export const useGameStore = defineStore('game', {
     },
 
     moveUnit(fromZone, toZone, fromIndex, toIndex) {
+      if (this.phase === 'COMBAT' && toZone === 'board') return
+
       const fromArray = fromZone === 'bench' ? this.bench : this.board
       const toArray = toZone === 'bench' ? this.bench : this.board
 

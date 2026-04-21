@@ -35,6 +35,22 @@ const getFugglerOnCombatHex = (row, col) => {
   return store.combatUnits.find(u => u.pos.q === q && u.pos.r === r && !u.isDead)
 }
 
+const getUnitStyle = (unit) => {
+  const r = unit.pos.r
+  const c = unit.pos.q + Math.floor(r / 2)
+  
+  // Usamos variables CSS para que sea responsivo
+  // vertical-step = height - overlap
+  // horizontal-step = width + 2*margin
+  // x = padding + c * horizontal-step + (row-is-shifted ? row-shift : 0)
+  
+  return {
+    top: `calc(var(--board-padding) + ${r} * (var(--hex-h) - var(--hex-overlap)))`,
+    left: `calc(var(--board-padding) + ${c} * (var(--hex-w) + 2 * var(--hex-margin)) + (${r % 2 === 1 ? 'var(--row-shift)' : '0px'}))`,
+    zIndex: r + 10
+  }
+}
+
 </script>
 
 <template>
@@ -80,7 +96,7 @@ const getFugglerOnCombatHex = (row, col) => {
           </template>
         </template>
 
-        <!-- Renderizado de COMBATE (Basado en combatUnits) -->
+        <!-- Renderizado de COMBATE (Solo rejilla de fondo) -->
         <template v-else>
           <div 
             v-for="colIdx in 7" 
@@ -88,17 +104,29 @@ const getFugglerOnCombatHex = (row, col) => {
             class="hex-slot is-hex"
             :class="rowIdx <= 3 ? 'enemy-slot' : 'board-slot'"
           >
-            <div v-if="getFugglerOnCombatHex(rowIdx-1, colIdx-1)" class="combat-unit-wrapper">
-              <FugglerUnit 
-                :fuggler="getFugglerOnCombatHex(rowIdx-1, colIdx-1)" 
-                :class="{ 'is-attacking': getFugglerOnCombatHex(rowIdx-1, colIdx-1).isAttacking }"
-              />
-              <div class="hp-bar-container">
-                <div class="hp-bar-fill" :style="{ width: (getFugglerOnCombatHex(rowIdx-1, colIdx-1).hp / getFugglerOnCombatHex(rowIdx-1, colIdx-1).maxHp * 100) + '%' }"></div>
-              </div>
-            </div>
+            <!-- Slot vacío, la unidad se renderiza en la capa absoluta -->
           </div>
         </template>
+      </div>
+
+      <!-- CAPA ABSOLUTA DE UNIDADES (Para movimiento fluido) -->
+      <div v-if="store.phase === 'COMBAT'" class="combat-absolute-layer">
+        <div 
+          v-for="unit in store.combatUnits.filter(u => !u.isDead)" 
+          :key="unit.instanceId"
+          class="combat-unit-absolute is-hex"
+          :style="getUnitStyle(unit)"
+          :class="{ 
+            'is-attacking': unit.isAttacking,
+            'enemy-slot': unit.side === 'enemy',
+            'board-slot': unit.side === 'player'
+          }"
+        >
+          <FugglerUnit :fuggler="unit" />
+          <div class="hp-bar-container">
+            <div class="hp-bar-fill" :style="{ width: (unit.hp / unit.maxHp * 100) + '%' }"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -126,6 +154,13 @@ const getFugglerOnCombatHex = (row, col) => {
 
 <style scoped>
 .board-area {
+  --hex-w: 80px;
+  --hex-h: 92px;
+  --hex-margin: 5px;
+  --hex-overlap: 24px;
+  --row-shift: 45px;
+  --board-padding: 40px;
+
   flex-grow: 1;
   padding: 1rem;
   display: flex;
@@ -161,19 +196,14 @@ const getFugglerOnCombatHex = (row, col) => {
 
 .hex-row {
   display: flex;
-  justify-content: center;
-  margin-bottom: -22px; /* superposicion vertical para encajar hexagonos */
-}
-/* indentar las filas pares para formar el panal de hexagonos */
-.hex-row:nth-child(even) {
-  margin-left: 90px; 
+  justify-content: flex-start;
+  margin-bottom: calc(-1 * var(--hex-overlap));
 }
 
-.hex-row {
-  display: flex;
-  justify-content: center;
-  margin-bottom: -24px; /* Ajuste para que encajen mejor */
+.hex-row:nth-child(even) {
+  padding-left: var(--row-shift);
 }
+
 
 .board-header {
   width: 100%;
@@ -211,10 +241,13 @@ const getFugglerOnCombatHex = (row, col) => {
 .unified-board {
   display: flex;
   flex-direction: column;
-  padding: 40px;
+  padding: var(--board-padding);
   background: rgba(0,0,0,0.3);
   border-radius: 50px;
   transition: all 0.5s ease;
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
 }
 
 .unified-board.is-combat {
@@ -230,6 +263,38 @@ const getFugglerOnCombatHex = (row, col) => {
 .board-slot {
   background: repeating-linear-gradient(45deg, #1f2b3c, #1f2b3c 5px, #29364a 5px, #29364a 10px) !important;
   border: 2px solid rgba(0, 255, 255, 0.1);
+}
+
+.hex-slot {
+  width: var(--hex-w);
+  height: var(--hex-h);
+  margin: 0 var(--hex-margin);
+  background: repeating-linear-gradient(45deg, #1f1f1f, #1f1f1f 5px, #262626 5px, #262626 10px);
+  -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.combat-absolute-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.combat-unit-absolute {
+  position: absolute;
+  width: var(--hex-w);
+  height: var(--hex-h);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.45s ease-in-out;
+  padding-top: 10px;
+  -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 }
 
 .combat-unit-wrapper {
@@ -269,53 +334,29 @@ const getFugglerOnCombatHex = (row, col) => {
 }
 
 @media (max-width: 768px) {
-  .hex-row:nth-child(even) {
-    margin-left: 65px;
-  }
-}
-
-.hex-slot {
-  width: 80px;
-  height: 92px;
-  margin: 0 5px;
-  background: repeating-linear-gradient(45deg, #1f1f1f, #1f1f1f 5px, #262626 5px, #262626 10px);
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  transition: transform 0.2s;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-@media (max-width: 768px) {
-  .hex-slot {
-    width: 60px;
-    height: 69px;
-    margin: 0 3px;
+  .board-area {
+    --hex-w: 60px;
+    --hex-h: 69px;
+    --hex-margin: 3px;
+    --hex-overlap: 18px;
+    --row-shift: 33px;
+    --board-padding: 30px;
   }
 }
 
 @media (max-width: 450px) {
-  .hex-slot {
-    width: 38px;
-    height: 44px;
-    margin: 0 1px;
-  }
-  .hex-row {
-    margin-bottom: -10px;
-  }
-  .hex-row:nth-child(even) {
-    margin-left: 40px;
+  .board-area {
+    --hex-w: 38px;
+    --hex-h: 44px;
+    --hex-margin: 1px;
+    --hex-overlap: 11px;
+    --row-shift: 20px;
+    --board-padding: 20px;
   }
   .board-title {
     font-size: 1.2rem;
     margin-bottom: 10px;
   }
-}
-.player-board .hex-slot {
-  background: repeating-linear-gradient(45deg, #2b1f3c, #2b1f3c 5px, #36294a 5px, #36294a 10px);
-}
-.player-board .hex-slot:hover {
-  transform: scale(1.1);
 }
 
 /* banquillo normal (cuadrado) */

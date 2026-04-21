@@ -1,5 +1,4 @@
 <script setup>
-import { computed } from 'vue'
 import FugglerTooltip from './FugglerTooltip.vue'
 
 const props = defineProps({
@@ -12,23 +11,11 @@ const props = defineProps({
     default: false
   }
 })
-
-// muestra el simbolo de estrellas de la unidad
-const starsDisplay = computed(() => {
-  if (props.fuggler.stars === 1) return 'A'
-  if (props.fuggler.stars === 2) return 'A+'
-  if (props.fuggler.stars === 3) return 'A++'
-  return 'A'
-})
 </script>
 
 <template>
   <FugglerTooltip :fuggler="fuggler">
     <div class="fuggler-unit" :class="`tier-${fuggler.tier}`">
-      <div v-if="!minimal" class="stars">{{ starsDisplay }}</div>
-      <div v-if="!minimal" class="hp-bar">
-        <div class="hp-fill" style="width: 100%"></div>
-      </div>
       <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="fuggler-image" />
     </div>
   </FugglerTooltip>
@@ -65,32 +52,6 @@ const starsDisplay = computed(() => {
 .tier-3 { background: repeating-linear-gradient(135deg, rgba(168,85,247,0.7), rgba(168,85,247,0.7) 4px, transparent 4px, transparent 8px), #581c87; }
 .tier-4 { background: repeating-linear-gradient(135deg, rgba(245,158,11,0.7), rgba(245,158,11,0.7) 4px, transparent 4px, transparent 8px), #78350f; }
 
-.stars {
-  position: absolute;
-  top: 15%;
-  left: 15%;
-  font-family: var(--title-font);
-  color: gold;
-  text-shadow: 2px 2px 0 #000;
-  font-size: 1.2rem;
-  transform: rotate(-10deg);
-}
-.hp-bar {
-  position: absolute;
-  top: 18%;
-  right: 15%;
-  width: 25px;
-  height: 8px;
-  background: #000;
-  border-radius: 0;
-  border: 1px solid #000;
-  overflow: hidden;
-  box-shadow: 2px 2px 0 var(--color-blood);
-}
-.hp-fill {
-  background: var(--color-toxic);
-  height: 100%;
-}
 .fuggler-image {
   width: 65px;
   height: 65px;
