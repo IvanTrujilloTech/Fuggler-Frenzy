@@ -6,6 +6,7 @@ import ShopArea from '../components/ShopArea.vue'
 import BoardArea from '../components/BoardArea.vue'
 import SellPanel from '../components/SellPanel.vue'
 import SynergyTracker from '../components/SynergyTracker.vue'
+import Ranking from '../components/Ranking.vue'
 import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
 
 const store = useGameStore()
@@ -25,14 +26,17 @@ onUnmounted(() => {
 <template>
   <main class="game-container">
     <div class="scale-wrapper">
+      <Ranking />
       <header class="game-header">
         <div class="hud">
           <div class="hud-item player-info">
             {{ store.username }} | HP: <span class="hp-text">{{ store.hp }}</span>
           </div>
-          <div class="hud-item timer-info" :class="{ 'warning': store.timeLeft <= 5 }">
-            <span class="phase">{{ store.phase }}</span>
-            <span class="timer">{{ store.timeLeft }}s</span>
+          <div class="hud-item timer-info" :class="{ 'warning': store.timeLeft <= 5 && store.phase === 'PLANNING' }">
+            <span class="phase">{{ store.phase === 'PLANNING' && store.timeLeft === 0 ? 'LISTO' : store.phase }}</span>
+            <span class="timer" v-if="store.phase === 'COMBAT'">PELEANDO...</span>
+            <span class="timer" v-else-if="store.phase !== 'PLANNING' || store.timeLeft > 0">{{ store.timeLeft }}s</span>
+            <span class="waiting" v-else>Esperando oponente...</span>
           </div>
           <div class="hud-item round-info">Ronda: {{ store.round }}</div>
           <div class="hud-item gold-info">

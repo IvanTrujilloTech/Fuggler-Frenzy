@@ -24,22 +24,18 @@ onMounted(() => {
       pull: false,
     },
     onAdd(evt) {
-      // sortable ya ha sacado el elemento del sortable del banquillo.
-      // vuedraggable en el banquillo escucha el evento 'remove' de sortable
-      // y ya ha actualizado store.bench[idx] antes de que esto se ejecute.
       const unit = store.draggingUnit
 
-      // elimina el nodo del dom de inmediato — no queremos que se quede en la zona de venta.
+      // elimina el nodo del dom de inmediato
       evt.item.remove()
 
       if (unit) {
-        store.gold += unit.cost
-        store.checkUpgrades()
+        store.sellUnitByInstance(unit.instanceId)
       }
 
       store.draggingUnit = null
       isDragOver.value = false
-      dragOverCounter = 0 // reinicia el contador del drag
+      dragOverCounter = 0
     },
   })
 })
