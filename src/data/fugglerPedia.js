@@ -238,5 +238,11 @@ export const ARTEFACTOS ={
       'obj2':'JABON'
     },
     'enunciado':'El Fuggler gana un escudo por cada Fuggler enemigo eliminado.'
-  }
+  },
+  costScale: {
+  1: 1,
+  2: 3,
+  3: 6,
+  4: 9
+}
 }
