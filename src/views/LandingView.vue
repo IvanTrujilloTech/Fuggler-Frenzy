@@ -1,11 +1,18 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGameStore } from '../stores/gameStore'
+import { useAudioStore } from '../stores/audioStore'
+import AudioSettings from '../components/AudioSettings.vue'
 
 const router = useRouter()
 const store = useGameStore()
+const audioStore = useAudioStore()
 const username = ref('')
+
+onMounted(() => {
+  audioStore.playLobbyMusic()
+})
 
 const startGame = () => {
   if (username.value.trim() !== '') {
@@ -45,6 +52,8 @@ const startGame = () => {
       <div class="blob blob1"></div>
       <div class="blob blob2"></div>
     </div>
+
+    <AudioSettings />
   </div>
 </template>
 

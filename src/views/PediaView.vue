@@ -1,10 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { FUGGLERS, FUGGLER_TYPES } from '../data/fugglerPedia'
 import { ITEM_COMPONENTS, ARTIFACT_RECIPES } from '../data/items'
+import { useAudioStore } from '../stores/audioStore'
 import FugglerUnit from '../components/FugglerUnit.vue'
 import ItemTooltip from '../components/ItemTooltip.vue'
+import AudioSettings from '../components/AudioSettings.vue'
 import iconDientudos from '../assets/HUD/SINERGYS/DIENTUDOS.svg'
 import iconBotones from '../assets/HUD/SINERGYS/BOTONES.svg'
 import iconRadioactivos from '../assets/HUD/SINERGYS/RADIOACTIVOS.svg'
@@ -21,7 +23,12 @@ const SYNERGY_ICONS = {
 }
 
 const router = useRouter()
+const audioStore = useAudioStore()
 const activeTab = ref('fugglers')
+
+onMounted(() => {
+  audioStore.playLobbyMusic()
+})
 
 // agrupa los fugglers por tipo
 const fugglersByType = computed(() => {
@@ -115,6 +122,8 @@ const fugglersByType = computed(() => {
         </div>
       </div>
     </div>
+    
+    <AudioSettings />
   </div>
 </template>
 

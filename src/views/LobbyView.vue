@@ -3,10 +3,13 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMultiplayerStore } from '../stores/multiplayerStore'
 import { useGameStore } from '../stores/gameStore'
+import { useAudioStore } from '../stores/audioStore'
+import AudioSettings from '../components/AudioSettings.vue'
 
 const router = useRouter()
 const multiplayerStore = useMultiplayerStore()
 const gameStore = useGameStore()
+const audioStore = useAudioStore()
 
 const username = ref(gameStore.username || '')
 const pinInput = ref('')
@@ -50,6 +53,7 @@ multiplayerStore.$subscribe((mutation, state) => {
 
 onMounted(async () => {
   await multiplayerStore.initialize()
+  audioStore.playLobbyMusic()
 })
 </script>
 
@@ -149,6 +153,8 @@ onMounted(async () => {
       <div class="blob blob1"></div>
       <div class="blob blob2"></div>
     </div>
+
+    <AudioSettings />
   </div>
 </template>
 
