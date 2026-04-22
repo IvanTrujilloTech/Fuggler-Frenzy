@@ -148,10 +148,7 @@ const hide = () => (isVisible.value = false);
         :style="[floatingStyles, { position: 'fixed' }]"
         class="tooltip-content"
       >
-        <div class="tt-cost-big" :class="{ 'cost-pop': animatingUpgrade }">
-          <img :src="coin" alt="Coin" class="coin-icon" />
-          {{ modifiedCost }}
-        </div>
+       
         <div class="tt-header">
           <strong :class="{ 'upgrade-anim': animatingUpgrade }">
             {{ fuggler.name }}{{ upgradeLabel }}
@@ -195,6 +192,10 @@ const hide = () => (isVisible.value = false);
               POISON: {{ modifiedStats.veneno }}%
             </span>
           </div>
+           <div class="tt-cost-big" :class="{ 'cost-pop': animatingUpgrade }">
+          <img :src="coin" alt="Coin" class="coin-icon" />
+          {{ modifiedCost }}
+        </div>
         </div>
       </div>
     </Teleport>
@@ -203,14 +204,20 @@ const hide = () => (isVisible.value = false);
 
 <style scoped>
 .tt-cost-big {
-  font-size: 1.4em;
+  font-size: 0.9em;
   display: flex;
+  background: rgba(255, 215, 0, 0.1);
+  justify-content: center;
   align-items: center;
   gap: 10px;
   font-weight: 900;
   color: #fbbf24;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
   margin-top: 4px;
+}
+.tt-cost-big img{
+  width: 24px;
+  height: 24px;
 }
 .upgrade-anim {
   animation: upgradePop 0.8s ease-out;
