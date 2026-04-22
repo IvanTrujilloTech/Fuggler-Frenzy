@@ -7,6 +7,7 @@ import BoardArea from '../components/BoardArea.vue'
 import SellPanel from '../components/SellPanel.vue'
 import SynergyTracker from '../components/SynergyTracker.vue'
 import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
+import ObjectArea from '../components/ObjectArea.vue'
 
 const store = useGameStore()
 const router = useRouter()
@@ -45,6 +46,7 @@ onUnmounted(() => {
     <div class="game-content">
       <SynergyTracker />
       <BoardArea />
+      <ObjectArea />
       <SellPanel />
     </div>
 

@@ -4,23 +4,36 @@ import { useGameStore } from '../stores/gameStore'
 const store = useGameStore()
 
 function pick(option) {
-  // 👉 añadir fuggler al bench
-  store.bench.push({
+  // solo en planning
+  if (store.phase !== 'PLANNING') return
+
+  // buscar slot libre en bench
+  const emptySlotIndex = store.bench.findIndex(slot => slot.length === 0)
+  if (emptySlotIndex === -1) return
+
+  // límite de 6 objetos
+  if (store.inventory.length >= 6) return
+
+  // añadir fuggler al bench (respetando tu estructura)
+  store.bench[emptySlotIndex].push({
     ...option.fuggler,
-    instanceId: crypto.randomUUID()
+    instanceId: crypto.randomUUID(),
+    stars: 1,
+    items: []
   })
 
-  // 👉 añadir objeto al inventario
-  store.objects.push({
+  // añadir objeto al inventario
+  store.inventory.push({
     ...option.object,
     instanceId: crypto.randomUUID()
   })
 
-  // 👉 cerrar evento
+  // cerrar evento
   store.planningEventActive = false
   store.planningOptions = []
 }
 </script>
+
 <template>
   <div v-if="store.planningEventActive" class="planning-event">
     <div class="container-wrapper">
@@ -38,43 +51,3 @@ function pick(option) {
     </div>
   </div>
 </template>
-<style scoped>
-.planning-event {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.7);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.container-wrapper {
-  display: flex;
-  gap: 40px;
-}
-
-.container {
-  width: 120px;
-  height: 160px;
-  background: #222;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.container:hover {
-  transform: scale(1.1);
-}
-
-.fuggler {
-  width: 100%;
-}
-
-.object {
-  width: 40px;
-}
-</style>
