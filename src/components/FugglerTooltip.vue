@@ -1,7 +1,7 @@
 <script setup>
 import { useGameStore } from "../stores/gameStore";
 import { ARTIFACT_RECIPES } from "../data/items";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 const store = useGameStore();
 const props = defineProps({ fuggler: { type: Object, required: true } });
