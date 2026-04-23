@@ -179,29 +179,41 @@ const hide = () => (isVisible.value = false);
               {{ FUGGLER_TYPES[typeKey].name }}
             </span>
           </div>
-          <div class="tt-stats" v-if="modifiedStats">
-            <span :class="{ 'stat-boosted': isStatBoosted('hp') }">
-              HP: {{ Math.floor(modifiedStats.hp) }}
-            </span>
-            <span :class="{ 'stat-boosted': isStatBoosted('damage') }">
-              ATK: {{ Math.floor(modifiedStats.damage) }}
-            </span>
-            <span :class="{ 'stat-boosted': isStatBoosted('armor') }">
-              DEF: {{ Math.floor(modifiedStats.armor) }}
-            </span>
-            <span>AS: {{ modifiedStats.attackSpeed }}</span>
-            <span v-if="modifiedStats.crit > 0" class="stat-boosted">
-              CRIT: {{ modifiedStats.crit }}%
-            </span>
-            <span v-if="modifiedStats.veneno > 0" class="stat-boosted">
-              POISON: {{ modifiedStats.veneno }}%
-            </span>
-          </div>
-           <div class="tt-cost-big" :class="{ 'cost-pop': animatingUpgrade }">
-          <img :src="coin" alt="Coin" class="coin-icon" />
-          {{ modifiedCost }}
-        </div>
-        </div>
+           <div class="tt-stats" v-if="modifiedStats">
+             <span :class="{ 'stat-boosted': isStatBoosted('hp') }">
+               HP: {{ Math.floor(modifiedStats.hp) }}
+             </span>
+             <span :class="{ 'stat-boosted': isStatBoosted('damage') }">
+               ATK: {{ Math.floor(modifiedStats.damage) }}
+             </span>
+             <span :class="{ 'stat-boosted': isStatBoosted('armor') }">
+               DEF: {{ Math.floor(modifiedStats.armor) }}
+             </span>
+             <span>AS: {{ modifiedStats.attackSpeed }}</span>
+             <span v-if="modifiedStats.crit > 0" class="stat-boosted">
+               CRIT: {{ modifiedStats.crit }}%
+             </span>
+             <span v-if="modifiedStats.veneno > 0" class="stat-boosted">
+               POISON: {{ modifiedStats.veneno }}%
+             </span>
+           </div>
+           <div class="tt-items" v-if="fuggler.items && fuggler.items.length > 0">
+             <div class="tt-items-label">Equipped Items:</div>
+             <div class="tt-item-list">
+               <span
+                 v-for="item in fuggler.items"
+                 :key="item.instanceId"
+                 class="tt-item-badge"
+               >
+                 {{ item.name }}
+               </span>
+             </div>
+           </div>
+            <div class="tt-cost-big" :class="{ 'cost-pop': animatingUpgrade }">
+           <img :src="coin" alt="Coin" class="coin-icon" />
+           {{ modifiedCost }}
+         </div>
+         </div>
       </div>
     </Teleport>
   </div>
@@ -311,5 +323,30 @@ const hide = () => (isVisible.value = false);
 .stat-boosted {
   color: #4ade80;
   text-shadow: 0 0 5px rgba(74, 222, 128, 0.3);
+}
+.tt-items {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #444;
+}
+.tt-items-label {
+  font-size: 0.8em;
+  color: #a855f7;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+.tt-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tt-item-badge {
+  font-size: 0.75em;
+  padding: 2px 6px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid #a855f7;
+  border-radius: 4px;
+  color: #e9d5ff;
+  text-align: left;
 }
 </style>

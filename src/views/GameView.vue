@@ -1,27 +1,27 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useGameStore } from '../stores/gameStore'
-import ShopArea from '../components/ShopArea.vue'
-import BoardArea from '../components/BoardArea.vue'
-import SellPanel from '../components/SellPanel.vue'
-import SynergyTracker from '../components/SynergyTracker.vue'
-import Ranking from '../components/Ranking.vue'
-import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
-import ObjectArea from '../components/ObjectArea.vue'
-import PlanningEvent from '../components/PlanningEvent.vue'
-const store = useGameStore()
-const router = useRouter()
+import { onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import { useGameStore } from "../stores/gameStore";
+import ShopArea from "../components/ShopArea.vue";
+import BoardArea from "../components/BoardArea.vue";
+import SellPanel from "../components/SellPanel.vue";
+import SynergyTracker from "../components/SynergyTracker.vue";
+import Ranking from "../components/Ranking.vue";
+import iconCoin from "../assets/HUD/OBJECTS/COIN.svg";
+import ObjectArea from "../components/ObjectArea.vue";
+import PlanningEvent from "../components/PlanningEvent.vue";
+const store = useGameStore();
+const router = useRouter();
 
 onMounted(() => {
   if (!store.username) {
-    router.push('/')
+    router.push("/");
   }
-})
+});
 
 onUnmounted(() => {
-  store.clearTimer()
-})
+  store.clearTimer();
+});
 </script>
 
 <template>
@@ -31,12 +31,28 @@ onUnmounted(() => {
       <header class="game-header">
         <div class="hud">
           <div class="hud-item player-info">
-            {{ store.username }} | HP: <span class="hp-text">{{ store.hp }}</span>
+            {{ store.username }} | HP:
+            <span class="hp-text">{{ store.hp }}</span>
           </div>
-          <div class="hud-item timer-info" :class="{ 'warning': store.timeLeft <= 5 && store.phase === 'PLANNING' }">
-            <span class="phase">{{ store.phase === 'PLANNING' && store.timeLeft === 0 ? 'LISTO' : store.phase }}</span>
-            <span class="timer" v-if="store.phase === 'COMBAT'">PELEANDO...</span>
-            <span class="timer" v-else-if="store.phase !== 'PLANNING' || store.timeLeft > 0">{{ store.timeLeft }}s</span>
+          <div
+            class="hud-item timer-info"
+            :class="{
+              warning: store.timeLeft <= 5 && store.phase === 'PLANNING',
+            }"
+          >
+            <span class="phase">{{
+              store.phase === "PLANNING" && store.timeLeft === 0
+                ? "LISTO"
+                : store.phase
+            }}</span>
+            <span class="timer" v-if="store.phase === 'COMBAT'"
+              >PELEANDO...</span
+            >
+            <span
+              class="timer"
+              v-else-if="store.phase !== 'PLANNING' || store.timeLeft > 0"
+              >{{ store.timeLeft }}s</span
+            >
             <span class="waiting" v-else>Esperando oponente...</span>
           </div>
           <div class="hud-item round-info">Ronda: {{ store.round }}</div>
@@ -47,13 +63,12 @@ onUnmounted(() => {
         </div>
       </header>
 
-    <div class="game-content">
-      <SynergyTracker />
-      <ObjectArea />
-      <PlanningEvent />
-      <BoardArea />
-      <SellPanel />
-    </div>
+      <div class="game-content">
+        <SynergyTracker />
+        <ObjectArea v-if="!store.planningEventActive" /> <PlanningEvent />
+        <BoardArea />
+        <SellPanel />
+      </div>
 
       <ShopArea />
     </div>
@@ -83,7 +98,7 @@ onUnmounted(() => {
   padding: 1rem;
   background: var(--color-felt);
   border-bottom: 5px dashed var(--color-stitch);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
   z-index: 10;
 }
 .hud {
@@ -100,7 +115,7 @@ onUnmounted(() => {
   background: #222;
   border: 3px solid #000;
   border-radius: 4px 10px 3px 8px;
-  box-shadow: 4px 4px 0 rgba(0,0,0,1);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 1);
   transform: rotate(1deg);
 }
 .player-info {
@@ -110,7 +125,7 @@ onUnmounted(() => {
   width: 36px;
   height: 36px;
   object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 .gold-info {
   background: #d4af37;
@@ -146,8 +161,15 @@ onUnmounted(() => {
   animation: pulse 1s infinite;
 }
 @keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.1); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
 }
 .game-content {
   flex-grow: 1;

@@ -12,28 +12,32 @@ const pick = (option) => {
   const emptySlotIndex = store.bench.findIndex(slot => slot.length === 0)
   if (emptySlotIndex === -1) return
 
-  // límite de 6 objetos
+  // límite de 6 objetos en inventario
   if (store.inventory.length >= 6) return
 
-  // añadir fuggler al bench (respetando tu estructura)
-  store.bench[emptySlotIndex].push({
+  // crear fuggler (sin objeto)
+  const fuggler = {
     ...option.fuggler,
     instanceId: crypto.randomUUID(),
-    stars: 1,
-    items: []
-  })
+    items: [],
+    stars: 1
+  }
 
-  // añadir objeto al inventario
-  store.inventory.push({
+  // añadir fuggler al bench
+  store.bench[emptySlotIndex].push(fuggler)
+
+  // crear objeto y añadirlo al inventario (para equipar manualmente después)
+  const item = {
     ...option.object,
     instanceId: crypto.randomUUID()
-  })
+  }
+  store.addItemToInventory(item)
 
-  // cerrar evento
+  // cerrar evento y seguir
   store.planningEventActive = false
   store.planningOptions = []
+  store.startTimer()
 }
-
 </script>
 
 <template>

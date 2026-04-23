@@ -273,7 +273,25 @@ export const useGameStore = defineStore("game", {
           ] || 1;
         stats.damage *= mult;
       }
-      // ... otros bonos ...
+      // ... otros bonos de sinergia ...
+
+      // Aplicar bonos de items equipados al fuggler
+      if (unit.items && unit.items.length > 0) {
+        unit.items.forEach(item => {
+          const desc = item.description || "";
+          const dmgMatch = desc.match(/\+(\d+)% Daño de Ataque/);
+          if (dmgMatch) stats.damage *= (1 + parseInt(dmgMatch[1]) / 100);
+          const asMatch = desc.match(/\+(\d+)% Velocidad de Ataque/);
+          if (asMatch) stats.attackSpeed *= (1 + parseInt(asMatch[1]) / 100);
+          const hpMatch = desc.match(/\+(\d+) Puntos de Vida/);
+          if (hpMatch) stats.hp += parseInt(hpMatch[1]);
+          if (desc.includes("+1 Resistencia CC")) stats.armor = (stats.armor || 0) + 1;
+          const critMatch = desc.match(/\+(\d+)% Probabilidad Crítico/);
+          if (critMatch) stats.crit = (stats.crit || 0) + parseInt(critMatch[1]);
+          if (desc.includes("+1s Duración CC")) stats.ccDuration = (stats.ccDuration || 0) + 1;
+        });
+      }
+
 
       return {
         instanceId: unit.instanceId,
@@ -650,6 +668,32 @@ export const useGameStore = defineStore("game", {
       }
       this.syncToFirebase();
     },
+    addItemToInventory(item) {
+      this.inventory.push(item);
+    },
+
+    equipItemToFuggler(fugglerId, item) {
+      const findFuggler = (slots) => {
+        for (const slot of slots) {
+          const f = slot[0]
+          if (f?.instanceId === fugglerId) return f
+        }
+        return null
+      }
+
+      const fuggler =
+        findFuggler(this.board) ||
+        findFuggler(this.bench)
+
+      if (!fuggler) return false
+
+      if (!fuggler.items) fuggler.items = []
+
+      if (fuggler.items.length >= 2) return false
+
+      fuggler.items.push(item)
+      return true
+    },
   },
 });
 
@@ -727,3 +771,6 @@ export const useGameStore = defineStore("game", {
 //     this.startTimer()
 //     this.syncToFirebase()
 //   }
+
+
+
