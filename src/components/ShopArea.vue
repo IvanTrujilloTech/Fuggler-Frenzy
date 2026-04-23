@@ -35,7 +35,7 @@ const store = useGameStore()
         v-for="(fuggler, index) in store.shop" 
         :key="index"
         class="shop-card"
-        :class="{ empty: !fuggler, [fuggler?.types[0]]: true }"
+        :class="{ empty: !fuggler, ['tier-' + fuggler?.tier]: fuggler }"
         @click="store.buyUnit(index)"
       >
         <div v-if="fuggler" class="card-content">
@@ -213,6 +213,12 @@ const store = useGameStore()
   transform: scale(1.05) translateY(-10px) rotate(3deg);
   box-shadow: 12px 12px 0 var(--color-toxic);
 }
+
+/* Fondos por Tier (Raridad) sincronizados con FugglerUnit.vue */
+.tier-1 { background: repeating-linear-gradient(135deg, rgba(156,163,175,0.7), rgba(156,163,175,0.7) 4px, transparent 4px, transparent 8px), #374151; }
+.tier-2 { background: repeating-linear-gradient(135deg, rgba(59,130,246,0.7), rgba(59,130,246,0.7) 4px, transparent 4px, transparent 8px), #1e3a8a; }
+.tier-3 { background: repeating-linear-gradient(135deg, rgba(168,85,247,0.7), rgba(168,85,247,0.7) 4px, transparent 4px, transparent 8px), #581c87; }
+.tier-4 { background: repeating-linear-gradient(135deg, rgba(245,158,11,0.7), rgba(245,158,11,0.7) 4px, transparent 4px, transparent 8px), #78350f; }
 
 @media (max-width: 600px) {
   .shop-card {
