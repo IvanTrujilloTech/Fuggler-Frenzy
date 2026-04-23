@@ -2,17 +2,21 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGameStore } from '../stores/gameStore'
+import { useAudioStore } from '../stores/audioStore'
 import ShopArea from '../components/ShopArea.vue'
 import BoardArea from '../components/BoardArea.vue'
 import SellPanel from '../components/SellPanel.vue'
 import SynergyTracker from '../components/SynergyTracker.vue'
 import Ranking from '../components/Ranking.vue'
+import AudioSettings from '../components/AudioSettings.vue'
 import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
 
 const store = useGameStore()
+const audioStore = useAudioStore()
 const router = useRouter()
 
 onMounted(() => {
+  audioStore.playCombatMusic()
   if (!store.username) {
     router.push('/')
   }
@@ -54,6 +58,8 @@ onUnmounted(() => {
 
       <ShopArea />
     </div>
+    
+    <AudioSettings />
   </main>
 </template>
 

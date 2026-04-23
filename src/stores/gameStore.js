@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { FUGGLERS, FUGGLER_TYPES, getShopProbabilities } from '../data/fugglerPedia'
 import { useMultiplayerStore } from './multiplayerStore'
+import { useAudioStore } from './audioStore'
 
 export const useGameStore = defineStore("game", {
   state: () => ({
@@ -358,6 +359,9 @@ export const useGameStore = defineStore("game", {
       if (target.hp <= 0) {
         target.hp = 0
         target.isDead = true
+        
+        const audioStore = useAudioStore()
+        audioStore.playRandomDeathSound()
       }
       
       // Activar flag para animacion en la UI si fuera necesario
