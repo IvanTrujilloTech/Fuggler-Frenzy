@@ -19,7 +19,7 @@ export const useGameStore = defineStore("game", {
     inventory: [], // array de objetos del jugador
     isDraggingFuggler: false, // true mientras se arrastra un fuggler del tablero o banquillo
     draggingUnit: null, // unidad que se esta arrastrando desde el banquillo
-    
+
     // Estado de combate
     combatUnits: [], // unidades activas en combate {instanceId, fuggler, side, pos: {q, r}, hp, maxHp, stats, target, lastAttack}
     combatInterval: null,
@@ -79,10 +79,10 @@ export const useGameStore = defineStore("game", {
       } else {
         this.round++
       }
-      
+
       this.phase = 'PLANNING'
       this.timeLeft = 30
-      this.gold += 5 
+      this.gold += 5
       this.rollShop(true)
       this.startTimer()
       this.syncToFirebase()
@@ -121,15 +121,15 @@ export const useGameStore = defineStore("game", {
 
     startCombat() {
       if (this.phase === 'COMBAT') return // evitar doble inicio
-      
+
       this.ensureUnitsOnBoard()
-      
+
       this.phase = 'COMBAT'
       this.timeLeft = 0 // Sin tiempo límite para el combate
       this.combatTick = 0
       this.initCombat()
       this.syncToFirebase()
-      
+
       // Iniciamos el bucle de combate
       if (this.combatInterval) clearInterval(this.combatInterval)
       this.combatInterval = setInterval(() => {
@@ -163,7 +163,7 @@ export const useGameStore = defineStore("game", {
       const units = []
       const playerSynergies = this.calculateSynergiesForBoard(this.board)
       const enemySynergies = this.calculateSynergiesForBoard(this.boardEnemy)
-      
+
       // Unidades del jugador (Slots 0-20 mapped to rows 3,4,5)
       this.board.forEach((slot, i) => {
         if (slot.length > 0) {
@@ -197,7 +197,7 @@ export const useGameStore = defineStore("game", {
       // Axial coordinates (even-row offset mapping)
       const r = row
       const q = col - Math.floor(row / 2)
-      
+
       // Aplicar bonos de sinergia (simplificado para MVP)
       const stats = { ...unit.stats }
       if (activeSynergies['B']) { // Botones -> Vida
@@ -229,7 +229,7 @@ export const useGameStore = defineStore("game", {
     getBreakpoint(typeId, count) {
       const type = FUGGLER_TYPES[typeId]
       if (!type) return 0
-      
+
       let activeBp = 0
       for (const bp of type.breakpoints) {
         if (count >= bp) activeBp = bp
@@ -240,7 +240,7 @@ export const useGameStore = defineStore("game", {
     calculateSynergiesForBoard(board) {
       const uniqueUnits = new Set()
       const synergiesCount = {}
-      
+
       board.forEach(slot => {
         if (slot.length > 0) {
           const unit = slot[0]
@@ -254,7 +254,7 @@ export const useGameStore = defineStore("game", {
           }
         }
       })
-      
+
       return synergiesCount
     },
 
@@ -307,9 +307,9 @@ export const useGameStore = defineStore("game", {
     },
 
     getHexDist(a, b) {
-      return (Math.abs(a.q - b.q) + 
-              Math.abs(a.q + a.r - b.q - b.r) + 
-              Math.abs(a.r - b.r)) / 2
+      return (Math.abs(a.q - b.q) +
+        Math.abs(a.q + a.r - b.q - b.r) +
+        Math.abs(a.r - b.r)) / 2
     },
 
     moveTowards(unit, targetPos) {
@@ -334,8 +334,8 @@ export const useGameStore = defineStore("game", {
 
     getHexNeighbors(pos) {
       const dirs = [
-        {q: 1, r: 0}, {q: 1, r: -1}, {q: 0, r: -1},
-        {q: -1, r: 0}, {q: -1, r: 1}, {q: 0, r: 1}
+        { q: 1, r: 0 }, { q: 1, r: -1 }, { q: 0, r: -1 },
+        { q: -1, r: 0 }, { q: -1, r: 1 }, { q: 0, r: 1 }
       ]
       return dirs.map(d => ({ q: pos.q + d.q, r: pos.r + d.r }))
         // Limitar al tablero 6x7
@@ -359,11 +359,11 @@ export const useGameStore = defineStore("game", {
       if (target.hp <= 0) {
         target.hp = 0
         target.isDead = true
-        
+
         const audioStore = useAudioStore()
         audioStore.playRandomDeathSound()
       }
-      
+
       // Activar flag para animacion en la UI si fuera necesario
       unit.isAttacking = true
       setTimeout(() => unit.isAttacking = false, 300)
@@ -371,12 +371,12 @@ export const useGameStore = defineStore("game", {
 
     endCombat(winner) {
       const multiStore = useMultiplayerStore()
-      this.phase = 'IDLE' 
+      this.phase = 'IDLE'
       if (winner === 'enemy') {
         this.hp -= 10 // Daño base por perder ronda (ajustar segun unidades vivas)
         this.syncToFirebase()
       }
-      
+
       if (this.combatInterval) {
         clearInterval(this.combatInterval)
         this.combatInterval = null
@@ -385,9 +385,9 @@ export const useGameStore = defineStore("game", {
       // El host se encarga de transicionar la sala de nuevo a PLANNING en Firebase
       if (multiStore.isHost) {
         setTimeout(() => {
-          multiStore.updateRoomState({ 
-            status: 'PLANNING', 
-            round: this.round + 1 
+          multiStore.updateRoomState({
+            status: 'PLANNING',
+            round: this.round + 1
           })
         }, 5000) // 5 seg de pausa para ver resultados
       }
@@ -442,14 +442,14 @@ export const useGameStore = defineStore("game", {
       return base * (scale[stars] ?? stars);
     },
     buyUnit(shopIndex) {
-      if (this.phase !== 'PLANNING' && this.phase !== 'COMBAT') return 
+      if (this.phase !== 'PLANNING' && this.phase !== 'COMBAT') return
       const unit = this.shop[shopIndex]
       if (!unit) return
-      
+
       if (this.gold < unit.cost) return
-      
+
       const emptySlotIndex = this.bench.findIndex(slot => slot.length === 0)
-      if (emptySlotIndex === -1) return 
+      if (emptySlotIndex === -1) return
 
       this.gold -= unit.cost;
       this.bench[emptySlotIndex].push({
@@ -576,78 +576,3 @@ export const useGameStore = defineStore("game", {
     },
   },
 });
-
-// === Líneas nuevas para la ruleta (comentadas) ===
-// import { ITEM_COMPONENTS } from '../data/items'
-//
-// En state, añadir:
-//   rouletteItems: Object.values(ITEM_COMPONENTS),
-//   roulettePhase: false,
-//   rouletteTimer: 10,
-//   selectedRouletteItem: null,
-//   rouletteInterval: null,
-//
-// Modificar startNewRound:
-//   startNewRound() {
-//     this.round++
-//     if (this.round % 3 === 0) {
-//       this.startRoulettePhase()
-//     } else {
-//       this.phase = 'PLANNING'
-//       this.timeLeft = 30
-//       this.gold += 5
-//       this.rollShop(true)
-//       this.startTimer()
-//     }
-//     this.syncToFirebase()
-//   },
-//
-// Modificar clearTimer:
-//   clearTimer() {
-//     if (this.timerInterval) {
-//       clearInterval(this.timerInterval)
-//       this.timerInterval = null
-//     }
-//     if (this.rouletteInterval) {
-//       clearInterval(this.rouletteInterval)
-//       this.rouletteInterval = null
-//     }
-//   },
-//
-// Agregar nuevas acciones:
-//   startRoulettePhase() {
-//     this.phase = 'ROULETTE'
-//     this.roulettePhase = true
-//     this.rouletteTimer = 10
-//     this.selectedRouletteItem = null
-//     this.rouletteInterval = setInterval(() => {
-//       this.rouletteTimer--
-//       if (this.rouletteTimer <= 0) {
-//         this.endRoulettePhase()
-//       }
-//     }, 1000)
-//     this.syncToFirebase()
-//   },
-//
-//   selectRouletteItem(item) {
-//     if (!this.roulettePhase) return
-//     this.selectedRouletteItem = item
-//   },
-//
-//   endRoulettePhase() {
-//     this.roulettePhase = false
-//     if (this.rouletteInterval) {
-//       clearInterval(this.rouletteInterval)
-//       this.rouletteInterval = null
-//     }
-//     if (this.selectedRouletteItem) {
-//       this.inventory.push({ ...this.selectedRouletteItem })
-//     }
-//     this.selectedRouletteItem = null
-//     this.phase = 'PLANNING'
-//     this.timeLeft = 30
-//     this.gold += 5
-//     this.rollShop(true)
-//     this.startTimer()
-//     this.syncToFirebase()
-//   }
