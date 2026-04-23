@@ -37,8 +37,9 @@ const isOnBoard = computed(() => {
   );
 });
 const modifiedStats = computed(() => {
-  if (!props.fuggler) return null;
-  const stats = { ...props.fuggler.stats };
+  if (!props.fuggler || !props.fuggler.stats) return null;
+
+const stats = { ...props.fuggler.stats };
   const types = props.fuggler.types || [];
   if (!isOnBoard.value) return stats;
   const synergies = activeSynergies.value;
@@ -81,10 +82,14 @@ const modifiedStats = computed(() => {
 
 const isStatBoosted = (statName) => {
   if (!modifiedStats.value) return false;
-  const current = modifiedStats.value[statName];
-  const base = props.fuggler.stats[statName] || 0;
+  if (!props.fuggler || !props.fuggler.stats) return false;
+
+  const current = modifiedStats.value[statName] || 0;
+  const base = props.fuggler.stats?.[statName] || 0;
+
   return current > base;
 };
+
 const upgradeLabel = computed(() => {
   const s = props.fuggler.stars ?? 1;
 
@@ -143,7 +148,7 @@ const hide = () => (isVisible.value = false);
 
     <Teleport to="body">
       <div
-        v-if="isVisible && fuggler"
+        v-if="isVisible && fuggler && fuggler.stats"
         ref="floating"
         :style="[floatingStyles, { position: 'fixed' }]"
         class="tooltip-content"

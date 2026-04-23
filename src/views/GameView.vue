@@ -9,6 +9,7 @@ import SynergyTracker from '../components/SynergyTracker.vue'
 import Ranking from '../components/Ranking.vue'
 import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
 import ObjectArea from '../components/ObjectArea.vue'
+import PlanningEvent from '../components/PlanningEvent.vue'
 const store = useGameStore()
 const router = useRouter()
 
@@ -49,6 +50,7 @@ onUnmounted(() => {
     <div class="game-content">
       <SynergyTracker />
       <ObjectArea />
+      <PlanningEvent />
       <BoardArea />
       <SellPanel />
     </div>
