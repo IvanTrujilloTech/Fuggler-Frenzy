@@ -1,352 +1,234 @@
 <script setup>
-import { computed, ref, watch } from "vue";
-import { useFloating, offset, flip, shift } from "@floating-ui/vue";
-import { FUGGLER_TYPES } from "../data/fugglerPedia";
 import { useGameStore } from "../stores/gameStore";
-import iconDientudos from "../assets/HUD/SINERGYS/DIENTUDOS.svg";
-import iconBotones from "../assets/HUD/SINERGYS/BOTONES.svg";
-import iconRadioactivos from "../assets/HUD/SINERGYS/RADIOACTIVOS.svg";
-import iconInadaptados from "../assets/HUD/SINERGYS/INADAPTADOS.svg";
-import iconCazadores from "../assets/HUD/SINERGYS/CAZADORES.svg";
-import coin from "../assets/HUD/OBJECTS/COIN.svg";
-const SYNERGY_ICONS = {
-  D: iconDientudos,
-  B: iconBotones,
-  R: iconRadioactivos,
-  I: iconInadaptados,
-  C: iconCazadores,
+import { ARTIFACT_RECIPES } from "../data/items";
+import { ref } from "vue";
+
+const store = useGameStore();
+const props = defineProps({ fuggler: { type: Object, required: true } });
+const showRecipes = ref(false);
+
+function onDragOver(event) { event.preventDefault(); }
+
+function onDrop(event) {
+  event.preventDefault();
+  const itemData = event.dataTransfer.getData("item");
+  if (!itemData) return;
+  const item = JSON.parse(itemData);
+  const success = store.equipItemToFuggler(props.fuggler.instanceId, item);
+  if (success) {
+    store.inventory = store.inventory.filter(i => i.instanceId !== item.instanceId);
+  }
+}
+
+function unequipItem(item) {
+  const fugglerItems = props.fuggler.items || [];
+  const idx = fugglerItems.findIndex(i => i.instanceId === item.instanceId);
+  if (idx >= 0) {
+    fugglerItems.splice(idx, 1);
+    store.inventory.push(item);
+  }
+}
+
+function tryCraftInObjectArea() {
+  const inv = store.inventory;
+  if (inv.length < 2) return;
+  const obj1 = inv[inv.length - 1];
+  const obj2 = inv[inv.length - 2];
+  const key1 = `${obj1.id}_${obj2.id}`;
+  const key2 = `${obj2.id}_${obj1.id}`;
+  const recipe = ARTIFACT_RECIPES[key1] || ARTIFACT_RECIPES[key2];
+  if (recipe) {
+    store.inventory = store.inventory.filter(i => i.instanceId !== obj1.instanceId && i.instanceId !== obj2.instanceId);
+    store.inventory.push({ ...recipe, instanceId: crypto.randomUUID(), type: "artifact" });
+  }
+}
+
+const ITEM_NAMES = {
+  tooth: 'Diente', thread: 'Hilo', pin: 'Imperdible', sock: 'Calcetin',
+  soap: 'Jabon', battery: 'Pila', ombligo: 'Pelusa', canicas: 'Canicas',
+  dentadura: 'Dentadura', collar: 'Collar', mando: 'Mando', jersei: 'Jersei'
 };
-
-const props = defineProps({
-  fuggler: {
-    type: Object,
-    required: true,
-  },
-});
-const animatingUpgrade = ref(false);
-const prevStars = ref(props.fuggler?.stars ?? 1);
-const reference = ref(null);
-const floating = ref(null);
-const isVisible = ref(false);
-
-const gameStore = useGameStore();
-const activeSynergies = computed(() => gameStore.activeSynergies);
-const isOnBoard = computed(() => {
-  return gameStore.board.some(
-    (slot) => slot.length > 0 && slot[0].instanceId === props.fuggler.instanceId
-  );
-});
-const modifiedStats = computed(() => {
-  if (!props.fuggler || !props.fuggler.stats) return null;
-
-const stats = { ...props.fuggler.stats };
-  const types = props.fuggler.types || [];
-  if (!isOnBoard.value) return stats;
-  const synergies = activeSynergies.value;
-
-  if (types.includes("D")) {
-    const dCount = synergies.D || 0;
-    if (dCount >= 6) stats.damage *= 1.5;
-    else if (dCount >= 4) stats.damage *= 1.25;
-    else if (dCount >= 2) stats.damage *= 1.1;
-  }
-  if (types.includes("B")) {
-    const bCount = synergies.B || 0;
-    if (bCount >= 6) stats.hp += 1000;
-    else if (bCount >= 5) stats.hp += 500;
-    else if (bCount >= 3) stats.hp += 200;
-  }
-  if (types.includes("I")) {
-    const iCount = synergies.I || 0;
-    if (iCount >= 6) stats.armor += 100;
-    else if (iCount >= 5) stats.armor += 40;
-    else if (iCount >= 3) stats.armor += 15;
-  }
-  if (types.includes("C")) {
-    const cCount = synergies.C || 0;
-    stats.crit = 0;
-    if (cCount >= 6) stats.crit = 80;
-    else if (cCount >= 4) stats.crit = 40;
-    else if (cCount >= 2) stats.crit = 15;
-  }
-
-  if (types.includes("R")) {
-    const rCount = synergies.R || 0;
-    stats.veneno = 0;
-    if (rCount >= 6) stats.veneno = 70;
-    else if (rCount >= 4) stats.veneno = 30;
-    else if (rCount >= 2) stats.veneno = 10;
-  }
-  return stats;
-});
-
-const isStatBoosted = (statName) => {
-  if (!modifiedStats.value) return false;
-  if (!props.fuggler || !props.fuggler.stats) return false;
-
-  const current = modifiedStats.value[statName] || 0;
-  const base = props.fuggler.stats?.[statName] || 0;
-
-  return current > base;
-};
-
-const upgradeLabel = computed(() => {
-  const s = props.fuggler.stars ?? 1;
-
-  if (s <= 1) return " (A)";
-  if (s === 2) return "  (A+)";
-  if (s === 3) return " (A++)";
-});
-
-const modifiedCost = computed(() => {
-  const base = props.fuggler.cost ?? 0;
-  const stars = props.fuggler.stars ?? 1;
-
-  const scale = props.fuggler.costScale ?? {  
-    1: 1,
-  2: 3,
-  3: 6,
-  4: 9 };
-  return base * (scale[stars] ?? stars);
-});
-
-watch(
-  () => props.fuggler?.stars,
-  (newVal, oldVal) => {
-    if (!newVal) return;
-
-    if (newVal > oldVal) {
-      animatingUpgrade.value = true;
-
-      setTimeout(() => {
-        animatingUpgrade.value = false;
-      }, 800); // duración animación
-    }
-
-    prevStars.value = newVal;
-  }
-);
-
-const { floatingStyles } = useFloating(reference, floating, {
-  placement: "top",
-  strategy: "fixed",
-  middleware: [offset(10), flip(), shift({ padding: 10 })],
-});
-
-const show = () => (isVisible.value = true);
-const hide = () => (isVisible.value = false);
 </script>
 
 <template>
-  <div
-    class="tooltip-wrapper"
-    ref="reference"
-    @mouseenter="show"
-    @mouseleave="hide"
-  >
-    <slot></slot>
+  <div class="tooltip-wrapper" ref="reference" @mouseenter="() => {}">
+    <div class="fuggler-unit" 
+      :class="`tier-${fuggler.tier}`"
+      @dragover="onDragOver"
+      @drop="onDrop"
+    >
+      <button class="btn-recipes" @click.stop="showRecipes = !showRecipes" :class="{ open: showRecipes }">📜</button>
 
-    <Teleport to="body">
-      <div
-        v-if="isVisible && fuggler && fuggler.stats"
-        ref="floating"
-        :style="[floatingStyles, { position: 'fixed' }]"
-        class="tooltip-content"
-      >
-       
-        <div class="tt-header">
-          <strong :class="{ 'upgrade-anim': animatingUpgrade }">
-            {{ fuggler.name }}{{ upgradeLabel }}
-          </strong>
-          <span class="tt-tier">Tier {{ fuggler.tier }}</span>
+      <div v-if="fuggler.items && fuggler.items.length > 0" class="equipped-items-side">
+        <div v-for="item in fuggler.items" :key="item.instanceId"
+          class="equipped-item-big" :title="`${item.name}\n${item.description}`" @click.stop="unequipItem(item)">
+          <img :src="item.img" :alt="item.name" />
+          <span class="item-effect">{{ item.description }}</span>
         </div>
-        <div class="tt-body">
-          <div class="tt-types">
-            <span
-              v-for="typeKey in fuggler.types"
-              :key="typeKey"
-              class="tt-type-badge"
-              :style="{
-                backgroundColor: FUGGLER_TYPES[typeKey].color,
-                color: typeKey === 'R' ? '#000' : '#fff',
-              }"
-            >
-              <img
-                :src="SYNERGY_ICONS[typeKey]"
-                class="type-icon"
-                :alt="FUGGLER_TYPES[typeKey].name"
-              />
-              {{ FUGGLER_TYPES[typeKey].name }}
-            </span>
-          </div>
-           <div class="tt-stats" v-if="modifiedStats">
-             <span :class="{ 'stat-boosted': isStatBoosted('hp') }">
-               HP: {{ Math.floor(modifiedStats.hp) }}
-             </span>
-             <span :class="{ 'stat-boosted': isStatBoosted('damage') }">
-               ATK: {{ Math.floor(modifiedStats.damage) }}
-             </span>
-             <span :class="{ 'stat-boosted': isStatBoosted('armor') }">
-               DEF: {{ Math.floor(modifiedStats.armor) }}
-             </span>
-             <span>AS: {{ modifiedStats.attackSpeed }}</span>
-             <span v-if="modifiedStats.crit > 0" class="stat-boosted">
-               CRIT: {{ modifiedStats.crit }}%
-             </span>
-             <span v-if="modifiedStats.veneno > 0" class="stat-boosted">
-               POISON: {{ modifiedStats.veneno }}%
-             </span>
-           </div>
-           <div class="tt-items" v-if="fuggler.items && fuggler.items.length > 0">
-             <div class="tt-items-label">Equipped Items:</div>
-             <div class="tt-item-list">
-               <span
-                 v-for="item in fuggler.items"
-                 :key="item.instanceId"
-                 class="tt-item-badge"
-               >
-                 {{ item.name }}
-               </span>
-             </div>
-           </div>
-            <div class="tt-cost-big" :class="{ 'cost-pop': animatingUpgrade }">
-           <img :src="coin" alt="Coin" class="coin-icon" />
-           {{ modifiedCost }}
-         </div>
-         </div>
       </div>
-    </Teleport>
+      
+      <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="fuggler-image" />
+      <div class="items-legacy">
+        <img v-for="item in fuggler.items || []" :key="item.instanceId + '-sm'" :src="item.img" class="item-icon" />
+      </div>
+    </div>
+
+    <div v-if="showRecipes" class="recipes-panel">
+      <h4>📜 Recetas de Artefactos</h4>
+      <div class="recipes-list">
+        <div v-for="(rec, key) in ARTIFACT_RECIPES" :key="key" class="recipe-item">
+          <div class="recipe-objs">
+            <span class="obj-tag">{{ ITEM_NAMES[rec.recipe[0]] || rec.recipe[0] }}</span>
+            <span class="plus">+</span>
+            <span class="obj-tag">{{ ITEM_NAMES[rec.recipe[1]] || rec.recipe[1] }}</span>
+          </div>
+          <div class="recipe-result">
+            <strong>{{ rec.name }}</strong>
+            <p>{{ rec.description }}</p>
+            <div class="recipe-effect">{{ rec.effects.join(', ') }}</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-close-recipes" @click="showRecipes = false">✕ Cerrar</button>
+    </div>
+
+    <div v-if="store.inventory.length >= 2" class="craft-hint" @click="tryCraftInObjectArea">
+      🔨 Combinar
+    </div>
   </div>
 </template>
 
 <style scoped>
-.tt-cost-big {
-  font-size: 0.9em;
-  display: flex;
-  background: rgba(255, 215, 0, 0.1);
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  font-weight: 900;
-  color: #fbbf24;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-  margin-top: 4px;
+.btn-recipes {
+  position: absolute; top: -8px; left: -8px; width: 28px; height: 28px;
+  border-radius: 50%; border: 2px solid #ffd700; background: rgba(0,0,0,0.9);
+  color: #ffd700; font-size: 14px; cursor: pointer; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
 }
-.tt-cost-big img{
-  width: 24px;
-  height: 24px;
-}
-.upgrade-anim {
-  animation: upgradePop 0.8s ease-out;
-  color: gold;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+.btn-recipes:hover { transform: scale(1.2); background: rgba(255,215,0,0.3); }
+.btn-recipes.open { background: rgba(255,215,0,0.3); }
+
+.equipped-items-side {
+  position: absolute; top: 50%; left: -55px; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 6px; z-index: 25;
 }
 
-@keyframes upgradePop {
-  0% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-  30% {
-    transform: scale(1.25);
-    filter: brightness(1.8);
-  }
-  60% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-}
-.tooltip-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
+.equipped-item-big {
+  width: 48px; height: 48px; border-radius: 8px;
+  border: 2px solid rgba(255, 215, 0, 0.9); background: rgba(0,0,0,0.95);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.6); position: relative;
+  transition: all 0.2s; padding: 3px;
 }
 
-.tooltip-content {
-  background: rgba(15, 15, 20, 0.95);
-  border: 1px solid #a855f7;
-  padding: 12px;
-  border-radius: 8px;
-  color: white;
-  width: max-content;
-  max-width: 250px;
-  z-index: 1000;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-  pointer-events: none;
-  font-family: sans-serif;
-  backdrop-filter: blur(5px);
+.equipped-item-big:hover {
+  transform: scale(1.2); border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7); z-index: 30;
 }
-.tt-header {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #444;
-  padding-bottom: 5px;
-  margin-bottom: 5px;
+
+.equipped-item-big:active { transform: scale(0.95); }
+
+.equipped-item-big img {
+  width: 34px; height: 34px; object-fit: contain;
+  pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
 }
-.tt-tier {
-  font-size: 0.8em;
-  color: gold;
+
+.item-effect {
+  position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.95); color: #4ade80; font-size: 9px;
+  padding: 2px 5px; border-radius: 3px; white-space: nowrap;
+  border: 1px solid rgba(74,222,128,0.5); pointer-events: none;
+  opacity: 0; transition: opacity 0.2s; z-index: 35;
 }
-.tt-types {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
+
+.equipped-item-big:hover .item-effect { opacity: 1; }
+
+.recipes-panel {
+  position: absolute; top: 50px; left: -8px;
+  background: rgba(15,15,20,0.98); border: 2px solid #ffd700;
+  border-radius: 10px; padding: 15px; width: 280px; max-height: 400px;
+  overflow-y: auto; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.8);
 }
-.tt-type-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8em;
-  font-weight: bold;
-  padding: 2px 8px 2px 4px;
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+
+.recipes-panel h4 {
+  color: #ffd700; font-size: 14px; margin: 0 0 10px 0;
+  text-align: center; font-family: var(--title-font);
 }
-.type-icon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+
+.recipes-list { display: flex; flex-direction: column; gap: 8px; }
+
+.recipe-item {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 8px;
 }
-.tt-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 15px;
-  font-size: 0.9em;
-  font-weight: bold;
+
+.recipe-objs {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
 }
-.stat-boosted {
-  color: #4ade80;
-  text-shadow: 0 0 5px rgba(74, 222, 128, 0.3);
+
+.obj-tag {
+  background: rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3);
+  padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #ffd700;
 }
-.tt-items {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #444;
+
+.plus { color: #888; font-size: 12px; }
+
+.recipe-result p {
+  color: #ccc; font-size: 11px; margin: 4px 0; line-height: 1.3;
 }
-.tt-items-label {
-  font-size: 0.8em;
-  color: #a855f7;
-  margin-bottom: 4px;
-  font-weight: bold;
+
+.recipe-effect {
+  color: #4ade80; font-size: 10px; font-style: italic;
 }
-.tt-item-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+
+.btn-close-recipes {
+  width: 100%; margin-top: 10px; padding: 6px;
+  background: rgba(255,0,0,0.2); border: 1px solid rgba(255,0,0,0.4);
+  color: #ff6b6b; border-radius: 5px; cursor: pointer; font-size: 12px;
 }
-.tt-item-badge {
-  font-size: 0.75em;
-  padding: 2px 6px;
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid #a855f7;
-  border-radius: 4px;
-  color: #e9d5ff;
-  text-align: left;
+
+.btn-close-recipes:hover { background: rgba(255,0,0,0.4); }
+
+.craft-hint {
+  position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+  background: rgba(255, 100, 50, 0.9); color: #fff; border: none;
+  padding: 4px 10px; border-radius: 12px; font-size: 10px;
+  cursor: pointer; z-index: 30; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.craft-hint:hover { background: rgba(255, 120, 60, 1); }
+
+.fuggler-unit {
+  position: relative; width: 100%; height: 100%;
+  border-radius: 4px 12px 3px 8px; background: var(--color-felt);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; box-shadow: 4px 4px 0 rgba(0,0,0,0.8);
+  border: 2px dashed #000; color: white; transition: all 0.2s;
+}
+
+.is-hex .fuggler-unit {
+  border-radius: 0; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  border: none; box-shadow: none;
+}
+
+.tier-1 { background: repeating-linear-gradient(135deg, rgba(156,163,175,0.7), rgba(156,163,175,0.7) 4px, transparent 4px, transparent 8px), #374151; }
+.tier-2 { background: repeating-linear-gradient(135deg, rgba(59,130,246,0.7), rgba(59,130,246,0.7) 4px, transparent 4px, transparent 8px), #1e3a8a; }
+.tier-3 { background: repeating-linear-gradient(135deg, rgba(168,85,247,0.7), rgba(168,85,247,0.7) 4px, transparent 4px, transparent 8px), #581c87; }
+.tier-4 { background: repeating-linear-gradient(135deg, rgba(245,158,11,0.7), rgba(245,158,11,0.7) 4px, transparent 4px, transparent 8px), #78350f; }
+
+.fuggler-image {
+  width: 65px; height: 65px; object-fit: contain;
+  z-index: 1; filter: drop-shadow(2px 4px 6px black);
+}
+
+.items-legacy {
+  position: absolute; top: -6px; right: -6px; display: flex; gap: 1px;
+  z-index: 15; opacity: 0.4;
+}
+
+.item-icon {
+  width: 12px; height: 12px; border-radius: 2px;
 }
 </style>
