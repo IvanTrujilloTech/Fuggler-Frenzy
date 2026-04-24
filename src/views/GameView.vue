@@ -12,8 +12,10 @@ import ObjectArea from "../components/ObjectArea.vue";
 import PlanningEvent from "../components/PlanningEvent.vue";
 import { ARTIFACT_RECIPES, ITEM_COMPONENTS } from "../data/items";
 import { ref, computed } from "vue";
+import { useMultiplayerStore } from "../stores/multiplayerStore";
 
 const store = useGameStore();
+const multiStore = useMultiplayerStore();
 const router = useRouter();
 const showRecipes = ref(false);
 
@@ -79,6 +81,12 @@ onUnmounted(() => {
               <button class="btn-recipes-main" @click="showRecipes = !showRecipes" title="Ver Recetas">
               <span class="plus-icon">+</span>
             </button>
+        </div>
+        
+        <!-- Alerta de Error de Conexión -->
+        <div v-if="multiStore.error" class="connection-error-banner">
+          <span class="error-msg">⚠️ {{ multiStore.error }}</span>
+          <button @click="multiStore.error = null" class="btn-dismiss">✕</button>
         </div>
       </header>
 
@@ -417,5 +425,40 @@ onUnmounted(() => {
     flex-direction: column;
     overflow-y: auto;
   }
+}
+
+/* Estilos de error de conexión */
+.connection-error-banner {
+  background: #ef4444;
+  color: white;
+  padding: 8px 16px;
+  margin-top: 10px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--title-font);
+  border: 2px solid #000;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+  animation: slide-down 0.3s ease-out;
+}
+
+@keyframes slide-down {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.error-msg {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.btn-dismiss {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 </style>

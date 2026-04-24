@@ -151,15 +151,9 @@ export const useGameStore = defineStore("game", {
           
           if (this.phase === 'PLANNING' && this.planningEventActive) {
             if (this.planningOptions && this.planningOptions.length > 0) {
-              this.pickPlanningOption(this.planningOptions[0]);
-            } else {
-              this.planningEventActive = false;
-            }
-          }
-          
-          if (this.phase === 'PLANNING' && this.planningEventActive) {
-            if (this.planningOptions && this.planningOptions.length > 0) {
-              this.pickPlanningOption(this.planningOptions[0]);
+              // Seleccionamos uno aleatorio si se acaba el tiempo
+              const randomIndex = Math.floor(Math.random() * this.planningOptions.length);
+              this.pickPlanningOption(this.planningOptions[randomIndex]);
             } else {
               this.planningEventActive = false;
             }
@@ -168,14 +162,24 @@ export const useGameStore = defineStore("game", {
           this.syncToFirebase();
 
           const multiStore = useMultiplayerStore();
-          // En multijugador, el Host es el que dicta el cambio de fase oficial en Firebase
-          if (multiStore.isHost && multiStore.gameState.status === "PLANNING") {
-            // Dar un pequeño margen para que la sincronización de tableros propage
-            setTimeout(() => {
-              multiStore.generateMatchups().then(() => {
-                multiStore.updateRoomState({ status: "COMBAT" });
-              });
-            }, 1000);
+          if (this.timeLeft <= 0) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+
+            if (multiStore.isHost && multiStore.gameState.status === "PLANNING") {
+              // Dar un pequeño margen para que la sincronización de tableros propage
+              setTimeout(() => {
+                multiStore.generateMatchups()
+                  .then(() => {
+                    return multiStore.updateRoomState({ status: "COMBAT" });
+                  })
+                  .catch(err => {
+                    console.error("Error al transicionar a COMBAT:", err);
+                    // Fallback local por si acaso para no bloquear la partida del host
+                    this.startCombat();
+                  });
+              }, 1000);
+            }
           }
         }
       }, 1000);
@@ -294,7 +298,7 @@ export const useGameStore = defineStore("game", {
 
       // Aplicar bonos de sinergia (simplificado para MVP)
       const stats = { ...unit.stats };
-      if (activeSynergies["B"]) {
+      if (activeSynergies["B"] && unit.types?.includes("B")) {
         // Botones -> Vida
         const bonus =
           { 3: 200, 5: 500, 6: 1000 }[
@@ -302,7 +306,7 @@ export const useGameStore = defineStore("game", {
           ] || 0;
         stats.hp += bonus;
       }
-      if (activeSynergies["D"]) {
+      if (activeSynergies["D"] && unit.types?.includes("D")) {
         // Dientudos -> Daño %
         const mult =
           { 2: 1.1, 4: 1.25, 6: 1.5 }[
@@ -310,7 +314,30 @@ export const useGameStore = defineStore("game", {
           ] || 1;
         stats.damage *= mult;
       }
-      // ... otros bonos de sinergia ...
+      if (activeSynergies["I"] && unit.types?.includes("I")) {
+        // Inadaptados -> Armadura
+        const bonus =
+          { 3: 15, 5: 40, 6: 100 }[
+            this.getBreakpoint("I", activeSynergies["I"])
+          ] || 0;
+        stats.armor += bonus;
+      }
+      if (activeSynergies["C"] && unit.types?.includes("C")) {
+        // Cazadores -> Crit
+        const bonus =
+          { 2: 15, 4: 40, 6: 80 }[
+            this.getBreakpoint("C", activeSynergies["C"])
+          ] || 0;
+        stats.crit = (stats.crit || 0) + bonus;
+      }
+      if (activeSynergies["R"] && unit.types?.includes("R")) {
+        // Radioactivos -> Daño adicional (veneno)
+        const mult =
+          { 2: 1.1, 4: 1.3, 6: 1.7 }[
+            this.getBreakpoint("R", activeSynergies["R"])
+          ] || 1;
+        stats.damage *= mult;
+      }
 
       // Aplicar bonos de items equipados al fuggler
       if (unit.items && unit.items.length > 0) {
@@ -502,7 +529,7 @@ export const useGameStore = defineStore("game", {
 
     endCombat(winner) {
       const multiStore = useMultiplayerStore();
-      this.phase = "IDLE";
+      this.phase = "COMBAT_FINISHED";
       if (winner === "enemy") {
         this.hp -= 10; // Daño base por perder ronda (ajustar segun unidades vivas)
         this.syncToFirebase();
@@ -563,14 +590,9 @@ export const useGameStore = defineStore("game", {
       const base = unit.cost ?? 0;
       const stars = unit.stars ?? 1;
 
-      const scale = {
-        1: 1,
-        2: 3,
-        3: 6,
-        4: 9,
-      };
-
-      return base * (scale[stars] ?? stars);
+      if (stars === 2) return base * 3;
+      if (stars === 3) return (base * 3) + 3;
+      return base;
     },
     buyUnit(shopIndex) {
       if (this.phase !== "PLANNING" && this.phase !== "COMBAT") return;
@@ -593,6 +615,30 @@ export const useGameStore = defineStore("game", {
       this.syncToFirebase();
     },
 
+    sellUnitAction(unit) {
+      if (!unit) return;
+      
+      // 1. Calcular oro según la nueva fórmula:
+      // A (1*): cost
+      // A+ (2*): cost * 3
+      // A++ (3*): (cost * 3) + 3
+      let goldEarned = unit.cost;
+      if (unit.stars === 2) goldEarned = unit.cost * 3;
+      if (unit.stars === 3) goldEarned = (unit.cost * 3) + 3;
+      
+      this.gold += goldEarned;
+
+      // 2. Devolver objetos al inventario
+      if (unit.items && unit.items.length > 0) {
+        unit.items.forEach(item => {
+          this.inventory.push(item);
+        });
+      }
+
+      this.checkUpgrades();
+      this.syncToFirebase();
+    },
+
     sellUnit(location, index) {
       if (this.phase !== "PLANNING" && this.phase !== "COMBAT") return;
       let unit = null;
@@ -605,10 +651,8 @@ export const useGameStore = defineStore("game", {
       }
 
       if (unit) {
-        this.gold += Math.floor(getRealCost(unit) * 0.5);
+        this.sellUnitAction(unit);
       }
-      this.checkUpgrades();
-      this.syncToFirebase();
     },
 
     sellUnitByInstance(instanceId) {
@@ -617,9 +661,7 @@ export const useGameStore = defineStore("game", {
         const slot = this.bench[i];
         if (slot.length > 0 && slot[0].instanceId === instanceId) {
           const unit = slot.pop();
-          this.gold += unit.cost;
-          this.checkUpgrades();
-          this.syncToFirebase();
+          this.sellUnitAction(unit);
           return;
         }
       }
@@ -627,9 +669,7 @@ export const useGameStore = defineStore("game", {
         const slot = this.board[i];
         if (slot.length > 0 && slot[0].instanceId === instanceId) {
           const unit = slot.pop();
-          this.gold += Math.floor(getRealCost(unit) * 0.5);
-          this.checkUpgrades();
-          this.syncToFirebase();
+          this.sellUnitAction(unit);
           return;
         }
       }
@@ -644,6 +684,11 @@ export const useGameStore = defineStore("game", {
 
       const fromArray = fromZone === "bench" ? this.bench : this.board;
       const toArray = toZone === "bench" ? this.bench : this.board;
+
+      // Límite de 6 unidades en el tablero
+      if (toZone === "board" && fromZone !== "board") {
+        if (this.activeBoardUnits >= 6) return;
+      }
 
       const sourceUnit = fromArray[fromIndex];
       const targetUnit = toArray[toIndex];

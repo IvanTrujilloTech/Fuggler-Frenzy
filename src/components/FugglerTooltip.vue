@@ -71,13 +71,30 @@ const computedStats = computed(() => {
   const modified = { ...props.fuggler.stats };
   const activeSynergies = store.activeSynergies || {};
   
-  if (activeSynergies["B"]) {
-    const bonus = { 3: 200, 5: 500, 6: 1000 }[store.getBreakpoint("B", activeSynergies["B"])] || 0;
-    modified.hp += bonus;
-  }
-  if (activeSynergies["D"]) {
-    const mult = { 2: 1.1, 4: 1.25, 6: 1.5 }[store.getBreakpoint("D", activeSynergies["D"])] || 1;
-    modified.damage *= mult;
+  // Las sinergias SOLO afectan a unidades del Board
+  const isOnBoard = store.board.some(slot => slot.some(u => u.instanceId === props.fuggler.instanceId));
+
+  if (isOnBoard) {
+    if (activeSynergies["B"] && props.fuggler.types?.includes("B")) {
+      const bonus = { 3: 200, 5: 500, 6: 1000 }[store.getBreakpoint("B", activeSynergies["B"])] || 0;
+      modified.hp += bonus;
+    }
+    if (activeSynergies["D"] && props.fuggler.types?.includes("D")) {
+      const mult = { 2: 1.1, 4: 1.25, 6: 1.5 }[store.getBreakpoint("D", activeSynergies["D"])] || 1;
+      modified.damage *= mult;
+    }
+    if (activeSynergies["I"] && props.fuggler.types?.includes("I")) {
+      const bonus = { 3: 15, 5: 40, 6: 100 }[store.getBreakpoint("I", activeSynergies["I"])] || 0;
+      modified.armor += bonus;
+    }
+    if (activeSynergies["C"] && props.fuggler.types?.includes("C")) {
+      const bonus = { 2: 15, 4: 40, 6: 80 }[store.getBreakpoint("C", activeSynergies["C"])] || 0;
+      modified.crit = (modified.crit || 0) + bonus;
+    }
+    if (activeSynergies["R"] && props.fuggler.types?.includes("R")) {
+      const mult = { 2: 1.1, 4: 1.3, 6: 1.7 }[store.getBreakpoint("R", activeSynergies["R"])] || 1;
+      modified.damage *= mult;
+    }
   }
 
   if (props.fuggler.items) {
@@ -207,7 +224,7 @@ const synergiesList = computed(() => {
         <!-- Fila 4: Coste -->
         <div class="hover-footer">
           <span class="gold-lbl">Precio de Venta</span>
-          <div class="gold-cost"><img src="../assets/HUD/OBJECTS/COIN.svg" alt="moneda">{{ fuggler.cost || 1 }}</div>
+          <div class="gold-cost"><img src="../assets/HUD/OBJECTS/COIN.svg" alt="moneda">{{ store.getRealCost(fuggler) }}</div>
         </div>
 
       </div>

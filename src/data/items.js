@@ -132,7 +132,14 @@ export const ARTIFACT_RECIPES = {
 export function combineItems(item1Id, item2Id) {
   const combination1 = `${item1Id}_${item2Id}`;
   const combination2 = `${item2Id}_${item1Id}`;
-  return (
-    ARTIFACT_RECIPES[combination1] || ARTIFACT_RECIPES[combination2] || null
-  );
+  
+  // Buscar en las recetas por la clave de combinación
+  for (const recipe of Object.values(ARTIFACT_RECIPES)) {
+    if ((recipe.recipe[0] === item1Id && recipe.recipe[1] === item2Id) ||
+        (recipe.recipe[0] === item2Id && recipe.recipe[1] === item1Id)) {
+      return recipe;
+    }
+  }
+  
+  return ARTIFACT_RECIPES[combination1] || ARTIFACT_RECIPES[combination2] || null;
 }

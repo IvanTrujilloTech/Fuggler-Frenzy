@@ -30,8 +30,7 @@ onMounted(() => {
       evt.item.remove()
 
       if (unit) {
-        store.gold += store.getRealCost(unit)
-        store.checkUpgrades()
+        store.sellUnitAction(unit)
       }
 
       store.draggingUnit = null
