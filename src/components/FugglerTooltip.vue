@@ -207,7 +207,7 @@ const synergiesList = computed(() => {
         <!-- Fila 4: Coste -->
         <div class="hover-footer">
           <span class="gold-lbl">Precio de Venta</span>
-          <span class="gold-cost">🪙 {{ fuggler.cost || 1 }}</span>
+          <div class="gold-cost"><img src="../assets/HUD/OBJECTS/COIN.svg" alt="moneda">{{ fuggler.cost || 1 }}</div>
         </div>
 
       </div>
@@ -372,6 +372,7 @@ const synergiesList = computed(() => {
 .hover-footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding-top: 4px;
   font-size: 16px;
   font-weight: bold;
@@ -380,6 +381,14 @@ const synergiesList = computed(() => {
   color: #9ca3af;
 }
 .gold-cost {
+display: flex;
+align-items: center;
+gap: 4px;
   color: #fbbf24;
+}
+.gold-cost img {
+width: 35px;
+height: 25px;
+object-fit: contain;
 }
 </style>
