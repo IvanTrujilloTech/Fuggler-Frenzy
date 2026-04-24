@@ -5,24 +5,35 @@ import { combineItems } from "../data/items";
 
 const store = useGameStore()
 
-function handleDrop() {
-  if (store.inventory.length < 2) return
+function onDragStart(event, item) {
+  // Configurar el item para que FugglerTooltip lo pueda leer al soltar
+  event.dataTransfer.setData("item", JSON.stringify(item));
+}
 
-  const obj1 = store.inventory[store.inventory.length - 1]
-  const obj2 = store.inventory[store.inventory.length - 2]
+function onDropItem(event, targetItem) {
+  const itemData = event.dataTransfer.getData("item");
+  if (!itemData) return;
+  
+  const sourceItem = JSON.parse(itemData);
+  
+  // No combinar consigo mismo
+  if (sourceItem.instanceId === targetItem.instanceId) return;
 
-  const result = combineItems(obj1.id, obj2.id)
+  const result = combineItems(sourceItem.id, targetItem.id);
 
   if (result) {
-    // eliminar los dos últimos
-    store.inventory.splice(-2, 2)
+    // eliminar ambos
+    store.inventory = store.inventory.filter(i => 
+      i.instanceId !== sourceItem.instanceId && 
+      i.instanceId !== targetItem.instanceId
+    );
 
     // añadir artefacto
     store.inventory.push({
       ...result,
       instanceId: crypto.randomUUID(),
       type: "artifact"
-    })
+    });
   }
 }
 </script>
@@ -34,11 +45,14 @@ function handleDrop() {
       group="objects"
       item-key="instanceId"
       class="inventory-stack"
-      @end="handleDrop"
     >
       <template #item="{ element }">
-        <div class="object">
-          <img :src="element.img" />
+        <div class="object"
+             draggable="true"
+             @dragstart="e => onDragStart(e, element)"
+             @dragover.prevent
+             @drop="e => onDropItem(e, element)">
+          <img :src="element.img" :title="element.name" />
         </div>
       </template>
     </draggable>
@@ -56,18 +70,28 @@ function handleDrop() {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 360px; /* 6 objetos */
+  max-height: 360px;
   overflow: hidden;
 }
 
 .object {
   width: 60px;
   height: 60px;
+  cursor: grab;
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  border: 2px dashed #a855f7;
+  padding: 4px;
+}
+
+.object:active {
+  cursor: grabbing;
 }
 
 .object img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  pointer-events: none; /* para que el drag y drop funcione bien en el div */
 }
 </style>

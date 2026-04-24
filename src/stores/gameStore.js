@@ -148,6 +148,22 @@ export const useGameStore = defineStore("game", {
           this.timeLeft--;
         } else {
           this.clearTimer();
+          
+          if (this.phase === 'PLANNING' && this.planningEventActive) {
+            if (this.planningOptions && this.planningOptions.length > 0) {
+              this.pickPlanningOption(this.planningOptions[0]);
+            } else {
+              this.planningEventActive = false;
+            }
+          }
+          
+          if (this.phase === 'PLANNING' && this.planningEventActive) {
+            if (this.planningOptions && this.planningOptions.length > 0) {
+              this.pickPlanningOption(this.planningOptions[0]);
+            } else {
+              this.planningEventActive = false;
+            }
+          }
           this.ensureUnitsOnBoard();
           this.syncToFirebase();
 
@@ -163,6 +179,27 @@ export const useGameStore = defineStore("game", {
           }
         }
       }, 1000);
+    },
+
+    pickPlanningOption(option) {
+      if (!option) return;
+      const emptySlotIndex = this.bench.findIndex(slot => slot.length === 0);
+      if (emptySlotIndex !== -1) {
+        this.bench[emptySlotIndex].push({
+          ...option.fuggler,
+          instanceId: crypto.randomUUID(),
+          stars: 1,
+          items: []
+        });
+      }
+      if (this.inventory.length < 6) {
+        this.inventory.push({
+          ...option.object,
+          instanceId: crypto.randomUUID()
+        });
+      }
+      this.planningEventActive = false;
+      this.planningOptions = [];
     },
 
     clearTimer() {
@@ -279,16 +316,16 @@ export const useGameStore = defineStore("game", {
       if (unit.items && unit.items.length > 0) {
         unit.items.forEach(item => {
           const desc = item.description || "";
-          const dmgMatch = desc.match(/\+(\d+)% Daño de Ataque/);
+          const dmgMatch = desc.match(/\+(\d+)% Daï¿½o de Ataque/);
           if (dmgMatch) stats.damage *= (1 + parseInt(dmgMatch[1]) / 100);
           const asMatch = desc.match(/\+(\d+)% Velocidad de Ataque/);
           if (asMatch) stats.attackSpeed *= (1 + parseInt(asMatch[1]) / 100);
           const hpMatch = desc.match(/\+(\d+) Puntos de Vida/);
           if (hpMatch) stats.hp += parseInt(hpMatch[1]);
           if (desc.includes("+1 Resistencia CC")) stats.armor = (stats.armor || 0) + 1;
-          const critMatch = desc.match(/\+(\d+)% Probabilidad Crítico/);
+          const critMatch = desc.match(/\+(\d+)% Probabilidad Crï¿½tico/);
           if (critMatch) stats.crit = (stats.crit || 0) + parseInt(critMatch[1]);
-          if (desc.includes("+1s Duración CC")) stats.ccDuration = (stats.ccDuration || 0) + 1;
+          if (desc.includes("+1s Duraciï¿½n CC")) stats.ccDuration = (stats.ccDuration || 0) + 1;
         });
       }
 
@@ -771,6 +808,3 @@ export const useGameStore = defineStore("game", {
 //     this.startTimer()
 //     this.syncToFirebase()
 //   }
-
-
-

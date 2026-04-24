@@ -10,8 +10,23 @@ import Ranking from "../components/Ranking.vue";
 import iconCoin from "../assets/HUD/OBJECTS/COIN.svg";
 import ObjectArea from "../components/ObjectArea.vue";
 import PlanningEvent from "../components/PlanningEvent.vue";
+import { ARTIFACT_RECIPES, ITEM_COMPONENTS } from "../data/items";
+import { ref, computed } from "vue";
+
 const store = useGameStore();
 const router = useRouter();
+const showRecipes = ref(false);
+
+const filteredRecipes = computed(() => {
+  const recipes = {};
+  for (const [key, rec] of Object.entries(ARTIFACT_RECIPES)) {
+    // Skip if it's the costScale property or ombligo
+    if (rec.recipe && ITEM_COMPONENTS[rec.recipe[0]] && ITEM_COMPONENTS[rec.recipe[1]]) {
+      recipes[key] = rec;
+    }
+  }
+  return recipes;
+});
 
 onMounted(() => {
   if (!store.username) {
@@ -59,9 +74,34 @@ onUnmounted(() => {
           <div class="hud-item gold-info">
             <img :src="iconCoin" class="coin-icon" alt="Oro" />
             {{ store.gold }}
+        
           </div>
+              <button class="btn-recipes-main" @click="showRecipes = !showRecipes" title="Ver Recetas">
+              <span class="plus-icon">+</span>
+            </button>
         </div>
       </header>
+
+      <!-- Panel de Recetas de Artefactos -->
+      <div v-if="showRecipes" class="recipes-modal" @click.self="showRecipes = false">
+        <div class="recipes-modal-content">
+          <div class="recipes-modal-header">
+            <h4>Recetas de Artefactos</h4>
+            <button class="btn-close-modal" @click="showRecipes = false">✕</button>
+          </div>
+          <div class="recipes-grid">
+            <div v-for="(rec, key) in filteredRecipes" :key="key" class="recipe-card">
+              <div class="recipe-formula">
+                <img :src="ITEM_COMPONENTS[rec.recipe[0]]?.img" class="recipe-obj-img" :title="ITEM_COMPONENTS[rec.recipe[0]]?.name" />
+                <span class="formula-plus">+</span>
+                <img :src="ITEM_COMPONENTS[rec.recipe[1]]?.img" class="recipe-obj-img" :title="ITEM_COMPONENTS[rec.recipe[1]]?.name" />
+                <span class="formula-equals">=</span>
+                <img :src="rec.img" class="recipe-result-img" :title="`${rec.name}\n${rec.description}`" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="game-content">
         <SynergyTracker />
@@ -136,6 +176,123 @@ onUnmounted(() => {
   gap: 8px;
   font-size: 1.25rem;
   font-weight: bold;
+}
+.btn-recipes-main {
+  background: #22c55e;
+  border: 2px solid #000;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 4px;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+  transition: transform 0.1s;
+}
+.btn-recipes-main:hover {
+  transform: scale(1.1);
+  background: #16a34a;
+}
+.btn-recipes-main:active {
+  transform: scale(0.95);
+  box-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+}
+.plus-icon {
+  color: #000;
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 1;
+}
+.recipes-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.recipes-modal-content {
+  background: var(--color-felt);
+  border: 4px dashed #000;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.8);
+}
+.recipes-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid rgba(0,0,0,0.2);
+  padding-bottom: 10px;
+}
+.recipes-modal-header h4 {
+  margin: 0;
+  font-family: var(--title-font);
+  font-size: 1.5rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 0 #000;
+}
+.btn-close-modal {
+  background: #ef4444;
+  color: white;
+  border: 2px solid #000;
+  border-radius: 5px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 2px 2px 0 #000;
+}
+.btn-close-modal:hover { background: #dc2626; }
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+.recipe-card {
+  background: rgba(0,0,0,0.4);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.recipe-formula {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.recipe-obj-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8));
+}
+.recipe-result-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(2px 3px 3px rgba(0,0,0,0.9));
+  margin-left: 5px;
+}
+.formula-plus, .formula-equals {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
 }
 .hp-text {
   color: var(--color-toxic);
