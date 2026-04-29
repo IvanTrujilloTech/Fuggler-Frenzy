@@ -131,7 +131,6 @@ const getUnitStyle = (unit) => {
     </div>
 
     <div class="bench-area">
-      <h2>Banquillo</h2>
       <div class="bench-grid">
         <draggable
           v-for="(slot, idx) in store.bench"

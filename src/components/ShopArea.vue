@@ -64,14 +64,19 @@ const store = useGameStore()
 .shop-container {
   background: repeating-linear-gradient(135deg, var(--color-felt), var(--color-felt) 10px, #222 10px, #222 20px);
   border-top: 6px dashed var(--color-stitch);
-  padding: 1rem;
+  border-right: 6px dashed var(--color-stitch);
+  border-left: 6px dashed var(--color-stitch);
+  padding: 10px 40px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   box-shadow: inset 0 10px 20px rgba(0,0,0,0.8);
   position: relative;
-  overflow-y: auto; /* Permitir scroll vertical si el wrap es mucho */
-  min-height: 150px;
+  overflow-y: hidden; /* Permitir scroll vertical si el wrap es mucho */
+  min-height: 70px;
+    width: 100%;
+  max-width: 1670px;
+  margin: 0 auto;
+
 }
 
 @media (max-width: 600px) {
@@ -150,10 +155,11 @@ const store = useGameStore()
 
 .shop-info {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   font-family: var(--title-font);
   font-size: 1.5rem;
+  gap:50%;
   letter-spacing: 2px;
   color: #fff;
 }

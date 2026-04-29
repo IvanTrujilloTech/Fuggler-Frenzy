@@ -47,6 +47,7 @@ onUnmounted(() => {
       </header>
 
     <div class="game-content">
+      
       <SynergyTracker />
       <BoardArea />
       <SellPanel />
@@ -193,6 +194,12 @@ onUnmounted(() => {
   .game-content {
     flex-direction: column;
     overflow-y: auto;
+  }
+    .left-panel {
+    display: flex;
+    flex-direction: row; /* o column según prefieras */
+    gap: 1rem;
+    width: 100%;
   }
 }
 
