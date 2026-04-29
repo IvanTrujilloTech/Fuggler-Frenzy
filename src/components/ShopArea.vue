@@ -195,15 +195,71 @@ h3{
   justify-content: center;
   flex-wrap: wrap; 
 }
+@media (max-width: 1280px) {
+  .shop-container {
+    padding: 10px 20px;
+  }
 
+  /* HEADER más compacto */
+  .shop-info {
+    font-size: 1.1rem;
+  }
+
+  .btn-reroll {
+    font-size: 0.95rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .coin-icon-shop {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* SELL PANEL más pequeño */
+  .sell-zone {
+    height: 55px;
+    width: 65%;
+  }
+
+  .sell-label {
+    font-size: 0.8rem;
+  }
+
+  .sell-icon {
+    font-size: 1.1rem;
+  }
+
+  /* CARTAS más pequeñas para que quepan */
+  .shop-card {
+    width: 110px;
+    height: 150px;
+  }
+
+  .shop-fuggler-image {
+    width: 55px;
+    height: 55px;
+  }
+
+  .name {
+    font-size: 0.85rem;
+  }
+
+  .cost {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+}
 @media (max-width: 600px) {
   .shop-cards {
     gap: 0.5rem;
   }
 }
 .shop-card {
-  width: 140px;
-  height: 180px;
+
+  width:  140px;
+  height:  180px;
+
   background: #333;
   border-radius: 5px 15px 4px 10px;
   border: 4px solid #000;
