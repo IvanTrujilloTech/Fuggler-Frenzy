@@ -1,5 +1,8 @@
 <script setup>
 import FugglerTooltip from './FugglerTooltip.vue'
+import { useGameStore } from '../stores/gameStore'
+import { computed } from 'vue'
+import { FUGGLER_TYPES } from '../data/fugglerPedia'
 
 const props = defineProps({
   fuggler: {
@@ -11,11 +14,34 @@ const props = defineProps({
     default: false
   }
 })
+
+const store = useGameStore()
+const isFaded = computed(() => props.fuggler.side === 'enemy')
+const isOnBoard = computed(() => store.board.some(slot => slot.some(u => u.instanceId === props.fuggler.instanceId)))
+
+const activeSynergyColor = computed(() => {
+  if (!isOnBoard.value) return null
+  const activeSyns = store.activeSynergies || {}
+  
+  // Buscar el primer tipo que tenga sinergia activa. Si tiene varios, podrías mezclarlos o priorizar uno.
+  for (const typeId of (props.fuggler.types || [])) {
+    const count = activeSyns[typeId] || 0
+    const typeDef = FUGGLER_TYPES[typeId]
+    if (typeDef && count >= typeDef.breakpoints[0]) {
+      return typeDef.color // Devolvemos el color de la sinergia activa
+    }
+  }
+  return null
+})
 </script>
 
 <template>
   <FugglerTooltip :fuggler="fuggler">
-    <div class="fuggler-unit" :class="`tier-${fuggler.tier}`">
+    <div 
+      class="fuggler-unit" 
+      :class="[`tier-${fuggler.tier}`, { 'has-synergy': activeSynergyColor }]"
+      :style="activeSynergyColor ? { '--glow-color': activeSynergyColor, 'box-shadow': `0 0 15px ${activeSynergyColor}, 4px 4px 0 rgba(0,0,0,0.8)`, 'border-color': activeSynergyColor } : {}"
+    >
       <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="fuggler-image" />
     </div>
   </FugglerTooltip>
@@ -35,7 +61,16 @@ const props = defineProps({
   box-shadow: 4px 4px 0 rgba(0,0,0,0.8);
   border: 2px dashed #000;
   color: white;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.has-synergy {
+  animation: pulse-border 2s infinite alternate;
+}
+
+@keyframes pulse-border {
+  from { border-width: 2px; }
+  to { border-width: 4px; filter: brightness(1.2); }
 }
 
 /* para encajar dentro del hexagono */

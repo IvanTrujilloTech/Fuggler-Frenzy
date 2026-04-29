@@ -6,6 +6,7 @@ import iconBotones from '../assets/HUD/SINERGYS/BOTONES.svg'
 import iconRadioactivos from '../assets/HUD/SINERGYS/RADIOACTIVOS.svg'
 import iconInadaptados from '../assets/HUD/SINERGYS/INADAPTADOS.svg'
 import iconCazadores from '../assets/HUD/SINERGYS/CAZADORES.svg'
+import FugglerTooltip from './FugglerTooltip.vue'
 
 const SYNERGY_ICONS = {
   D: iconDientudos,
@@ -34,27 +35,34 @@ const store = useGameStore()
       <div 
         v-for="(fuggler, index) in store.shop" 
         :key="index"
-        class="shop-card"
-        :class="{ empty: !fuggler, ['tier-' + fuggler?.tier]: fuggler }"
-        @click="store.buyUnit(index)"
+        class="shop-card-wrapper"
       >
-        <div v-if="fuggler" class="card-content">
-          <div class="cost">
-            {{ fuggler.cost }}
-            <img :src="iconCoin" class="coin-icon-cost" alt="Oro" />
+        <div v-if="!fuggler" class="shop-card empty"></div>
+        <FugglerTooltip v-else :fuggler="fuggler">
+          <div 
+            class="shop-card"
+            :class="[fuggler.types[0]]"
+            @click="store.buyUnit(index)"
+          >
+            <div class="card-content">
+              <div class="cost">
+                {{ fuggler.cost }}
+                <img :src="iconCoin" class="coin-icon-cost" alt="Oro" />
+              </div>
+              <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="shop-fuggler-image" />
+              <div class="name">{{ fuggler.name }}</div>
+              <div class="types">
+                <img
+                  v-for="typeKey in fuggler.types"
+                  :key="typeKey"
+                  :src="SYNERGY_ICONS[typeKey]"
+                  class="type-icon-shop"
+                  :alt="typeKey"
+                />
+              </div>
+            </div>
           </div>
-          <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="shop-fuggler-image" />
-          <div class="name">{{ fuggler.name }}</div>
-          <div class="types">
-            <img
-              v-for="typeKey in fuggler.types"
-              :key="typeKey"
-              :src="SYNERGY_ICONS[typeKey]"
-              class="type-icon-shop"
-              :alt="typeKey"
-            />
-          </div>
-        </div>
+        </FugglerTooltip>
       </div>
     </div>
   </div>

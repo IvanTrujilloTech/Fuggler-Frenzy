@@ -179,7 +179,7 @@ export const useMultiplayerStore = defineStore('multiplayer', {
             gameStore.startNewRound()
           }
           
-          if (this.gameState.status === 'COMBAT' && gameStore.phase !== 'COMBAT') {
+          if (this.gameState.status === 'COMBAT' && gameStore.phase !== 'COMBAT' && gameStore.phase !== 'COMBAT_FINISHED') {
             gameStore.startCombat()
           }
         } else {
@@ -188,6 +188,9 @@ export const useMultiplayerStore = defineStore('multiplayer', {
           this.isHost = false
           this.players = {}
         }
+      }, (err) => {
+        this.error = "Error de sincronización: " + err.message
+        console.error("Firebase onValue Error:", err)
       })
     },
 
@@ -218,8 +221,14 @@ export const useMultiplayerStore = defineStore('multiplayer', {
 
     async updateRoomState(data) {
       if (!this.isHost || !this.roomId) return
-      const stateRef = ref(db, `rooms/${this.roomId}/gameState`)
-      await update(stateRef, data)
+      try {
+        const stateRef = ref(db, `rooms/${this.roomId}/gameState`)
+        await update(stateRef, data)
+        this.error = null // Limpiar error si la actualización tiene éxito
+      } catch (err) {
+        this.error = "Error al actualizar estado: " + err.message
+        console.error(err)
+      }
     },
 
     async generateMatchups() {

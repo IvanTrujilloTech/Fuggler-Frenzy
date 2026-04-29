@@ -1,310 +1,411 @@
 <script setup>
-import { computed, ref, watch } from "vue";
-import { useFloating, offset, flip, shift } from "@floating-ui/vue";
-import { FUGGLER_TYPES } from "../data/fugglerPedia";
 import { useGameStore } from "../stores/gameStore";
-import iconDientudos from "../assets/HUD/SINERGYS/DIENTUDOS.svg";
-import iconBotones from "../assets/HUD/SINERGYS/BOTONES.svg";
-import iconRadioactivos from "../assets/HUD/SINERGYS/RADIOACTIVOS.svg";
-import iconInadaptados from "../assets/HUD/SINERGYS/INADAPTADOS.svg";
-import iconCazadores from "../assets/HUD/SINERGYS/CAZADORES.svg";
-import coin from "../assets/HUD/OBJECTS/COIN.svg";
-const SYNERGY_ICONS = {
-  D: iconDientudos,
-  B: iconBotones,
-  R: iconRadioactivos,
-  I: iconInadaptados,
-  C: iconCazadores,
-};
+import { computed, ref } from "vue";
+import { FUGGLER_TYPES } from "../data/fugglerPedia";
 
-const props = defineProps({
-  fuggler: {
-    type: Object,
-    required: true,
-  },
-});
-const animatingUpgrade = ref(false);
-const prevStars = ref(props.fuggler?.stars ?? 1);
+const store = useGameStore();
+const props = defineProps({ fuggler: { type: Object, required: true } });
+
 const reference = ref(null);
-const floating = ref(null);
-const isVisible = ref(false);
+const isHovered = ref(false);
+const hoverStyle = ref({ top: '0px', left: '0px' });
 
-const gameStore = useGameStore();
-const activeSynergies = computed(() => gameStore.activeSynergies);
-const isOnBoard = computed(() => {
-  return gameStore.board.some(
-    (slot) => slot.length > 0 && slot[0].instanceId === props.fuggler.instanceId
-  );
-});
-const modifiedStats = computed(() => {
-  if (!props.fuggler) return null;
-  const stats = { ...props.fuggler.stats };
-  const types = props.fuggler.types || [];
-  if (!isOnBoard.value) return stats;
-  const synergies = activeSynergies.value;
-
-  if (types.includes("D")) {
-    const dCount = synergies.D || 0;
-    if (dCount >= 6) stats.damage *= 1.5;
-    else if (dCount >= 4) stats.damage *= 1.25;
-    else if (dCount >= 2) stats.damage *= 1.1;
+function onDragOver(event) { 
+  // Permitir native drop SOLO si es un objeto de equipamiento
+  if (event.dataTransfer.types.includes("item")) {
+    event.preventDefault(); 
   }
-  if (types.includes("B")) {
-    const bCount = synergies.B || 0;
-    if (bCount >= 6) stats.hp += 1000;
-    else if (bCount >= 5) stats.hp += 500;
-    else if (bCount >= 3) stats.hp += 200;
+}
+
+function onDrop(event) {
+  const itemData = event.dataTransfer.getData("item");
+  if (!itemData) return; // Si no es item, dejar que vuedraggable actúe
+  
+  event.preventDefault();
+  const item = JSON.parse(itemData);
+  const success = store.equipItemToFuggler(props.fuggler.instanceId, item);
+  if (success) {
+    store.inventory = store.inventory.filter(i => i.instanceId !== item.instanceId);
   }
-  if (types.includes("I")) {
-    const iCount = synergies.I || 0;
-    if (iCount >= 6) stats.armor += 100;
-    else if (iCount >= 5) stats.armor += 40;
-    else if (iCount >= 3) stats.armor += 15;
+}
+
+function unequipItem(item) {
+  const fugglerItems = props.fuggler.items || [];
+  const idx = fugglerItems.findIndex(i => i.instanceId === item.instanceId);
+  if (idx >= 0) {
+    fugglerItems.splice(idx, 1);
+    store.inventory.push(item);
   }
-  if (types.includes("C")) {
-    const cCount = synergies.C || 0;
-    stats.crit = 0;
-    if (cCount >= 6) stats.crit = 80;
-    else if (cCount >= 4) stats.crit = 40;
-    else if (cCount >= 2) stats.crit = 15;
-  }
+}
 
-  if (types.includes("R")) {
-    const rCount = synergies.R || 0;
-    stats.veneno = 0;
-    if (rCount >= 6) stats.veneno = 70;
-    else if (rCount >= 4) stats.veneno = 30;
-    else if (rCount >= 2) stats.veneno = 10;
-  }
-  return stats;
-});
-
-const isStatBoosted = (statName) => {
-  if (!modifiedStats.value) return false;
-  const current = modifiedStats.value[statName];
-  const base = props.fuggler.stats[statName] || 0;
-  return current > base;
-};
-const upgradeLabel = computed(() => {
-  const s = props.fuggler.stars ?? 1;
-
-  if (s <= 1) return " (A)";
-  if (s === 2) return "  (A+)";
-  if (s === 3) return " (A++)";
-});
-
-const modifiedCost = computed(() => {
-  const base = props.fuggler.cost ?? 0;
-  const stars = props.fuggler.stars ?? 1;
-
-  const scale = props.fuggler.costScale ?? {  
-    1: 1,
-  2: 3,
-  3: 6,
-  4: 9 };
-  return base * (scale[stars] ?? stars);
-});
-
-watch(
-  () => props.fuggler?.stars,
-  (newVal, oldVal) => {
-    if (!newVal) return;
-
-    if (newVal > oldVal) {
-      animatingUpgrade.value = true;
-
-      setTimeout(() => {
-        animatingUpgrade.value = false;
-      }, 800); // duración animación
+const isEnemy = computed(() => {
+  if (props.fuggler.side === 'enemy') return true;
+  if (store.boardEnemy) {
+    for (const slot of store.boardEnemy) {
+      if (slot && slot.some(u => u.instanceId === props.fuggler.instanceId)) return true;
     }
-
-    prevStars.value = newVal;
   }
-);
-
-const { floatingStyles } = useFloating(reference, floating, {
-  placement: "top",
-  strategy: "fixed",
-  middleware: [offset(10), flip(), shift({ padding: 10 })],
+  return false;
 });
 
-const show = () => (isVisible.value = true);
-const hide = () => (isVisible.value = false);
+function onMouseEnter() {
+  if (isEnemy.value) return; // No mostrar en contrincantes
+  isHovered.value = true;
+  if (reference.value) {
+    const rect = reference.value.getBoundingClientRect();
+    hoverStyle.value = {
+      top: `${rect.top - 15}px`,
+      left: `${rect.left + rect.width / 2}px`
+    };
+  }
+}
+
+function onMouseLeave() {
+  isHovered.value = false;
+}
+
+const computedStats = computed(() => {
+  if (!props.fuggler.stats) return {};
+  
+  const base = { ...props.fuggler.stats };
+  const modified = { ...props.fuggler.stats };
+  const activeSynergies = store.activeSynergies || {};
+  
+  // Las sinergias SOLO afectan a unidades del Board
+  const isOnBoard = store.board.some(slot => slot.some(u => u.instanceId === props.fuggler.instanceId));
+
+  if (isOnBoard) {
+    if (activeSynergies["B"] && props.fuggler.types?.includes("B")) {
+      const bonus = { 3: 200, 5: 500, 6: 1000 }[store.getBreakpoint("B", activeSynergies["B"])] || 0;
+      modified.hp += bonus;
+    }
+    if (activeSynergies["D"] && props.fuggler.types?.includes("D")) {
+      const mult = { 2: 1.1, 4: 1.25, 6: 1.5 }[store.getBreakpoint("D", activeSynergies["D"])] || 1;
+      modified.damage *= mult;
+    }
+    if (activeSynergies["I"] && props.fuggler.types?.includes("I")) {
+      const bonus = { 3: 15, 5: 40, 6: 100 }[store.getBreakpoint("I", activeSynergies["I"])] || 0;
+      modified.armor += bonus;
+    }
+    if (activeSynergies["C"] && props.fuggler.types?.includes("C")) {
+      const bonus = { 2: 15, 4: 40, 6: 80 }[store.getBreakpoint("C", activeSynergies["C"])] || 0;
+      modified.crit = (modified.crit || 0) + bonus;
+    }
+    if (activeSynergies["R"] && props.fuggler.types?.includes("R")) {
+      const mult = { 2: 1.1, 4: 1.3, 6: 1.7 }[store.getBreakpoint("R", activeSynergies["R"])] || 1;
+      modified.damage *= mult;
+    }
+  }
+
+  if (props.fuggler.items) {
+    props.fuggler.items.forEach(item => {
+      const desc = item.description || "";
+      const dmgMatch = desc.match(/\+(\d+)% Daño de Ataque/);
+      if (dmgMatch) modified.damage *= (1 + parseInt(dmgMatch[1]) / 100);
+      const asMatch = desc.match(/\+(\d+)% Velocidad de Ataque/);
+      if (asMatch) modified.attackSpeed *= (1 + parseInt(asMatch[1]) / 100);
+      const hpMatch = desc.match(/\+(\d+) Puntos de Vida/);
+      if (hpMatch) modified.hp += parseInt(hpMatch[1]);
+      if (desc.includes("+1 Resistencia CC")) modified.armor = (modified.armor || 0) + 1;
+      const critMatch = desc.match(/\+(\d+)% Probabilidad Crítico/);
+      if (critMatch) modified.crit = (modified.crit || 0) + parseInt(critMatch[1]);
+      if (desc.includes("+1s Duración CC")) modified.ccDuration = (modified.ccDuration || 0) + 1;
+    });
+  }
+
+  return {
+    hp: { value: Math.round(modified.hp || 0), isBuffed: modified.hp > base.hp },
+    damage: { value: Math.round(modified.damage || 0), isBuffed: modified.damage > base.damage },
+    attackSpeed: { value: (modified.attackSpeed || 1).toFixed(2), isBuffed: modified.attackSpeed > base.attackSpeed },
+    armor: { value: modified.armor || 0, isBuffed: modified.armor > base.armor },
+    crit: { value: modified.crit || 0, isBuffed: modified.crit > (base.crit || 0) }
+  };
+});
+
+const synergiesList = computed(() => {
+  if (!props.fuggler.types) return [];
+  return props.fuggler.types.map(t => {
+    const count = store.activeSynergies ? (store.activeSynergies[t] || 0) : 0;
+    const typeDef = FUGGLER_TYPES[t];
+    
+    let level = 0;
+    if (typeDef) {
+       if (count >= typeDef.breakpoints[0]) {
+         level = 1;
+       }
+       if (typeDef.breakpoints[1] && count >= typeDef.breakpoints[1]) {
+         level = 2;
+       }
+       if (typeDef.breakpoints[2] && count >= typeDef.breakpoints[2]) {
+         level = 3;
+       }
+    }
+    
+    return {
+      type: t,
+      name: typeDef ? typeDef.name : t,
+      icon: typeDef ? typeDef.icon : null,
+      color: typeDef ? typeDef.color : '#fff',
+      level
+    };
+  });
+});
 </script>
 
 <template>
-  <div
-    class="tooltip-wrapper"
-    ref="reference"
-    @mouseenter="show"
-    @mouseleave="hide"
-  >
-    <slot></slot>
+  <div class="tooltip-wrapper" ref="reference" 
+       @dragover="onDragOver" 
+       @drop="onDrop"
+       @mouseenter="onMouseEnter" 
+       @mouseleave="onMouseLeave">
+    
+    <slot></slot> <!-- Permite a FugglerUnit renderizar su interior sin reemplazarlo -->
+
+    <div v-if="fuggler.items && fuggler.items.length > 0" class="equipped-items-side">
+      <div v-for="item in fuggler.items" :key="item.instanceId"
+        class="equipped-item-big" :title="`${item.name}\n${item.description}`" @click.stop="unequipItem(item)">
+        <img :src="item.img" :alt="item.name" />
+        <span class="item-effect">{{ item.description }}</span>
+      </div>
+    </div>
 
     <Teleport to="body">
-      <div
-        v-if="isVisible && fuggler"
-        ref="floating"
-        :style="[floatingStyles, { position: 'fixed' }]"
-        class="tooltip-content"
-      >
-       
-        <div class="tt-header">
-          <strong :class="{ 'upgrade-anim': animatingUpgrade }">
-            {{ fuggler.name }}{{ upgradeLabel }}
-          </strong>
-          <span class="tt-tier">Tier {{ fuggler.tier }}</span>
-        </div>
-        <div class="tt-body">
-          <div class="tt-types">
-            <span
-              v-for="typeKey in fuggler.types"
-              :key="typeKey"
-              class="tt-type-badge"
-              :style="{
-                backgroundColor: FUGGLER_TYPES[typeKey].color,
-                color: typeKey === 'R' ? '#000' : '#fff',
-              }"
-            >
-              <img
-                :src="SYNERGY_ICONS[typeKey]"
-                class="type-icon"
-                :alt="FUGGLER_TYPES[typeKey].name"
-              />
-              {{ FUGGLER_TYPES[typeKey].name }}
+      <div v-if="isHovered" class="fuggler-stats-hover" :style="hoverStyle">
+        
+        <!-- Fila 1: Nombre con Evolución (A, A+, A++), Tier -->
+        <div class="hover-header">
+          <div class="name-synergy-group">
+            <span class="fuggler-name">
+              {{ fuggler.name }} {{ fuggler.stars === 3 ? '(A++)' : fuggler.stars === 2 ? '(A+)' : '(A)' }}
             </span>
           </div>
-          <div class="tt-stats" v-if="modifiedStats">
-            <span :class="{ 'stat-boosted': isStatBoosted('hp') }">
-              HP: {{ Math.floor(modifiedStats.hp) }}
-            </span>
-            <span :class="{ 'stat-boosted': isStatBoosted('damage') }">
-              ATK: {{ Math.floor(modifiedStats.damage) }}
-            </span>
-            <span :class="{ 'stat-boosted': isStatBoosted('armor') }">
-              DEF: {{ Math.floor(modifiedStats.armor) }}
-            </span>
-            <span>AS: {{ modifiedStats.attackSpeed }}</span>
-            <span v-if="modifiedStats.crit > 0" class="stat-boosted">
-              CRIT: {{ modifiedStats.crit }}%
-            </span>
-            <span v-if="modifiedStats.veneno > 0" class="stat-boosted">
-              POISON: {{ modifiedStats.veneno }}%
-            </span>
+          <span class="fuggler-tier">Tier {{ fuggler.tier || 1 }}</span>
+        </div>
+
+        <!-- Fila 2: Sinergias (Solo Iconos) -->
+        <div class="hover-synergies" v-if="synergiesList.length > 0">
+          <div v-for="syn in synergiesList" :key="syn.type" class="synergy-badge" :style="{
+             '--syn-color': syn.color,
+             'box-shadow': syn.level > 0 ? `0 0 ${syn.level * 6}px ${syn.color}` : 'none',
+             'border-color': syn.level > 0 ? syn.color : 'rgba(255,255,255,0.2)'
+          }">
+            <img v-if="syn.icon" :src="syn.icon" class="syn-icon" />
           </div>
-           <div class="tt-cost-big" :class="{ 'cost-pop': animatingUpgrade }">
-          <img :src="coin" alt="Coin" class="coin-icon" />
-          {{ modifiedCost }}
         </div>
+
+        <hr class="separator" />
+
+        <!-- Fila 3: Stats -->
+        <div class="hover-stats-row">
+          <div class="stat-col">
+            <span class="stat-lbl">HP</span>
+            <strong :class="{ buffed: computedStats.hp?.isBuffed }">{{ computedStats.hp?.value }}</strong>
+          </div>
+          <div class="stat-col">
+            <span class="stat-lbl">Daño</span>
+            <strong :class="{ buffed: computedStats.damage?.isBuffed }">{{ computedStats.damage?.value }}</strong>
+          </div>
+          <div class="stat-col">
+            <span class="stat-lbl">V.Atq</span>
+            <strong :class="{ buffed: computedStats.attackSpeed?.isBuffed }">{{ computedStats.attackSpeed?.value }}</strong>
+          </div>
+          <div class="stat-col">
+            <span class="stat-lbl">Armor</span>
+            <strong :class="{ buffed: computedStats.armor?.isBuffed }">{{ computedStats.armor?.value }}</strong>
+          </div>
+          <div class="stat-col">
+            <span class="stat-lbl">Crít</span>
+            <strong :class="{ buffed: computedStats.crit?.isBuffed }">{{ computedStats.crit?.value }}%</strong>
+          </div>
         </div>
+
+        <hr class="separator" />
+
+        <!-- Fila 4: Coste -->
+        <div class="hover-footer">
+          <span class="gold-lbl">Precio de Venta</span>
+          <div class="gold-cost"><img src="../assets/HUD/OBJECTS/COIN.svg" alt="moneda">{{ store.getRealCost(fuggler) }}</div>
+        </div>
+
       </div>
     </Teleport>
   </div>
 </template>
 
 <style scoped>
-.tt-cost-big {
-  font-size: 0.9em;
-  display: flex;
-  background: rgba(255, 215, 0, 0.1);
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  font-weight: 900;
-  color: #fbbf24;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-  margin-top: 4px;
-}
-.tt-cost-big img{
-  width: 24px;
-  height: 24px;
-}
-.upgrade-anim {
-  animation: upgradePop 0.8s ease-out;
-  color: gold;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-}
-
-@keyframes upgradePop {
-  0% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-  30% {
-    transform: scale(1.25);
-    filter: brightness(1.8);
-  }
-  60% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-}
 .tooltip-wrapper {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
-.tooltip-content {
-  background: rgba(15, 15, 20, 0.95);
-  border: 1px solid #a855f7;
-  padding: 12px;
-  border-radius: 8px;
-  color: white;
-  width: max-content;
-  max-width: 250px;
-  z-index: 1000;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-  pointer-events: none;
-  font-family: sans-serif;
-  backdrop-filter: blur(5px);
+.equipped-items-side {
+  position: absolute; top: 50%; left: -60px; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 6px; z-index: 25;
 }
-.tt-header {
+
+.equipped-item-big {
+  width: 48px; height: 48px; border-radius: 8px;
+  border: 2px solid rgba(255, 215, 0, 0.9); background: rgba(0,0,0,0.95);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.6); position: relative;
+  transition: all 0.2s; padding: 3px;
+}
+
+.equipped-item-big:hover {
+  transform: scale(1.2); border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7); z-index: 30;
+}
+
+.equipped-item-big:active { transform: scale(0.95); }
+
+.equipped-item-big img {
+  width: 34px; height: 34px; object-fit: contain;
+  pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+.item-effect {
+  position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.95); color: #4ade80; font-size: 9px;
+  padding: 2px 5px; border-radius: 3px; white-space: nowrap;
+  border: 1px solid rgba(74,222,128,0.5); pointer-events: none;
+  opacity: 0; transition: opacity 0.2s; z-index: 35;
+}
+
+.equipped-item-big:hover .item-effect { opacity: 1; }
+</style>
+
+<style>
+/* Estilos globales para el Teleport */
+.fuggler-stats-hover {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  position: fixed;
+  transform: translate(-50%, -100%);
+  background: rgba(15, 15, 20, 0.98);
+  border: 2px solid #a855f7;
+  padding: 16px 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 10000;
+  pointer-events: none;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+  min-width: 300px;
+}
+
+.hover-header {
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid #444;
-  padding-bottom: 5px;
-  margin-bottom: 5px;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 6px;
 }
-.tt-tier {
-  font-size: 0.8em;
-  color: gold;
-}
-.tt-types {
+.name-synergy-group {
   display: flex;
+  align-items: baseline;
   gap: 6px;
-  margin-bottom: 8px;
   flex-wrap: wrap;
 }
-.tt-type-badge {
-  display: inline-flex;
+.fuggler-name {
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.fuggler-syn-inline {
+  font-size: 16px;
+  font-weight: bold;
+}
+.fuggler-tier {
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background: #a855f7;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.hover-synergies {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.synergy-badge {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.8em;
-  font-weight: bold;
-  padding: 2px 8px 2px 4px;
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  gap: 6px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
 }
-.type-icon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+.syn-icon {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
-.tt-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 15px;
-  font-size: 0.9em;
+.syn-label {
+  font-size: 14px;
   font-weight: bold;
 }
-.stat-boosted {
-  color: #4ade80;
-  text-shadow: 0 0 5px rgba(74, 222, 128, 0.3);
+
+.separator {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  margin: 2px 0;
+}
+
+.hover-stats-row {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.4);
+  padding: 12px;
+  border-radius: 8px;
+  gap: 14px;
+}
+.stat-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.stat-lbl {
+  font-size: 13px;
+  color: #a855f7;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.stat-col strong {
+  font-size: 18px;
+  color: #fff;
+}
+.stat-col strong.buffed {
+  color: #10b981;
+}
+
+.hover-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 4px;
+  font-size: 16px;
+  font-weight: bold;
+}
+.gold-lbl {
+  color: #9ca3af;
+}
+.gold-cost {
+display: flex;
+align-items: center;
+gap: 4px;
+  color: #fbbf24;
+}
+.gold-cost img {
+width: 35px;
+height: 25px;
+object-fit: contain;
 }
 </style>
