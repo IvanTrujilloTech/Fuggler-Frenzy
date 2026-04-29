@@ -167,8 +167,12 @@ const getUnitStyle = (unit) => {
   align-items: center;
   gap: 1rem;
   overflow-y: auto;
+   scrollbar-width: none;       
+  -ms-overflow-style: none;   
 }
-
+.board-area::-webkit-scrollbar {
+  display: none;               /* Chrome, Safari */
+}
 /* Tablero Hexagonal */
 .hex-board {
   display: flex;

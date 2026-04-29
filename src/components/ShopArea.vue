@@ -159,7 +159,7 @@ const store = useGameStore()
   align-items: center;
   font-family: var(--title-font);
   font-size: 1.5rem;
-  gap:50%;
+  gap:80%;
   letter-spacing: 2px;
   color: #fff;
 }
