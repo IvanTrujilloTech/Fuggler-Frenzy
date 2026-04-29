@@ -21,7 +21,7 @@ const store = useGameStore()
 <template>
   <div class="shop-container">
     <div class="shop-info">
-      <h3>
+      <h3 >
         Tienda
         <img :src="iconCoin" class="coin-icon-shop" alt="Oro" />
         {{ store.gold }}
@@ -78,7 +78,9 @@ const store = useGameStore()
   margin: 0 auto;
 
 }
-
+h3{
+  text-align: center;
+}
 @media (max-width: 600px) {
   .shop-container {
     padding-bottom: 2rem;
