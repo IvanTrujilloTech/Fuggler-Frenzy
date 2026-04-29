@@ -157,6 +157,16 @@ function onDragLeave() {
   .sell-drop-zone {
     min-height: 0;
     height: 100%;
+    width:30%;
+  }
+  .sell{
+            position: absolute;
+        width: 52%;
+        height: 316px;
+        /* left: -21px; */
+        order: 1;
+        /* left: 0; */
+        right: 0;
   }
 }
 
