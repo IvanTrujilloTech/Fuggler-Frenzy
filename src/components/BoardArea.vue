@@ -62,7 +62,7 @@ const getUnitStyle = (unit) => {
       </div>
     </div>
 
-    <div class="unified-board" :class="{ 'is-combat': store.phase === 'COMBAT' }">
+       <div class="unified-board" :class="{ 'is-combat': store.phase === 'COMBAT', 'is-dragging': store.draggingUnit }">
       <!-- Un solo bucle de 6 filas (0-2: Enemigo, 3-5: Jugador) -->
       <div class="hex-row" v-for="rowIdx in 6" :key="'row-'+rowIdx">
         
@@ -261,6 +261,10 @@ flex-direction: flex-start;
 .enemy-slot {
   background: repeating-linear-gradient(45deg, #3c1f1f, #3c1f1f 5px, #4a2929 5px, #4a2929 10px) !important;
   border: 2px solid rgba(255, 0, 0, 0.2);
+}
+
+.is-dragging .enemy-slot {
+  pointer-events: none;
 }
 
 .board-slot {
