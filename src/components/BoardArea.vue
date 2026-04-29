@@ -158,8 +158,8 @@ const getUnitStyle = (unit) => {
   --hex-margin: 5px;
   --hex-overlap: 24px;
   --row-shift: 45px;
-  --board-padding: 40px;
-
+  --board-padding: 20px 40px;
+flex-direction: flex-start;
   flex-grow: 1;
   padding: 1rem;
   display: flex;

@@ -134,7 +134,9 @@ const hideTooltip = () => {
 <style scoped>
 .synergy-tracker {
   background: var(--color-felt);
-  border: 4px dashed var(--color-stitch);
+  border-left: 4px dashed var(--color-stitch);
+    border-bottom: 4px dashed var(--color-stitch);
+
   border-radius: 4px 15px 4px 15px;
   padding: 10px;
   width: 220px;

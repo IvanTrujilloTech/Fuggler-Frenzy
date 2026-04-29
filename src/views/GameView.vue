@@ -29,9 +29,7 @@ onUnmounted(() => {
       <Ranking />
       <header class="game-header">
         <div class="hud">
-          <div class="hud-item player-info">
-            {{ store.username }} | HP: <span class="hp-text">{{ store.hp }}</span>
-          </div>
+        
           <div class="hud-item timer-info" :class="{ 'warning': store.timeLeft <= 5 && store.phase === 'PLANNING' }">
             <span class="phase">{{ store.phase === 'PLANNING' && store.timeLeft === 0 ? 'LISTO' : store.phase }}</span>
             <span class="timer" v-if="store.phase === 'COMBAT'">PELEANDO...</span>
@@ -48,9 +46,9 @@ onUnmounted(() => {
 
     <div class="game-content">
       
-      <SynergyTracker />
-      <BoardArea />
-      <SellPanel />
+   <SynergyTracker class="synergy" />
+  <BoardArea class="board" />
+  <SellPanel class="sell" />
     </div>
 
       <ShopArea />
@@ -195,12 +193,15 @@ onUnmounted(() => {
     flex-direction: column;
     overflow-y: auto;
   }
-    .left-panel {
-    display: flex;
-    flex-direction: row; /* o column según prefieras */
-    gap: 1rem;
-    width: 100%;
-  }
+  .sell {         position: absolute;
+        width: 69%;
+        /* height: 142px; */
+        /* left: -21px; */
+        order: 1;
+        /* left: 0; */
+        right: 0;}
+  .synergy { order: 3; }
+  .board { order: 2; }
 }
 
 @media (max-width: 600px) {

@@ -189,8 +189,9 @@ const store = useGameStore()
 .shop-cards {
   display: flex;
   gap: 1.5rem;
+  margin-top:-10px;
   justify-content: center;
-  flex-wrap: wrap; /* Permitir que las cartas bajen de fila */
+  flex-wrap: wrap; 
 }
 
 @media (max-width: 600px) {
