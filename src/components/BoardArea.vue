@@ -2,16 +2,115 @@
 import { useGameStore } from '../stores/gameStore'
 import draggable from 'vuedraggable'
 import FugglerUnit from './FugglerUnit.vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const store = useGameStore()
+
+/* =========================
+   ZOOM + PAN SYSTEM
+========================= */
+const zoom = ref(1)
+const targetZoom = ref(1)
+
+const maxZoom = 2.2
+
+const pan = ref({ x: 0, y: 0 })
+const isPanning = ref(false)
+const lastMouse = ref({ x: 0, y: 0 })
+
+const boardViewport = ref(null)
+
+/* =========================
+   ZOOM SUAVE
+========================= */
+let animationFrame = null
+
+const animateZoom = () => {
+  zoom.value += (targetZoom.value - zoom.value) * 0.12
+
+  if (Math.abs(targetZoom.value - zoom.value) > 0.001) {
+    animationFrame = requestAnimationFrame(animateZoom)
+  } else {
+    animationFrame = null
+  }
+}
+
+/* =========================
+   WHEEL
+========================= */
+const onWheel = (e) => {
+  e.preventDefault()
+
+  const zoomIntensity = 0.002
+  const delta = -e.deltaY * zoomIntensity
+
+  let newZoom = targetZoom.value + delta
+
+  // 🔥 CLAVE: nunca bajar de 1
+  if (newZoom < 1) newZoom = 1
+  if (newZoom > maxZoom) newZoom = maxZoom
+
+  if (newZoom === targetZoom.value) return
+
+  const rect = boardViewport.value.getBoundingClientRect()
+
+  const mouseX = e.clientX - rect.left
+  const mouseY = e.clientY - rect.top
+
+  const scaleChange = newZoom / targetZoom.value
+
+  pan.value.x = mouseX - (mouseX - pan.value.x) * scaleChange
+  pan.value.y = mouseY - (mouseY - pan.value.y) * scaleChange
+
+  targetZoom.value = newZoom
+
+  if (!animationFrame) animateZoom()
+}
+
+/* =========================
+   PAN SOLO SI ZOOM > 1
+========================= */
+const onMouseDown = (e) => {
+  if (e.button !== 1) return
+  if (zoom.value <= 1) return
+
+  isPanning.value = true
+  lastMouse.value = { x: e.clientX, y: e.clientY }
+}
+
+const onMouseMove = (e) => {
+  if (!isPanning.value) return
+
+  const dx = e.clientX - lastMouse.value.x
+  const dy = e.clientY - lastMouse.value.y
+
+  pan.value.x += dx
+  pan.value.y += dy
+
+  lastMouse.value = { x: e.clientX, y: e.clientY }
+}
+
+const onMouseUp = () => {
+  isPanning.value = false
+}
+
+onMounted(() => {
+  window.addEventListener('mouseup', onMouseUp)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('mouseup', onMouseUp)
+})
+
+/* =========================
+   LÓGICA ORIGINAL
+========================= */
 
 const getBoardGroupOptions = (index) => {
   return {
     name: 'fugglers',
     put: (to, from) => {
-      // si la casilla ya tiene un fuggler, no se puede soltar
       if (store.board[index].length >= 1) return false;
-      // si viene del banquillo y ya hay 6 fugglers en tablero, bloquear
       const isFromBench = from.el.classList.contains('bench-slot');
       if (isFromBench && store.activeBoardUnits >= 6) return false;
       return true;
@@ -29,7 +128,6 @@ const getBenchGroupOptions = (index) => {
 }
 
 const getFugglerOnCombatHex = (row, col) => {
-  // Convert row, col to q, r
   const r = row
   const q = col - Math.floor(row / 2)
   return store.combatUnits.find(u => u.pos.q === q && u.pos.r === r && !u.isDead)
@@ -38,98 +136,113 @@ const getFugglerOnCombatHex = (row, col) => {
 const getUnitStyle = (unit) => {
   const r = unit.pos.r
   const c = unit.pos.q + Math.floor(r / 2)
-  
-  // Usamos variables CSS para que sea responsivo
-  // vertical-step = height - overlap
-  // horizontal-step = width + 2*margin
-  // x = padding + c * horizontal-step + (row-is-shifted ? row-shift : 0)
-  
+
   return {
     top: `calc(var(--board-padding) + ${r} * (var(--hex-h) - var(--hex-overlap)))`,
     left: `calc(var(--board-padding) + ${c} * (var(--hex-w) + 2 * var(--hex-margin)) + (${r % 2 === 1 ? 'var(--row-shift)' : '0px'}))`,
     zIndex: r + 10
   }
 }
-
 </script>
 
 <template>
   <div class="board-area">
+    
     <div class="board-header">
       <div class="active-count">
         <span class="count-label">Fugglers:</span>
-        <span class="count-value" :class="{ 'at-limit': store.activeBoardUnits >= 6 }">{{ store.activeBoardUnits }} / 6</span>
+        <span class="count-value" :class="{ 'at-limit': store.activeBoardUnits >= 6 }">
+          {{ store.activeBoardUnits }} / 6
+        </span>
       </div>
     </div>
 
-       <div class="unified-board" :class="{ 'is-combat': store.phase === 'COMBAT', 'is-dragging': store.draggingUnit }">
-      <!-- Un solo bucle de 6 filas (0-2: Enemigo, 3-5: Jugador) -->
-      <div class="hex-row" v-for="rowIdx in 6" :key="'row-'+rowIdx">
-        
-        <!-- Renderizado de CELDAS (Planning Phase) -->
-        <template v-if="store.phase !== 'COMBAT'">
-          <!-- Si es fila 0,1,2 (Enemigo) -->
-          <template v-if="rowIdx <= 3">
-            <div 
-              class="hex-slot is-hex enemy-slot" 
-              v-for="colIdx in 7" 
-              :key="'e-col-'+colIdx"
-            >
-              <FugglerUnit v-if="store.boardEnemy[(rowIdx-1)*7 + (colIdx-1)]?.length > 0" :fuggler="store.boardEnemy[(rowIdx-1)*7 + (colIdx-1)][0]" />
-            </div>
-          </template>
+    <!-- 🔥 ZOOM WRAPPER -->
+    <div 
+      class="board-viewport"
+      ref="boardViewport"
+      @wheel="onWheel"
+      @mousedown="onMouseDown"
+      @mousemove="onMouseMove"
+    >
+      <div 
+        class="board-transform"
+        :style="{
+          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`
+        }"
+      >
+        <div class="unified-board" :class="{ 'is-combat': store.phase === 'COMBAT', 'is-dragging': store.draggingUnit }">
 
-          <!-- Si es fila 3,4,5 (Jugador) -->
-          <template v-else>
-            <draggable
-              v-for="colIdx in 7"
-              :key="'p-col-'+colIdx"
-              v-model="store.board[(rowIdx-4)*7 + (colIdx-1)]"
-              :group="getBoardGroupOptions((rowIdx-4)*7 + (colIdx-1))"
-              item-key="instanceId"
-              class="hex-slot is-hex board-slot"
-            >
-              <template #item="{ element }">
-                <FugglerUnit :fuggler="element" />
+          <div class="hex-row" v-for="rowIdx in 6" :key="'row-'+rowIdx">
+            
+            <template v-if="store.phase !== 'COMBAT'">
+
+              <template v-if="rowIdx <= 3">
+                <div 
+                  class="hex-slot is-hex enemy-slot" 
+                  v-for="colIdx in 7" 
+                  :key="'e-col-'+colIdx"
+                >
+                  <FugglerUnit 
+                    v-if="store.boardEnemy[(rowIdx-1)*7 + (colIdx-1)]?.length > 0" 
+                    :fuggler="store.boardEnemy[(rowIdx-1)*7 + (colIdx-1)][0]" 
+                  />
+                </div>
               </template>
-            </draggable>
-          </template>
-        </template>
 
-        <!-- Renderizado de COMBATE (Solo rejilla de fondo) -->
-        <template v-else>
-          <div 
-            v-for="colIdx in 7" 
-            :key="'c-col-'+colIdx"
-            class="hex-slot is-hex"
-            :class="rowIdx <= 3 ? 'enemy-slot' : 'board-slot'"
-          >
-            <!-- Slot vacío, la unidad se renderiza en la capa absoluta -->
-          </div>
-        </template>
-      </div>
+              <template v-else>
+                <draggable
+                  v-for="colIdx in 7"
+                  :key="'p-col-'+colIdx"
+                  v-model="store.board[(rowIdx-4)*7 + (colIdx-1)]"
+                  :group="getBoardGroupOptions((rowIdx-4)*7 + (colIdx-1))"
+                  item-key="instanceId"
+                  class="hex-slot is-hex board-slot"
+                >
+                  <template #item="{ element }">
+                    <FugglerUnit :fuggler="element" />
+                  </template>
+                </draggable>
+              </template>
 
-      <!-- CAPA ABSOLUTA DE UNIDADES (Para movimiento fluido) -->
-      <div v-if="store.phase === 'COMBAT'" class="combat-absolute-layer">
-        <div 
-          v-for="unit in store.combatUnits.filter(u => !u.isDead)" 
-          :key="unit.instanceId"
-          class="combat-unit-absolute is-hex"
-          :style="getUnitStyle(unit)"
-          :class="{ 
-            'is-attacking': unit.isAttacking,
-            'enemy-slot': unit.side === 'enemy',
-            'board-slot': unit.side === 'player'
-          }"
-        >
-          <FugglerUnit :fuggler="unit" />
-          <div class="hp-bar-container">
-            <div class="hp-bar-fill" :style="{ width: (unit.hp / unit.maxHp * 100) + '%' }"></div>
+            </template>
+
+            <template v-else>
+              <div 
+                v-for="colIdx in 7" 
+                :key="'c-col-'+colIdx"
+                class="hex-slot is-hex"
+                :class="rowIdx <= 3 ? 'enemy-slot' : 'board-slot'"
+              ></div>
+            </template>
+
           </div>
+
+          <!-- COMBAT LAYER -->
+          <div v-if="store.phase === 'COMBAT'" class="combat-absolute-layer">
+            <div 
+              v-for="unit in store.combatUnits.filter(u => !u.isDead)" 
+              :key="unit.instanceId"
+              class="combat-unit-absolute is-hex"
+              :style="getUnitStyle(unit)"
+              :class="{ 
+                'is-attacking': unit.isAttacking,
+                'enemy-slot': unit.side === 'enemy',
+                'board-slot': unit.side === 'player'
+              }"
+            >
+              <FugglerUnit :fuggler="unit" />
+              <div class="hp-bar-container">
+                <div class="hp-bar-fill" :style="{ width: (unit.hp / unit.maxHp * 100) + '%' }"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
 
+    <!-- BENCH -->
     <div class="bench-area">
       <div class="bench-grid">
         <draggable
@@ -148,10 +261,35 @@ const getUnitStyle = (unit) => {
         </draggable>
       </div>
     </div>
+
   </div>
 </template>
 
 <style scoped>
+/* 🔥 ZOOM SYSTEM */
+.board-viewport {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+  position: relative;
+}
+
+.board-viewport:active {
+  cursor: grabbing;
+}
+
+.board-transform {
+  transform-origin: 0 0;
+  will-change: transform;
+    transition: transform 0.08s linear; 
+}
+
+
+
+.board-area::-webkit-scrollbar {
+  display: none;
+}
 .board-area {
   --hex-w: 80px;
   --hex-h: 92px;
