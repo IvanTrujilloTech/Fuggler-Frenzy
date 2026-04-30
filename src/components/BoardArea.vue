@@ -6,9 +6,6 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const store = useGameStore()
 
-/* =========================
-   ZOOM + PAN SYSTEM
-========================= */
 const zoom = ref(1)
 const targetZoom = ref(1)
 
@@ -20,9 +17,7 @@ const lastMouse = ref({ x: 0, y: 0 })
 
 const boardViewport = ref(null)
 
-/* =========================
-   ZOOM SUAVE
-========================= */
+
 let animationFrame = null
 
 const animateZoom = () => {
@@ -35,9 +30,7 @@ const animateZoom = () => {
   }
 }
 
-/* =========================
-   WHEEL
-========================= */
+
 const onWheel = (e) => {
   e.preventDefault()
 
@@ -67,9 +60,6 @@ const onWheel = (e) => {
   if (!animationFrame) animateZoom()
 }
 
-/* =========================
-   PAN SOLO SI ZOOM > 1
-========================= */
 const onMouseDown = (e) => {
   if (e.button !== 1) return
   if (zoom.value <= 1) return
@@ -103,7 +93,7 @@ onBeforeUnmount(() => {
 })
 
 /* =========================
-   LÓGICA ORIGINAL
+  esto es el codigo original antes del zoomL
 ========================= */
 
 const getBoardGroupOptions = (index) => {
