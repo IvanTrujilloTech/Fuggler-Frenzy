@@ -112,13 +112,13 @@ function onDropSlot(event, targetItem, targetIndex) {
              @dragstart="e => onDragStart(e, item, index)"
              @dragend="onDragEnd">
           <img :src="item.img" />
-          
-          <!-- Tooltip Normal del Objeto (solo si no estamos combinando aquí) -->
-          <div class="object-tooltip" v-if="hoveredSlot !== index || !previewArtifact">
-            <div class="tooltip-name" :class="{'text-gold': item.type === 'artifact'}">{{ item.name }}</div>
-            <div class="tooltip-desc">{{ item.description }}</div>
-            <div v-if="item.lore" class="tooltip-lore">"{{ item.lore }}"</div>
-          </div>
+        </div>
+
+        <!-- Tooltip Normal del Objeto (solo si no estamos combinando aquí) -->
+        <div class="object-tooltip" v-if="item && (hoveredSlot !== index || !previewArtifact)">
+          <div class="tooltip-name" :class="{'text-gold': item.type === 'artifact'}">{{ item.name }}</div>
+          <div class="tooltip-desc">{{ item.description }}</div>
+          <div v-if="item.lore" class="tooltip-lore">"{{ item.lore }}"</div>
         </div>
 
         <!-- Tooltip de Previsualización de Combinación -->
