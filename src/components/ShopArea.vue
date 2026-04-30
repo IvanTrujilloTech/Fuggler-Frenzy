@@ -1,11 +1,11 @@
 <script setup>
-import { useGameStore } from '../stores/gameStore'
-import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
-import iconDientudos from '../assets/HUD/SINERGYS/DIENTUDOS.svg'
-import iconBotones from '../assets/HUD/SINERGYS/BOTONES.svg'
-import iconRadioactivos from '../assets/HUD/SINERGYS/RADIOACTIVOS.svg'
-import iconInadaptados from '../assets/HUD/SINERGYS/INADAPTADOS.svg'
-import iconCazadores from '../assets/HUD/SINERGYS/CAZADORES.svg'
+import { useGameStore } from "../stores/gameStore";
+import iconCoin from "../assets/HUD/OBJECTS/COIN.svg";
+import iconDientudos from "../assets/HUD/SINERGYS/DIENTUDOS.svg";
+import iconBotones from "../assets/HUD/SINERGYS/BOTONES.svg";
+import iconRadioactivos from "../assets/HUD/SINERGYS/RADIOACTIVOS.svg";
+import iconInadaptados from "../assets/HUD/SINERGYS/INADAPTADOS.svg";
+import iconCazadores from "../assets/HUD/SINERGYS/CAZADORES.svg";
 
 const SYNERGY_ICONS = {
   D: iconDientudos,
@@ -13,26 +13,30 @@ const SYNERGY_ICONS = {
   R: iconRadioactivos,
   I: iconInadaptados,
   C: iconCazadores,
-}
+};
 
-const store = useGameStore()
+const store = useGameStore();
 </script>
 
 <template>
   <div class="shop-container">
     <div class="shop-info">
-      <h3 >
+      <h3>
         Tienda
         <img :src="iconCoin" class="coin-icon-shop" alt="Oro" />
         {{ store.gold }}
       </h3>
-      <button class="btn-reroll" @click="store.rollShop(false)" :disabled="store.gold < 2">
+      <button
+        class="btn-reroll"
+        @click="store.rollShop(false)"
+        :disabled="store.gold < 2"
+      >
         Reroll (2 <img :src="iconCoin" class="coin-icon-shop" alt="Oro" />)
       </button>
     </div>
     <div class="shop-cards">
-      <div 
-        v-for="(fuggler, index) in store.shop" 
+      <div
+        v-for="(fuggler, index) in store.shop"
         :key="index"
         class="shop-card"
         :class="{ empty: !fuggler, [fuggler?.types[0]]: true }"
@@ -43,7 +47,12 @@ const store = useGameStore()
             {{ fuggler.cost }}
             <img :src="iconCoin" class="coin-icon-cost" alt="Oro" />
           </div>
-          <img v-if="fuggler.image" :src="fuggler.image" :alt="fuggler.name" class="shop-fuggler-image" />
+          <img
+            v-if="fuggler.image"
+            :src="fuggler.image"
+            :alt="fuggler.name"
+            class="shop-fuggler-image"
+          />
           <div class="name">{{ fuggler.name }}</div>
           <div class="types">
             <img
@@ -62,28 +71,47 @@ const store = useGameStore()
 
 <style scoped>
 .shop-container {
-  background: repeating-linear-gradient(135deg, var(--color-felt), var(--color-felt) 10px, #222 10px, #222 20px);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-felt),
+    var(--color-felt) 10px,
+    #222 10px,
+    #222 20px
+  );
   border-top: 6px dashed var(--color-stitch);
   border-right: 6px dashed var(--color-stitch);
   border-left: 6px dashed var(--color-stitch);
   padding: 10px 40px;
   display: flex;
   flex-direction: column;
-  box-shadow: inset 0 10px 20px rgba(0,0,0,0.8);
+  box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.8);
   position: relative;
   overflow-y: hidden; /* Permitir scroll vertical si el wrap es mucho */
   min-height: 70px;
-    width: 100%;
+  width: 100%;
   max-width: 1670px;
   margin: 0 auto;
-
 }
-h3{
+h3 {
   text-align: center;
 }
 @media (max-width: 600px) {
   .shop-container {
     padding-bottom: 2rem;
+  }
+}
+@media (max-width: 1366px) {
+  .shop-info {
+    padding: 0 10px;
+  }
+  button{
+        height: 54px;
+        width: 200px;  }
+        h3{
+          font-size: 1.2rem;
+        }
+  .shop-cards {
+    margin-top: -34px;
   }
 }
 
@@ -95,7 +123,7 @@ h3{
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(3px);
 }
 .sell-zone {
@@ -109,7 +137,7 @@ h3{
   transition: border-color 0.2s, background 0.2s, transform 0.15s;
   animation: sell-pulse 1.2s ease-in-out infinite;
   background: rgba(230, 57, 70, 0.08);
-  box-shadow: 0 0 20px rgba(230,57,70,0.3);
+  box-shadow: 0 0 20px rgba(230, 57, 70, 0.3);
   cursor: default;
 }
 .sell-zone--over {
@@ -120,8 +148,13 @@ h3{
   animation: none;
 }
 @keyframes sell-pulse {
-  0%, 100% { box-shadow: 0 0 14px rgba(230,57,70,0.3); }
-  50%      { box-shadow: 0 0 32px rgba(230,57,70,0.7); }
+  0%,
+  100% {
+    box-shadow: 0 0 14px rgba(230, 57, 70, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 32px rgba(230, 57, 70, 0.7);
+  }
 }
 .sell-zone-inner {
   display: flex;
@@ -134,7 +167,7 @@ h3{
 .sell-icon {
   font-size: 1.8rem;
   line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
 }
 .sell-label {
   font-family: var(--title-font);
@@ -161,9 +194,36 @@ h3{
   align-items: center;
   font-family: var(--title-font);
   font-size: 1.5rem;
-  gap:80%;
+  gap: 80%;
+    flex-wrap: nowrap;        
+
   letter-spacing: 2px;
   color: #fff;
+}
+.shop-info h3 {
+  white-space: nowrap;      
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width:350px;
+}
+@media (min-resolution: 0.8dppx) and (max-resolution: 1.2dppx) {
+  .shop-card {
+    width: 170px;
+    height: 210px;
+  }
+
+  .shop-fuggler-image {
+    width: 90px;
+    height: 90px;
+  }
+
+  .name {
+    font-size: 1.2rem;
+  }
+
+  .shop-cards {
+    gap: 2.5rem;
+  }
 }
 .btn-reroll {
   background: var(--color-toxic);
@@ -174,6 +234,7 @@ h3{
   cursor: pointer;
   font-family: var(--title-font);
   font-size: 1.5rem;
+   flex-shrink: 0;  
   box-shadow: 4px 4px 0 #000;
   transform: rotate(-2deg);
   transition: transform 0.1s;
@@ -191,9 +252,9 @@ h3{
 .shop-cards {
   display: flex;
   gap: 1.5rem;
-  margin-top:-10px;
+  margin-top: -10px;
   justify-content: center;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
 }
 @media (max-width: 1280px) {
   .shop-container {
@@ -256,14 +317,13 @@ h3{
   }
 }
 .shop-card {
-
-  width:  140px;
-  height:  180px;
+  width: 140px;
+  height: 180px;
 
   background: #333;
   border-radius: 5px 15px 4px 10px;
   border: 4px solid #000;
-  box-shadow: 8px 8px 0 rgba(0,0,0,1);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 1);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -297,7 +357,7 @@ h3{
   }
 }
 .shop-card.empty {
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   border: 4px dashed var(--color-stitch);
   box-shadow: none;
   cursor: default;
@@ -335,13 +395,13 @@ h3{
   height: 20px;
   object-fit: contain;
   vertical-align: middle;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 .coin-icon-cost {
   width: 16px;
   height: 16px;
   object-fit: contain;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
 }
 .shop-fuggler-image {
   width: 75px;
@@ -389,13 +449,13 @@ h3{
   justify-content: center;
   gap: 4px;
   padding: 4px 6px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   border-top: 2px solid #000;
 }
 .type-icon-shop {
   width: 22px;
   height: 22px;
   object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
 }
 </style>

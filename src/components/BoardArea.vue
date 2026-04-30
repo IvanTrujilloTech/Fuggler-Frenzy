@@ -147,7 +147,6 @@ const getUnitStyle = (unit) => {
       </div>
     </div>
 
-    <!-- 🔥 ZOOM WRAPPER -->
     <div 
       class="board-viewport"
       ref="boardViewport"
@@ -493,7 +492,38 @@ flex-direction: flex-start;
     margin-bottom: 10px;
   }
 }
+/*esto es portatil*/
 
+@media (max-width: 1366px) {
+  .board-area {
+    --hex-w: 60px;
+    --hex-h: 55px;
+    --hex-margin: 3px;
+    --hex-overlap: 20px;
+    --row-shift: 36px;
+    --board-padding: 15px 25px;
+  }
+
+  .unified-board {
+    transform: scale(0.9);
+    transform-origin: top center;
+  }
+}
+@media (min-width: 1800px) {
+  .board-area {
+    --hex-w: 95px;
+    --hex-h: 110px;
+    --hex-margin: 6px;
+    --hex-overlap: 28px;
+    --row-shift: 52px;
+    --board-padding: 30px 60px;
+  }
+
+  .unified-board {
+    transform: scale(1.15);
+    transform-origin: top center;
+  }
+}
 /* banquillo normal (cuadrado) */
 .bench-area {
   margin-top: auto;

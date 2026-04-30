@@ -132,6 +132,40 @@ const hideTooltip = () => {
 </template>
 
 <style scoped>
+/* Pantallas grandes / zoom out (efecto similar a 90% / 80%) */
+@media (min-width: 1600px) {
+  .synergy-tracker {
+    width: 260px;
+    min-width: 260px;
+    padding: 14px;
+  }
+
+  .syn-icon {
+    width: 65px;
+    height: 65px;
+  }
+
+  .syn-count {
+    font-size: 1.7rem;
+  }
+}
+
+@media (min-width: 1800px) {
+  .synergy-tracker {
+    width: 280px;
+    min-width: 280px;
+    padding: 16px;
+  }
+
+  .syn-icon {
+    width: 75px;
+    height: 75px;
+  }
+
+  .syn-count {
+    font-size: 1.9rem;
+  }
+}
 .synergy-tracker {
   background: var(--color-felt);
   border-left: 4px dashed var(--color-stitch);
