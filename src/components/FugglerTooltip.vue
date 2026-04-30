@@ -25,7 +25,10 @@ function onDrop(event) {
   const item = JSON.parse(itemData);
   const success = store.equipItemToFuggler(props.fuggler.instanceId, item);
   if (success) {
-    store.inventory = store.inventory.filter(i => i.instanceId !== item.instanceId);
+    const invIdx = store.inventory.findIndex(i => i && i.instanceId === item.instanceId);
+    if (invIdx !== -1) {
+      store.inventory[invIdx] = null;
+    }
   }
 }
 
@@ -34,7 +37,10 @@ function unequipItem(item) {
   const idx = fugglerItems.findIndex(i => i.instanceId === item.instanceId);
   if (idx >= 0) {
     fugglerItems.splice(idx, 1);
-    store.inventory.push(item);
+    const emptyIdx = store.inventory.findIndex(i => i === null);
+    if (emptyIdx !== -1) {
+      store.inventory[emptyIdx] = item;
+    }
   }
 }
 
@@ -227,6 +233,23 @@ const synergiesList = computed(() => {
           <div class="gold-cost"><img src="../assets/HUD/OBJECTS/COIN.svg" alt="moneda">{{ store.getRealCost(fuggler) }}</div>
         </div>
 
+        <!-- Fila 5: Objetos Equipados -->
+        <template v-if="fuggler.items && fuggler.items.length > 0">
+          <hr class="separator" />
+          <div class="hover-items">
+            <span class="items-title">Objetos Equipados</span>
+            <div class="items-list">
+              <div v-for="item in fuggler.items" :key="'tt-'+item.instanceId" class="hover-item-row">
+                <img :src="item.img" />
+                <div class="hover-item-text">
+                  <span class="hover-item-name" :class="{'text-gold': item.type === 'artifact'}">{{ item.name }}</span>
+                  <span class="hover-item-desc">{{ item.description }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
       </div>
     </Teleport>
   </div>
@@ -407,5 +430,53 @@ gap: 4px;
 width: 35px;
 height: 25px;
 object-fit: contain;
+}
+
+/* Items in tooltip */
+.hover-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.items-title {
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hover-item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.3);
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.hover-item-row img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.hover-item-text {
+  display: flex;
+  flex-direction: column;
+}
+.hover-item-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+}
+.hover-item-desc {
+  font-size: 11px;
+  color: #4ade80;
+}
+.text-gold {
+  color: #ffd700 !important;
 }
 </style>

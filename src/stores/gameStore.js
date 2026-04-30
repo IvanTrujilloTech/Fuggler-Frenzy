@@ -20,7 +20,7 @@ export const useGameStore = defineStore("game", {
     bench: Array.from({ length: 9 }, () => []), // 9 slots fijos, cada uno vacio o con 1 unidad
     board: Array.from({ length: 21 }, () => []), // 21 slots fijos (cuadricula 3x7)
     boardEnemy: Array.from({ length: 21 }, () => []), // 21 slots del tablero enemigo
-    inventory: [], // array de objetos del jugador
+    inventory: Array.from({ length: 8 }, () => null), // array fijo de 8 slots
     isDraggingFuggler: false, // true mientras se arrastra un fuggler del tablero o banquillo
     draggingUnit: null, // unidad que se esta arrastrando desde el banquillo
 
@@ -197,11 +197,12 @@ export const useGameStore = defineStore("game", {
           items: []
         });
       }
-      if (this.inventory.length < 6) {
-        this.inventory.push({
+      const emptyInvIndex = this.inventory.findIndex(i => i === null);
+      if (emptyInvIndex !== -1) {
+        this.inventory[emptyInvIndex] = {
           ...option.object,
           instanceId: crypto.randomUUID()
-        });
+        };
       }
       this.planningEventActive = false;
       this.planningOptions = [];
@@ -635,7 +636,10 @@ export const useGameStore = defineStore("game", {
       // 2. Devolver objetos al inventario
       if (unit.items && unit.items.length > 0) {
         unit.items.forEach(item => {
-          this.inventory.push(item);
+          const emptyIdx = this.inventory.findIndex(i => i === null);
+          if (emptyIdx !== -1) {
+            this.inventory[emptyIdx] = item;
+          }
         });
       }
 
@@ -741,6 +745,16 @@ export const useGameStore = defineStore("game", {
       otherUnits.forEach((u) => {
         if (u.loc === "board") this.board[u.idx] = [];
         if (u.loc === "bench") this.bench[u.idx] = [];
+        
+        // Devolver objetos de las unidades consumidas
+        if (u.items && u.items.length > 0) {
+          u.items.forEach(item => {
+            const emptyIdx = this.inventory.findIndex(i => i === null);
+            if (emptyIdx !== -1) {
+              this.inventory[emptyIdx] = item;
+            }
+          });
+        }
       });
 
       const targetSlot =
@@ -755,7 +769,10 @@ export const useGameStore = defineStore("game", {
       this.syncToFirebase();
     },
     addItemToInventory(item) {
-      this.inventory.push(item);
+      const emptyIdx = this.inventory.findIndex(i => i === null);
+      if (emptyIdx !== -1) {
+        this.inventory[emptyIdx] = item;
+      }
     },
 
     equipItemToFuggler(fugglerId, item) {
