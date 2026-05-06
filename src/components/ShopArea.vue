@@ -202,7 +202,6 @@ h3 {
 }
 .shop-info h3 {
   white-space: nowrap;      
-  overflow: hidden;
   text-overflow: ellipsis;
   width:350px;
 }

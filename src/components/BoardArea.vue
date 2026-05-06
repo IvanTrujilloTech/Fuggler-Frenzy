@@ -12,24 +12,32 @@ const targetZoom = ref(1)
 const maxZoom = 2.2
 
 const pan = ref({ x: 0, y: 0 })
+const targetPan = ref({ x: 0, y: 0 })
 const isPanning = ref(false)
 const lastMouse = ref({ x: 0, y: 0 })
 
 const boardViewport = ref(null)
 
-
 let animationFrame = null
 
 const animateZoom = () => {
   zoom.value += (targetZoom.value - zoom.value) * 0.12
+  pan.value.x += (targetPan.value.x - pan.value.x) * 0.12
+  pan.value.y += (targetPan.value.y - pan.value.y) * 0.12
 
-  if (Math.abs(targetZoom.value - zoom.value) > 0.001) {
+  if (
+    Math.abs(targetZoom.value - zoom.value) > 0.001 ||
+    Math.abs(targetPan.value.x - pan.value.x) > 0.1 ||
+    Math.abs(targetPan.value.y - pan.value.y) > 0.1
+  ) {
     animationFrame = requestAnimationFrame(animateZoom)
   } else {
+    zoom.value = targetZoom.value
+    pan.value.x = targetPan.value.x
+    pan.value.y = targetPan.value.y
     animationFrame = null
   }
 }
-
 
 const onWheel = (e) => {
   e.preventDefault()
@@ -52,8 +60,13 @@ const onWheel = (e) => {
 
   const scaleChange = newZoom / targetZoom.value
 
-  pan.value.x = mouseX - (mouseX - pan.value.x) * scaleChange
-  pan.value.y = mouseY - (mouseY - pan.value.y) * scaleChange
+  targetPan.value.x = mouseX - (mouseX - targetPan.value.x) * scaleChange
+  targetPan.value.y = mouseY - (mouseY - targetPan.value.y) * scaleChange
+
+  if (newZoom === 1) {
+    targetPan.value.x = 0;
+    targetPan.value.y = 0;
+  }
 
   targetZoom.value = newZoom
 
@@ -61,8 +74,11 @@ const onWheel = (e) => {
 }
 
 const onMouseDown = (e) => {
-  if (e.button !== 1) return
+  if (e.button !== 0 && e.button !== 1) return
   if (zoom.value <= 1) return
+
+  // Permitir arrastrar personajes con click izquierdo sin iniciar paneo del tablero
+  if (e.button === 0 && e.target.closest('.fuggler-unit')) return;
 
   isPanning.value = true
   lastMouse.value = { x: e.clientX, y: e.clientY }
@@ -74,6 +90,8 @@ const onMouseMove = (e) => {
   const dx = e.clientX - lastMouse.value.x
   const dy = e.clientY - lastMouse.value.y
 
+  targetPan.value.x += dx
+  targetPan.value.y += dy
   pan.value.x += dx
   pan.value.y += dy
 
@@ -92,9 +110,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('mouseup', onMouseUp)
 })
 
-/* =========================
-  esto es el codigo original antes del zoomL
-========================= */
+
 
 const getBoardGroupOptions = (index) => {
   return {
@@ -133,6 +149,20 @@ const getUnitStyle = (unit) => {
     zIndex: r + 10
   }
 }
+const isLaptop = ref(false)
+
+const checkResolution = () => {
+  isLaptop.value = window.innerWidth <= 1366
+}
+
+onMounted(() => {
+  checkResolution()
+  window.addEventListener('resize', checkResolution)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkResolution)
+})
 </script>
 
 <template>
@@ -207,7 +237,6 @@ const getUnitStyle = (unit) => {
 
           </div>
 
-          <!-- COMBAT LAYER -->
           <div v-if="store.phase === 'COMBAT'" class="combat-absolute-layer">
             <div 
               v-for="unit in store.combatUnits.filter(u => !u.isDead)" 
@@ -255,13 +284,16 @@ const getUnitStyle = (unit) => {
 </template>
 
 <style scoped>
-/* 🔥 ZOOM SYSTEM */
 .board-viewport {
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
   cursor: grab;
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .board-viewport:active {
@@ -280,22 +312,20 @@ const getUnitStyle = (unit) => {
   display: none;
 }
 .board-area {
-  --hex-w: 80px;
-  --hex-h: 92px;
-  --hex-margin: 5px;
-  --hex-overlap: 24px;
-  --row-shift: 45px;
-  --board-padding: 20px 40px;
-flex-direction: flex-start;
+  --hex-w: 52px;
+  --hex-h: 60px;
+  --hex-margin: 2px;
+  --hex-overlap: 20px;
+  --row-shift: 29px;
+  --board-padding: 8px 16px;
   flex-grow: 1;
-  padding: 1rem;
+  min-height: 0;
+  padding: 0.25rem 0.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  overflow-y: auto;
-   scrollbar-width: none;       
-  -ms-overflow-style: none;   
+  gap: 0.4rem;
+  overflow: hidden;
 }
 .board-area::-webkit-scrollbar {
   display: none;               /* Chrome, Safari */
@@ -374,7 +404,7 @@ flex-direction: flex-start;
   padding: var(--board-padding);
   background: rgba(0,0,0,0.3);
   border-radius: 50px;
-  transition: all 0.5s ease;
+  transition: background 0.5s ease, box-shadow 0.5s ease;
   position: relative;
   width: fit-content;
   margin: 0 auto;
@@ -430,7 +460,6 @@ flex-direction: flex-start;
   -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 }
-
 .combat-unit-wrapper {
   position: relative;
   display: flex;
@@ -497,7 +526,8 @@ flex-direction: flex-start;
 @media (max-width: 1366px) {
   .board-area {
     --hex-w: 60px;
-    --hex-h: 55px;
+    --hex-h: 69px;
+    
     --hex-margin: 3px;
     --hex-overlap: 20px;
     --row-shift: 36px;
@@ -508,6 +538,22 @@ flex-direction: flex-start;
     transform: scale(0.9);
     transform-origin: top center;
   }
+  .bench-area{
+    max-width: 650px;
+    padding: 10px;
+  }
+  .bench-slot {
+  width: 65px;
+  height: 65px;
+}
+
+  .enemy-slot {
+    opacity: 0.45;
+    filter: grayscale(0.4) brightness(0.8);
+    transform: scale(0.95);
+  }
+
+
 }
 @media (min-width: 1800px) {
   .board-area {
@@ -517,6 +563,7 @@ flex-direction: flex-start;
     --hex-overlap: 28px;
     --row-shift: 52px;
     --board-padding: 30px 60px;
+
   }
 
   .unified-board {
