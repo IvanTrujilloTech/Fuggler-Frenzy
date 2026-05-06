@@ -75,7 +75,6 @@ const onWheel = (e) => {
 
 const onMouseDown = (e) => {
   if (e.button !== 0 && e.button !== 1) return
-  if (zoom.value <= 1) return
 
   // Permitir arrastrar personajes con click izquierdo sin iniciar paneo del tablero
   if (e.button === 0 && e.target.closest('.fuggler-unit')) return;
@@ -312,12 +311,12 @@ onBeforeUnmount(() => {
   display: none;
 }
 .board-area {
-  --hex-w: 52px;
+  --hex-w: 49px;
   --hex-h: 60px;
   --hex-margin: 2px;
   --hex-overlap: 20px;
-  --row-shift: 29px;
-  --board-padding: 8px 16px;
+  --row-shift: 27px;
+  --board-padding: 8px 14px;
   flex-grow: 1;
   min-height: 0;
   padding: 0.25rem 0.5rem;
