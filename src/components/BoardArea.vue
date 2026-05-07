@@ -137,10 +137,11 @@ const getFugglerOnCombatHex = (row, col) => {
   const q = col - Math.floor(row / 2)
   return store.combatUnits.find(u => u.pos.q === q && u.pos.r === r && !u.isDead)
 }
+
 const getUnitStyle = (unit) => {
   const r = unit.pos.r
   const c = unit.pos.q + Math.floor(r / 2)
-  
+
   return {
     top: `calc(var(--board-padding) + ${r} * (var(--hex-h) - var(--hex-overlap)))`,
     left: `calc(var(--board-padding) + ${c} * (var(--hex-w) + 2 * var(--hex-margin)) + (${r % 2 === 1 ? 'var(--row-shift)' : '0px'}))`,
@@ -310,12 +311,12 @@ onBeforeUnmount(() => {
   display: none;
 }
 .board-area {
-  --hex-w: 80px;
-  --hex-h: 92px;
-  --hex-margin: 5px;
-  --hex-overlap: 24px;
-  --row-shift: 45px;
-  --board-padding: 40px;
+  --hex-w: 49px;
+  --hex-h: 60px;
+  --hex-margin: 2px;
+  --hex-overlap: 20px;
+  --row-shift: 27px;
+  --board-padding: 8px 14px;
   flex-grow: 1;
   min-height: 0;
   padding: 0.25rem 0.5rem;
@@ -328,13 +329,7 @@ onBeforeUnmount(() => {
 .board-area::-webkit-scrollbar {
   display: none;               /* Chrome, Safari */
 }
-.slot-item {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+/* Tablero Hexagonal */
 .hex-board {
   display: flex;
   flex-direction: column;
@@ -342,10 +337,12 @@ onBeforeUnmount(() => {
   margin: 10px 0;
   position: relative;
 }
+
 .enemy-board {
   opacity: 0.8;
   transform: scale(0.9);
 }
+
 .board-title {
   color: var(--color-toxic);
   font-family: var(--title-font);
@@ -355,20 +352,25 @@ onBeforeUnmount(() => {
   margin-bottom: 20px;
   transform: rotate(-1deg);
 }
+
 .hex-row {
   display: flex;
   justify-content: flex-start;
   margin-bottom: calc(-1 * var(--hex-overlap));
 }
+
 .hex-row:nth-child(even) {
   padding-left: var(--row-shift);
 }
+
+
 .board-header {
   width: 100%;
   display: flex;
   justify-content: flex-start;
   padding: 0 20px;
 }
+
 .active-count {
   background: #222;
   padding: 10px 20px;
@@ -380,13 +382,21 @@ onBeforeUnmount(() => {
   gap: 10px;
   font-family: var(--title-font);
 }
-.count-label { color: #888; }
+
+.count-label {
+  color: #888;
+}
+
 .count-value {
   color: var(--color-toxic);
   font-family: var(--number-font);
   font-size: 1.2rem;
 }
-.count-value.at-limit { color: #ff4444; }
+
+.count-value.at-limit {
+  color: #ff4444;
+}
+
 .unified-board {
   display: flex;
   flex-direction: column;
@@ -398,10 +408,12 @@ onBeforeUnmount(() => {
   width: fit-content;
   margin: 0 auto;
 }
+
 .unified-board.is-combat {
   background: rgba(139, 0, 0, 0.1);
   box-shadow: inset 0 0 100px rgba(255,0,0,0.1);
 }
+
 .enemy-slot {
   background: repeating-linear-gradient(45deg, #3c1f1f, #3c1f1f 5px, #4a2929 5px, #4a2929 10px) !important;
   border: 2px solid rgba(255, 0, 0, 0.2);
@@ -415,6 +427,7 @@ onBeforeUnmount(() => {
   background: repeating-linear-gradient(45deg, #1f2b3c, #1f2b3c 5px, #29364a 5px, #29364a 10px) !important;
   border: 2px solid rgba(0, 255, 255, 0.1);
 }
+
 .hex-slot {
   width: var(--hex-w);
   height: var(--hex-h);
@@ -427,11 +440,13 @@ onBeforeUnmount(() => {
   justify-content: center;
   align-items: center;
 }
+
 .combat-absolute-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
+
 .combat-unit-absolute {
   position: absolute;
   width: var(--hex-w);
@@ -452,6 +467,7 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
 }
+
 .hp-bar-container {
   position: absolute;
   top: 10px;
@@ -462,14 +478,17 @@ onBeforeUnmount(() => {
   border-radius: 3px;
   overflow: hidden;
 }
+
 .hp-bar-fill {
   height: 100%;
   background: var(--color-toxic);
   transition: width 0.3s ease;
 }
+
 .is-attacking {
   animation: attack-nudge 0.3s ease-out;
 }
+
 @keyframes attack-nudge {
   0% { transform: scale(1); }
   50% { transform: scale(1.2) translateY(-10px); }
@@ -575,48 +594,25 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 20px !important;
-  padding: 10px 5px;
+  gap: 10px;
 }
 .bench-slot {
-  width: 85px !important;
-  height: 85px !important;
-  min-width: 85px !important;
-  min-height: 85px !important;
-  background: #111 !important;
-  border: 3px dashed var(--color-stitch) !important;
-  border-radius: 6px 14px 5px 10px !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  position: relative !important;
+  width: 80px;
+  height: 80px;
+  background: #111;
+  border: 3px dashed var(--color-stitch);
+  border-radius: 5px 12px 4px 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.bench-slot:empty::after {
-  content: 'Slot vacío';
-  font-size: 0.65em;
-  color: rgba(255,255,255,0.15);
-  text-align: center;
-}
-
-/* Ficha mejorada del fuggler en el banquillo */
-.bench-slot .fuggler-unit {
-  transform: scale(0.9);
-  transition: transform 0.3s;
-}
-.bench-slot:hover .fuggler-unit {
-  transform: scale(0.95);
-}
-
 @media (max-width: 600px) {
-  .bench-grid { gap: 12px !important; }
-  .bench-slot { 
-    width: 65px !important; 
-    height: 65px !important;
-    min-width: 65px !important;
-    min-height: 65px !important;
+  .board-title {
+    font-size: 1.5rem;
   }
-}
-@media (max-width: 450px) {
-  .board-title { font-size: 1.2rem; margin-bottom: 10px; }
+  .bench-slot {
+    width: 60px;
+    height: 60px;
+  }
 }
 </style>
