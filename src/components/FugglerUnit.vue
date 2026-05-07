@@ -94,4 +94,10 @@ const activeSynergyColor = computed(() => {
   z-index: 1;
   filter: drop-shadow(2px 4px 6px black);
 }
+@media (max-width: 1366px) {
+  .fuggler-image {
+    width: 90%;
+    height: 90%;
+  }
+}
 </style>

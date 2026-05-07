@@ -390,6 +390,15 @@ onUnmounted(() => {
     flex-direction: column;
     overflow-y: auto;
   }
+  .sell {         position: absolute;
+        width: 69%;
+        /* height: 142px; */
+        /* left: -21px; */
+        order: 1;
+        /* left: 0; */
+        right: 0;}
+  .synergy { order: 3; }
+  .board { order: 2; }
 }
 
 @media (max-width: 600px) {
