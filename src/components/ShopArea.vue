@@ -198,15 +198,13 @@ h3 {
 
 .shop-info {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   font-family: var(--title-font);
   font-size: 1.5rem;
-  gap: 80%;
-    flex-wrap: nowrap;        
-
   letter-spacing: 2px;
   color: #fff;
+  padding: 0 10px;
 }
 .shop-info h3 {
   white-space: nowrap;      

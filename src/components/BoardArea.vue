@@ -143,8 +143,8 @@ const getUnitStyle = (unit) => {
   const c = unit.pos.q + Math.floor(r / 2)
 
   return {
-    top: `calc(var(--board-padding) + ${r} * (var(--hex-h) - var(--hex-overlap)))`,
-    left: `calc(var(--board-padding) + ${c} * (var(--hex-w) + 2 * var(--hex-margin)) + (${r % 2 === 1 ? 'var(--row-shift)' : '0px'}))`,
+    top: `calc(var(--board-padding-v) + ${r} * (var(--hex-h) - var(--hex-overlap)))`,
+    left: `calc(var(--board-padding-h) + ${c} * (var(--hex-w) + 2 * var(--hex-margin)) + (${r % 2 === 1 ? 'var(--row-shift)' : '0px'}))`,
     zIndex: r + 10
   }
 }
@@ -316,7 +316,8 @@ onBeforeUnmount(() => {
   --hex-margin: 2px;
   --hex-overlap: 20px;
   --row-shift: 27px;
-  --board-padding: 8px 14px;
+  --board-padding-v: 8px;
+  --board-padding-h: 14px;
   flex-grow: 1;
   min-height: 0;
   padding: 0.25rem 0.5rem;
@@ -400,13 +401,15 @@ onBeforeUnmount(() => {
 .unified-board {
   display: flex;
   flex-direction: column;
-  padding: var(--board-padding);
+  padding: var(--board-padding-v) var(--board-padding-h);
   background: rgba(0,0,0,0.3);
   border-radius: 50px;
   transition: background 0.5s ease, box-shadow 0.5s ease;
   position: relative;
   width: fit-content;
   margin: 0 auto;
+  transform: scale(0.9);
+  transform-origin: center center;
 }
 
 .unified-board.is-combat {
@@ -502,7 +505,8 @@ onBeforeUnmount(() => {
     --hex-margin: 3px;
     --hex-overlap: 18px;
     --row-shift: 33px;
-    --board-padding: 30px;
+    --board-padding-v: 30px;
+    --board-padding-h: 30px;
   }
 }
 
@@ -513,7 +517,8 @@ onBeforeUnmount(() => {
     --hex-margin: 1px;
     --hex-overlap: 11px;
     --row-shift: 20px;
-    --board-padding: 20px;
+    --board-padding-v: 20px;
+    --board-padding-h: 20px;
   }
   .board-title {
     font-size: 1.2rem;
@@ -530,12 +535,13 @@ onBeforeUnmount(() => {
     --hex-margin: 3px;
     --hex-overlap: 20px;
     --row-shift: 36px;
-    --board-padding: 15px 25px;
+    --board-padding-v: 15px;
+    --board-padding-h: 25px;
   }
 
   .unified-board {
-    transform: scale(0.9);
-    transform-origin: top center;
+    transform: scale(0.85);
+    transform-origin: center center;
   }
   .bench-area{
     max-width: 650px;
@@ -561,13 +567,14 @@ onBeforeUnmount(() => {
     --hex-margin: 6px;
     --hex-overlap: 28px;
     --row-shift: 52px;
-    --board-padding: 30px 60px;
+    --board-padding-v: 30px;
+    --board-padding-h: 60px;
 
   }
 
   .unified-board {
-    transform: scale(1.15);
-    transform-origin: top center;
+    transform: scale(1.05);
+    transform-origin: center center;
   }
 }
 /* banquillo normal (cuadrado) */

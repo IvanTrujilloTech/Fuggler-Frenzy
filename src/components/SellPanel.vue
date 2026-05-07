@@ -143,11 +143,14 @@ function onDragLeave() {
 
 .sell-drop-zone {
   flex: 1;
+  border: 3px dashed #e63946;
   border-radius: 6px 18px 5px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-
+  background: rgba(230, 57, 70, 0.06);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  animation: pulse-sell 1.5s ease-in-out infinite;
   cursor: default;
   min-height: 140px;
 }
