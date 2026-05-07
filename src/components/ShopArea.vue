@@ -17,6 +17,7 @@ const SYNERGY_ICONS = {
 };
 
 const store = useGameStore();
+const xpCosts = [0, 2, 4, 8, 12, 20];
 </script>
 
 <template>
@@ -27,13 +28,37 @@ const store = useGameStore();
         <img :src="iconCoin" class="coin-icon-shop" alt="Oro" />
         {{ store.gold }}
       </h3>
-      <button
-        class="btn-reroll"
-        @click="store.rollShop(false)"
-        :disabled="store.gold < 2"
-      >
-        Reroll (2 <img :src="iconCoin" class="coin-icon-shop" alt="Oro" />)
-      </button>
+      <div class="shop-actions">
+        <button
+          class="btn-reroll"
+          @click="store.rollShop(false)"
+          :disabled="store.gold < 2"
+        >
+          Reroll (2 <img :src="iconCoin" class="coin-icon-shop" alt="Oro" />)
+        </button>
+
+        <div class="xp-section">
+          <button
+            class="btn-xp"
+            @click="store.buyXP()"
+            :disabled="store.gold < xpCosts[store.level] || store.level >= 6"
+          >
+            XP ({{ store.level >= 6 ? 'MAX' : xpCosts[store.level] }}
+            <img :src="iconCoin" class="coin-icon-shop" alt="Oro" />)
+          </button>
+          <div class="xp-display">
+            <div class="xp-level">LVL {{ store.level }}</div>
+            <div class="xp-bars">
+              <div 
+                v-for="i in 3" 
+                :key="i" 
+                class="xp-bar" 
+                :class="{ 'filled': store.xpProgress >= i }"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="shop-cards">
       <div
@@ -253,6 +278,90 @@ h3 {
   color: #222;
   box-shadow: none;
   cursor: not-allowed;
+}
+
+/* XP SECTION */
+.shop-actions {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.xp-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.4);
+  padding: 8px 15px;
+  border-radius: 8px;
+  border: 2px solid #000;
+  transform: rotate(1deg);
+}
+
+.btn-xp {
+  background: #2de2e2; /* Un azul cyan toxico */
+  color: #000;
+  border: 3px solid #000;
+  padding: 0.3rem 1rem;
+  border-radius: 4px 8px 3px 10px;
+  cursor: pointer;
+  font-family: var(--title-font);
+  font-size: 1.2rem;
+  box-shadow: 3px 3px 0 #000;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.btn-xp:not(:disabled):hover {
+  transform: scale(1.05) rotate(-2deg);
+  background: #00ffff;
+}
+
+.btn-xp:disabled {
+  background: #444;
+  color: #777;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.xp-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.xp-level {
+  font-family: var(--title-font);
+  font-size: 1rem;
+  color: #2de2e2;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.xp-bars {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.xp-bar {
+  flex: 1;
+  height: 8px;
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 2px;
+}
+
+.xp-bar.filled {
+  background: #2de2e2;
+  box-shadow: 0 0 8px rgba(45, 226, 226, 0.6);
+  border-color: #000;
+}
+
+@media (max-width: 1280px) {
+  .shop-actions { gap: 1rem; }
+  .btn-xp { font-size: 0.9rem; padding: 0.2rem 0.6rem; }
+  .xp-level { font-size: 0.8rem; }
 }
 .shop-cards {
   display: flex;

@@ -117,7 +117,7 @@ const getBoardGroupOptions = (index) => {
     put: (to, from) => {
       if (store.board[index].length >= 1) return false;
       const isFromBench = from.el.classList.contains('bench-slot');
-      if (isFromBench && store.activeBoardUnits >= 6) return false;
+      if (isFromBench && store.activeBoardUnits >= store.level) return false;
       return true;
     }
   }
@@ -170,8 +170,8 @@ onBeforeUnmount(() => {
     <div class="board-header">
       <div class="active-count">
         <span class="count-label">Fugglers:</span>
-        <span class="count-value" :class="{ 'at-limit': store.activeBoardUnits >= 6 }">
-          {{ store.activeBoardUnits }} / 6
+        <span class="count-value" :class="{ 'at-limit': store.activeBoardUnits >= store.level }">
+          {{ store.activeBoardUnits }} / {{ store.level }}
         </span>
       </div>
     </div>

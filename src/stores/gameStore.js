@@ -23,6 +23,8 @@ export const useGameStore = defineStore("game", {
     inventory: Array.from({ length: 8 }, () => null), // array fijo de 8 slots
     isDraggingFuggler: false, // true mientras se arrastra un fuggler del tablero o banquillo
     draggingUnit: null, // unidad que se esta arrastrando desde el banquillo
+    level: 1,
+    xpProgress: 0,
 
     //esto es el loot de los objetos IMPORTANTE
     planningEventActive: false,
@@ -206,6 +208,23 @@ export const useGameStore = defineStore("game", {
       }
       this.planningEventActive = false;
       this.planningOptions = [];
+    },
+
+    buyXP() {
+      if (this.level >= 6) return;
+      const costs = [0, 2, 4, 8, 12, 20];
+      const currentCost = costs[this.level];
+
+      if (this.gold < currentCost) return;
+
+      this.gold -= currentCost;
+      this.xpProgress++;
+
+      if (this.xpProgress >= 3) {
+        this.xpProgress = 0;
+        this.level++;
+      }
+      this.syncToFirebase();
     },
 
     clearTimer() {
@@ -693,9 +712,9 @@ export const useGameStore = defineStore("game", {
       const fromArray = fromZone === "bench" ? this.bench : this.board;
       const toArray = toZone === "bench" ? this.bench : this.board;
 
-      // Límite de 6 unidades en el tablero
+      // Límite de unidades en el tablero basado en el nivel
       if (toZone === "board" && fromZone !== "board") {
-        if (this.activeBoardUnits >= 6) return;
+        if (this.activeBoardUnits >= this.level) return;
       }
 
       const sourceUnit = fromArray[fromIndex];
