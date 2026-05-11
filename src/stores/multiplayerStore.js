@@ -178,6 +178,8 @@ export const useMultiplayerStore = defineStore('multiplayer', {
           if (this.gameState.status === 'PLANNING' && gameStore.phase !== 'PLANNING') {
             gameStore.startNewRound()
           }
+
+          gameStore.checkVictory()
           
           if (this.gameState.status === 'COMBAT' && gameStore.phase !== 'COMBAT' && gameStore.phase !== 'COMBAT_FINISHED') {
             gameStore.startCombat()

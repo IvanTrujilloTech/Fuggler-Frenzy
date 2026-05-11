@@ -34,6 +34,7 @@ export const useGameStore = defineStore("game", {
     combatUnits: [], // unidades activas en combate {instanceId, fuggler, side, pos: {q, r}, hp, maxHp, stats, target, lastAttack}
     combatInterval: null,
     combatTick: 0,
+    gameResult: null, // null, 'WON', 'LOST'
   }),
   getters: {
     activeBoardUnits: (state) => {
@@ -81,6 +82,29 @@ export const useGameStore = defineStore("game", {
           gold: this.gold,
           username: this.username,
         });
+
+        // Verificar derrota
+        if (this.hp <= 0 && this.gameResult === null) {
+          this.gameResult = 'LOST';
+          const audioStore = useAudioStore();
+          // audioStore.playGameOverSound(); // Si existiera
+        }
+        
+        this.checkVictory();
+      }
+    },
+    checkVictory() {
+      const multiStore = useMultiplayerStore();
+      if (!multiStore.roomId || this.gameResult !== null || this.round < 2) return;
+
+      const playerIds = Object.keys(multiStore.players);
+      if (playerIds.length < 2) return; // Necesitamos al menos 2 jugadores para una "victoria" por eliminacion
+
+      const alivePlayers = playerIds.filter(id => multiStore.players[id].hp > 0);
+      
+      // Si solo quedo yo vivo (y soy uno de los que estan vivos)
+      if (alivePlayers.length === 1 && alivePlayers[0] === multiStore.playerKey) {
+        this.gameResult = 'WON';
       }
     },
     startPlanningEvent() {
@@ -194,9 +218,9 @@ export const useGameStore = defineStore("game", {
       if (emptySlotIndex !== -1) {
         this.bench[emptySlotIndex].push({
           ...option.fuggler,
-          instanceId: crypto.randomUUID(),
+          instanceId: typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Math.random().toString(36).substring(2),
           stars: 1,
-          stats: structuredClone(option.fuggler.stats),
+          stats: JSON.parse(JSON.stringify(option.fuggler.stats)),
           items: []
         });
       }
@@ -600,9 +624,9 @@ export const useGameStore = defineStore("game", {
           const randomUnit = pool[Math.floor(Math.random() * pool.length)];
           newShop.push({
             ...randomUnit,
-            instanceId: crypto.randomUUID(),
+            instanceId: typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Math.random().toString(36).substring(2),
             stars: 1,
-            stats: structuredClone(randomUnit.stats),
+            stats: JSON.parse(JSON.stringify(randomUnit.stats)),
             items: [],
           });
         } else {
@@ -633,8 +657,8 @@ export const useGameStore = defineStore("game", {
       this.gold -= unit.cost;
       this.bench[emptySlotIndex].push({
         ...unit,
-        instanceId: crypto.randomUUID(),
-        stats: structuredClone(unit.stats)
+        instanceId: typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+        stats: JSON.parse(JSON.stringify(unit.stats))
       });
       this.shop[shopIndex] = null;
 

@@ -12,6 +12,7 @@ import AudioSettings from '../components/AudioSettings.vue'
 import iconCoin from "../assets/HUD/OBJECTS/COIN.svg";
 import ObjectArea from "../components/ObjectArea.vue";
 import PlanningEvent from "../components/PlanningEvent.vue";
+import GameOver from "../components/GameOver.vue";
 import { ARTIFACT_RECIPES, ITEM_COMPONENTS } from "../data/items";
 import { ref, computed } from "vue";
 import { useMultiplayerStore } from "../stores/multiplayerStore";
@@ -124,6 +125,8 @@ onUnmounted(() => {
 
       <ShopArea />
     </div>
+    
+    <GameOver v-if="store.gameResult" :result="store.gameResult" />
     
     <AudioSettings />
   </main>
