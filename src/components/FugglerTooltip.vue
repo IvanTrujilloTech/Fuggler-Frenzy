@@ -1,7 +1,7 @@
 <script setup>
 import { useGameStore } from "../stores/gameStore";
 import { computed, ref } from "vue";
-import { FUGGLER_TYPES } from "../data/fugglerPedia";
+import { FUGGLER_TYPES, FUGGLER_ROLES } from "../data/fugglerPedia";
 
 const store = useGameStore();
 const props = defineProps({ fuggler: { type: Object, required: true } });
@@ -9,6 +9,10 @@ const props = defineProps({ fuggler: { type: Object, required: true } });
 const reference = ref(null);
 const isHovered = ref(false);
 const hoverStyle = ref({ top: '0px', left: '0px' });
+
+const roleInfo = computed(() => {
+  return FUGGLER_ROLES[props.fuggler.role] || { name: 'Desconocido', icon: '❓', color: '#888' };
+});
 
 function onDragOver(event) { 
   // Permitir native drop SOLO si es un objeto de equipamiento
@@ -184,6 +188,10 @@ const synergiesList = computed(() => {
             <span class="fuggler-name">
               {{ fuggler.name }} {{ fuggler.stars === 3 ? '(A++)' : fuggler.stars === 2 ? '(A+)' : '(A)' }}
             </span>
+            <div class="role-badge" :style="{ backgroundColor: roleInfo.color }">
+              <span>{{ roleInfo.icon }}</span>
+              <span>{{ roleInfo.name }}</span>
+            </div>
           </div>
           <span class="fuggler-tier">Tier {{ fuggler.tier || 1 }}</span>
         </div>
@@ -336,6 +344,19 @@ const synergiesList = computed(() => {
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+.role-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+  margin-left: 5px;
 }
 .fuggler-syn-inline {
   font-size: 16px;

@@ -196,6 +196,7 @@ export const useGameStore = defineStore("game", {
           ...option.fuggler,
           instanceId: crypto.randomUUID(),
           stars: 1,
+          stats: structuredClone(option.fuggler.stats),
           items: []
         });
       }
@@ -601,6 +602,7 @@ export const useGameStore = defineStore("game", {
             ...randomUnit,
             instanceId: crypto.randomUUID(),
             stars: 1,
+            stats: structuredClone(randomUnit.stats),
             items: [],
           });
         } else {
@@ -632,6 +634,7 @@ export const useGameStore = defineStore("game", {
       this.bench[emptySlotIndex].push({
         ...unit,
         instanceId: crypto.randomUUID(),
+        stats: structuredClone(unit.stats)
       });
       this.shop[shopIndex] = null;
 
@@ -781,9 +784,12 @@ export const useGameStore = defineStore("game", {
           ? this.board[targetUnit.idx]
           : this.bench[targetUnit.idx];
       if (targetSlot.length > 0) {
-        targetSlot[0].stars += 1;
-        targetSlot[0].stats.hp *= 1.8;
-        targetSlot[0].stats.damage *= 1.8;
+        const unit = targetSlot[0];
+        unit.stars += 1;
+        const scale = unit.stats.scaling || { hp: 1.8, damage: 1.8 };
+        unit.stats.hp *= scale.hp;
+        unit.stats.damage *= scale.damage;
+        if (scale.armor) unit.stats.armor = (unit.stats.armor || 0) + scale.armor;
       }
       this.syncToFirebase();
     },
