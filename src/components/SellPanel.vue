@@ -19,8 +19,8 @@ onMounted(() => {
   Sortable.create(sellZoneEl.value, {
     group: {
       name: 'fugglers',
-      // solo se aceptan drops que vengan de un bench-slot
-      put: (to, from) => from.el.classList.contains('bench-slot'),
+      // se aceptan drops que vengan de un bench-slot o board-slot
+      put: (to, from) => from.el.classList.contains('bench-slot') || from.el.classList.contains('board-slot'),
       pull: false,
     },
     onAdd(evt) {

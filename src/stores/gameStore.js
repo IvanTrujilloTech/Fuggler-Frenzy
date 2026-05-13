@@ -22,7 +22,7 @@ export const useGameStore = defineStore("game", {
     boardEnemy: Array.from({ length: 21 }, () => []), // 21 slots del tablero enemigo
     inventory: Array.from({ length: 8 }, () => null), // array fijo de 8 slots
     isDraggingFuggler: false, // true mientras se arrastra un fuggler del tablero o banquillo
-    draggingUnit: null, // unidad que se esta arrastrando desde el banquillo
+    draggingUnit: null, // unidad que se esta arrastrando desde el banquillo o el tablero
     level: 1,
     xpProgress: 0,
 

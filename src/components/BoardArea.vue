@@ -216,6 +216,8 @@ onBeforeUnmount(() => {
                   :group="getBoardGroupOptions((rowIdx-4)*7 + (colIdx-1))"
                   item-key="instanceId"
                   class="hex-slot is-hex board-slot"
+                  @start="() => { store.draggingUnit = store.board[(rowIdx-4)*7 + (colIdx-1)][0] ?? null }"
+                  @end="store.draggingUnit = null"
                 >
                   <template #item="{ element }">
                     <FugglerUnit :fuggler="element" />
