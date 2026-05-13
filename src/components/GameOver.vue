@@ -29,7 +29,9 @@ const exitGame = async () => {
     <div class="result-card">
       <div class="card-inner">
         <div class="crown-icon" v-if="isVictory">👑</div>
+        <!-- <img class="imgvictoria" src="../assets/HUD/Victoria.svg" v-if="isVictory"> -->
         <div class="skull-icon" v-else>💀</div>
+        <!-- <img class="imgderrota" src="../assets/HUD/Derrota.svg" v-else> -->
         
         <h1 class="result-title">{{ isVictory ? '¡VICTORIA!' : '¡ELIMINADO!' }}</h1>
         <p class="result-subtitle">
