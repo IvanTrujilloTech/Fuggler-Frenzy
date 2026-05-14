@@ -125,7 +125,6 @@ onUnmounted(() => {
 
       <ShopArea />
     </div>
-    <GameOver result="WON" />
     
     <GameOver v-if="store.gameResult" :result="store.gameResult" />
     
