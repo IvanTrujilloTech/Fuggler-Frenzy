@@ -148,8 +148,8 @@ const exitGame = async () => {
     align-items: flex-end;
 
   }
-
-  /* .img-derrota2,
+/* 
+   .img-derrota2,
   .img-derrota1,
   .img-victoria2,
   .img-victoria1 {
@@ -164,12 +164,223 @@ const exitGame = async () => {
     bottom: 0;
     left: 0;
     z-index: 1;
-  } */
+  }  */
 }
 
+/* =========================
+   LAPTOPS PEQUEÑOS (≤1366px)
+   - Card un poco más pequeño
+   - Imágenes más cercanas
+========================= */
+@media (max-width: 1366px) {
+
+  .result-card {
+    max-width: 430px; /* 500 → ~14% reduction */
+    padding: 2.2rem 2rem;
+    transform: rotate(-1deg); /* mantener ligero slant */
+  }
+
+  .result-title {
+    font-size: 4rem;
+  }
+
+  .result-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 2.2rem;
+  }
+
+  .stats-summary {
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .value {
+    font-size: 1.6rem;
+  }
+
+  .exit-btn {
+    font-size: 1.5rem;
+    padding: 0.9rem 2.1rem;
+  }
+
+  /* =========================
+     IMÁGENES PEGADAS AL CARD
+  ========================= */
+
+  .imagenesVictoria,
+  .imagenesDerrota {
+    inset: 0px;
+  }
+
+  .img-victoria1,
+  .img-victoria2 {
+    width: 200px;
+  }
+
+  .img-victoria1 {
+    top: 5px;
+    right: 5px;
+  }
+
+  .img-victoria2 {
+    bottom: 5px;
+    left: 5px;
+  }
+
+  .img-derrota1 {
+    top: -31%;
+        left: 23%;
+        width: 220px;
+        rotate: -30deg;
+  }
+
+  .img-derrota2 {
+            bottom: 0px;
+        right: 20%;
+        width: 220px;
+  }
+}
+
+/* =========================
+   MONITORES GRANDES / 2K / 4K
+========================= */
+@media (min-width: 1920px) {
+
+  .result-card {
+    max-width: 650px;
+    padding: 4rem;
+    border-width: 5px;
+  }
+
+  .result-title {
+    font-size: 5.5rem;
+  }
+
+  .result-subtitle {
+    font-size: 1.7rem;
+  }
+
+  .stats-summary {
+    gap: 1.5rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .stat-item {
+    padding: 1.3rem;
+  }
+
+  .label {
+    font-size: 1rem;
+  }
+
+  .value {
+    font-size: 2.3rem;
+  }
+
+  .exit-btn {
+    font-size: 2rem;
+    padding: 1.2rem 3rem;
+  }
+
+  .imgvictoria,
+  .imgderrota {
+    width: 140px;
+    height: 140px;
+  }
+
+  .img-victoria1,
+  .img-victoria2,
+  .img-derrota1,
+  .img-derrota2 {
+    width:350px;
+  }
+
+  .img-victoria1 {
+    top: 10%;
+    right: 30%;
+  }
+
+  .img-victoria2 {
+    bottom: -20px;
+    left: 30%;
+  }
+
+  .img-derrota1 {
+    top: 10%;
+    left: 30%;
+    rotate: -45deg;
+  }
+
+  .img-derrota2 {
+    bottom: 0px;
+    right: 30%;
+  }
+}
+/* =========================
+   PORTÁTILES GRANDES / MONITORES MEDIOS
+========================= */
+@media (max-width: 1700px) and (min-width: 1200px) {
+
+  .result-card {
+    max-width: 520px;
+    padding: 2.5rem;
+  }
+
+  .result-title {
+    font-size: 4rem;
+  }
+
+  .result-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .stats-summary {
+    gap: 0.8rem;
+  }
+
+  .stat-item {
+    padding: 0.9rem;
+  }
+
+  .value {
+    font-size: 1.6rem;
+  }
+
+  .exit-btn {
+    font-size: 1.5rem;
+    padding: 0.9rem 2rem;
+  }
 
 
 
+  .img-victoria1,
+  .img-victoria2,
+  .img-derrota1,
+  .img-derrota2 {
+    width: 300px;
+  }
+
+  .img-victoria1 {
+    top: 2%;
+    right: 25%;
+  }
+
+  .img-victoria2 {
+    bottom: 0;
+    left: 25%;
+  }
+
+  .img-derrota1 {
+    top: 2%;
+    rotate: -45deg;
+    left: 25%;
+  }
+
+  .img-derrota2 {
+    bottom: 0px;
+    right: 35%;
+  }
+}
 .game-over-overlay {
   position: fixed;
   inset: 0;
