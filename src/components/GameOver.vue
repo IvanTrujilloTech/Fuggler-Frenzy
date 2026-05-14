@@ -26,13 +26,23 @@ const exitGame = async () => {
 
 <template>
   <div class="game-over-overlay" :class="{ 'is-victory': isVictory, 'is-defeat': !isVictory }">
+    <div class="imagenesVictoria" v-if="isVictory">
+      <img class="img-victoria1" src="../assets/HUD/FINAL_SCREEN/VICTORIA_FUGGLER_1.png">
+      <img class="img-victoria2" src="../assets/HUD/FINAL_SCREEN/VICTORIA_FUGGLER_2.png">
+    </div>
+    <div class="imagenesDerrota" v-if="!isVictory">
+      <img class="img-derrota1" src="../assets/HUD/FINAL_SCREEN/DERROTA_FUGGLER_1.png">
+      <img class="img-derrota2" src="../assets/HUD/FINAL_SCREEN/DERROTA_FUGGLER_2.png">
+    </div>
     <div class="result-card">
       <div class="card-inner">
-        <div class="crown-icon" v-if="isVictory">👑</div>
+        <div class="crown-icon" v-if="isVictory"><img class="imgvictoria"
+            src="../assets/HUD/FINAL_SCREEN/VICTORIA_CORONA.png"></div>
         <!-- <img class="imgvictoria" src="../assets/HUD/Victoria.svg" v-if="isVictory"> -->
-        <div class="skull-icon" v-else>💀</div>
+        <div class="skull-icon" v-else><img class="imgderrota" src="../assets/HUD/FINAL_SCREEN/DERROTA_CIRCULO.png">
+        </div>
         <!-- <img class="imgderrota" src="../assets/HUD/Derrota.svg" v-else> -->
-        
+
         <h1 class="result-title">{{ isVictory ? '¡VICTORIA!' : '¡ELIMINADO!' }}</h1>
         <p class="result-subtitle">
           {{ isVictory ? 'Has demostrado ser el Fuggler Maestro definitivo.' : 'Tus Fugglers han caído en combate...' }}
@@ -58,14 +68,108 @@ const exitGame = async () => {
         </button>
       </div>
     </div>
-    
+
     <div class="particles">
-        <div v-for="n in 20" :key="n" class="particle"></div>
+      <div v-for="n in 20" :key="n" class="particle"></div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.imagenesDerrota,
+.imagenesVictoria {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+}
+
+.imagenesVictoria {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.img-victoria1,
+.img-victoria2 {
+  position: absolute;
+  width: 350px;
+  z-index: 1;
+}
+
+.img-victoria1 {
+  top: 0;
+  right: 0;
+  width: 200px;
+}
+
+.img-victoria2 {
+  bottom: 0;
+  left: 0;
+}
+
+.img-derrota2,
+.img-derrota1 {
+  position: absolute;
+  width: 300px;
+}
+
+.img-derrota2 {
+  bottom: 0;
+  right: -17%;
+  z-index: 1;
+}
+
+.img-derrota1 {
+  top: 2%;
+  left: 13%;
+  width: 250px;
+  rotate: -30deg;
+
+}
+
+.imgvictoria,
+.imgderrota {
+  width: 100px;
+  height: 100px;
+}
+
+@media (max-width: 1024px) and (min-width: 768px) {
+
+  .imagenesDerrota,
+  .imagenesVictoria {
+    width: 80%;
+    position: absolute;
+    bottom: 0px;
+
+    display: flex;
+    gap: 30%;
+    justify-content: space-between;
+    align-items: flex-end;
+
+  }
+
+  /* .img-derrota2,
+  .img-derrota1,
+  .img-victoria2,
+  .img-victoria1 {
+    width: 300px;
+    top: 0;
+    right: 0;
+    z-index: 1;
+  }
+
+  .img-derrota1 {
+    width: 300px;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+  } */
+}
+
+
+
+
 .game-over-overlay {
   position: fixed;
   inset: 0;
@@ -91,7 +195,7 @@ const exitGame = async () => {
   border: 4px dashed var(--color-stitch);
   padding: 3rem;
   border-radius: 15px 40px 10px 50px;
-  box-shadow: 15px 15px 0px rgba(0,0,0,0.8);
+  box-shadow: 15px 15px 0px rgba(0, 0, 0, 0.8);
   max-width: 500px;
   width: 90%;
   text-align: center;
@@ -114,10 +218,9 @@ const exitGame = async () => {
   z-index: 2;
 }
 
-.crown-icon, .skull-icon {
-  font-size: 5rem;
+.crown-icon,
+.skull-icon {
   margin-bottom: 1rem;
-  filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
   animation: float 3s infinite ease-in-out;
 }
 
@@ -129,8 +232,13 @@ const exitGame = async () => {
   text-shadow: 4px 4px 0 #000;
 }
 
-.is-victory .result-title { color: var(--color-toxic); }
-.is-defeat .result-title { color: #ef4444; }
+.is-victory .result-title {
+  color: var(--color-toxic);
+}
+
+.is-defeat .result-title {
+  color: #ef4444;
+}
 
 .result-subtitle {
   font-family: 'Patrick Hand', cursive;
@@ -147,10 +255,10 @@ const exitGame = async () => {
 }
 
 .stat-item {
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   padding: 1rem;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
 }
@@ -209,23 +317,55 @@ const exitGame = async () => {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  50% { transform: translateY(-20px) rotate(5deg); }
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes moveParticle {
-  from { transform: translate(0, 0); }
-  to { transform: translate(100vw, 100vh); }
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(100vw, 100vh);
+  }
 }
 
 /* Variedad de partículas */
-.particle:nth-child(2n) { background: #a855f7; width: 6px; height: 6px; }
-.particle:nth-child(3n) { background: #ef4444; width: 8px; height: 8px; }
-.particle:nth-child(odd) { animation-duration: 15s; }
-.particle:nth-child(even) { animation-duration: 20s; }
+.particle:nth-child(2n) {
+  background: #a855f7;
+  width: 6px;
+  height: 6px;
+}
+
+.particle:nth-child(3n) {
+  background: #ef4444;
+  width: 8px;
+  height: 8px;
+}
+
+.particle:nth-child(odd) {
+  animation-duration: 15s;
+}
+
+.particle:nth-child(even) {
+  animation-duration: 20s;
+}
 </style>
