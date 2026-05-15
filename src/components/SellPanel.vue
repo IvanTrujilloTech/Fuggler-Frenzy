@@ -56,16 +56,8 @@ function onDragLeave() {
 
 <template>
   <div class="sell-panel">
-    <div
-      class="sell-drop-wrapper"
-      @dragenter="onDragEnter"
-      @dragleave="onDragLeave"
-    >
-      <div
-        ref="sellZoneEl"
-        class="sell-drop-zone"
-        :class="{ 'sell-drop-zone--over': isDragOver }"
-      >
+    <div class="sell-drop-wrapper" @dragenter="onDragEnter" @dragleave="onDragLeave">
+      <div ref="sellZoneEl" class="sell-drop-zone" :class="{ 'sell-drop-zone--over': isDragOver }">
         <div class="sell-drop-inner">
           <span class="sell-label">{{ isDragOver ? '¡Suelta!' : 'Arrastra\naquí' }}</span>
         </div>
@@ -84,14 +76,13 @@ function onDragLeave() {
   justify-content: center;
   gap: 0.75rem;
   padding: 1rem 0.2rem;
-  background: repeating-linear-gradient(
-    135deg,
-    #1a0d0d,
-    #1a0d0d 8px,
-    #200f0f 8px,
-    #200f0f 16px
-  );
+  background: repeating-linear-gradient(135deg,
+      #1a0d0d,
+      #1a0d0d 8px,
+      #200f0f 8px,
+      #200f0f 16px);
   border-left: 5px dashed #e63946;
+  border-bottom: 5px dashed #e63946;
   box-shadow: -6px 0 20px rgba(230, 57, 70, 0.2);
 }
 
@@ -143,14 +134,12 @@ function onDragLeave() {
 
 .sell-drop-zone {
   flex: 1;
-  border: 3px dashed #e63946;
+
   border-radius: 6px 18px 5px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(230, 57, 70, 0.06);
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-  animation: pulse-sell 1.5s ease-in-out infinite;
   cursor: default;
   min-height: 140px;
 }
@@ -159,16 +148,17 @@ function onDragLeave() {
   .sell-drop-zone {
     min-height: 0;
     height: 100%;
-    width:30%;
+    width: 30%;
   }
-  .sell{
-            position: absolute;
-        width: 52%;
-        height: 316px;
-        /* left: -21px; */
-        order: 1;
-        /* left: 0; */
-        right: 0;
+
+  .sell {
+    position: absolute;
+    width: 52%;
+    height: 316px;
+    /* left: -21px; */
+    order: 1;
+    /* left: 0; */
+    right: 0;
   }
 }
 
@@ -181,8 +171,15 @@ function onDragLeave() {
 }
 
 @keyframes pulse-sell {
-  0%, 100% { box-shadow: 0 0 8px rgba(230, 57,  70, 0.2); }
-  50%       { box-shadow: 0 0 22px rgba(230, 57, 70, 0.6); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(230, 57, 70, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 22px rgba(230, 57, 70, 0.6);
+  }
 }
 
 .sell-drop-inner {
@@ -202,7 +199,7 @@ function onDragLeave() {
 }
 
 .sell-drop-zone--over .sell-icon {
-      align-items: stretch;
+  align-items: stretch;
   transform: scale(1.3) rotate(-10deg);
 }
 

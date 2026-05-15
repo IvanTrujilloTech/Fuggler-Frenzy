@@ -26,14 +26,17 @@ export const FUGGLER_TYPES = {
     bonuses: { 2: '+15% Crit', 4: '+40% Crit', 6: '+80% Crit' }
   }
 };
-
+import TANQUE from '../assets/HUD/CATEGORIES/TANQUE.png';
+import ASESINO from '../assets/HUD/CATEGORIES/ASESINO.png';
+import LUCHADOR from '../assets/HUD/CATEGORIES/LUCHADOR.png';
+import HOSTIGADOR from '../assets/HUD/CATEGORIES/HOSTIGADOR.png';
 // utilidad para crear estadisticas base segun el tier
 // ROLES de los Fugglers
 export const FUGGLER_ROLES = {
-  TANQUE: { name: 'Tanque', color: '#618BB3' },
-  ASESINO: { name: 'Asesino', color: '#AA3B3D' },
-  LUCHADOR: { name: 'Luchador', color: '#61B361' },
-  HOSTIGADOR: { name: 'Hostigador', color: '#FFEC58' }
+  TANQUE: { name: 'Tanque', color: '#618BB3', img: TANQUE },
+  ASESINO: { name: 'Asesino', color: '#AA3B3D', img: ASESINO },
+  LUCHADOR: { name: 'Luchador', color: '#61B361', img: LUCHADOR },
+  HOSTIGADOR: { name: 'Hostigador', color: '#FFEC58', img: HOSTIGADOR }
 };
 
 // Utilidades para definir estadisticas base por rol y tier
@@ -156,7 +159,7 @@ export const FUGGLERS = [
 
   // 15 raros (coste 2)
   createFuggler('r1', 'Ibai', ['D', 'B'], 2, 2, 'TANQUE', imgIbai, { hp: 1200 }),
- // Corregido para que customStats se mezcle bien
+  // Corregido para que customStats se mezcle bien
   createFuggler('r2', 'Ludopatia', ['D', 'R'], 2, 2, 'HOSTIGADOR', imgLudopatia),
   createFuggler('r3', 'McNugget', ['D', 'I'], 2, 2, 'LUCHADOR', imgMcNugget),
   createFuggler('r4', 'Atomic Fuggler', ['D', 'C'], 2, 2, 'ASESINO', imgatomicfuggler),

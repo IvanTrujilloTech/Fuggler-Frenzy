@@ -14,17 +14,17 @@ const roleInfo = computed(() => {
   return FUGGLER_ROLES[props.fuggler.role] || { name: 'Desconocido', icon: '❓', color: '#888' };
 });
 
-function onDragOver(event) { 
+function onDragOver(event) {
   // Permitir native drop SOLO si es un objeto de equipamiento
   if (event.dataTransfer.types.includes("item")) {
-    event.preventDefault(); 
+    event.preventDefault();
   }
 }
 
 function onDrop(event) {
   const itemData = event.dataTransfer.getData("item");
   if (!itemData) return; // Si no es item, dejar que vuedraggable actúe
-  
+
   event.preventDefault();
   const item = JSON.parse(itemData);
   const success = store.equipItemToFuggler(props.fuggler.instanceId, item);
@@ -76,11 +76,11 @@ function onMouseLeave() {
 
 const computedStats = computed(() => {
   if (!props.fuggler.stats) return {};
-  
+
   const base = { ...props.fuggler.stats };
   const modified = { ...props.fuggler.stats };
   const activeSynergies = store.activeSynergies || {};
-  
+
   // Las sinergias SOLO afectan a unidades del Board
   const isOnBoard = store.board.some(slot => slot.some(u => u.instanceId === props.fuggler.instanceId));
 
@@ -137,20 +137,20 @@ const synergiesList = computed(() => {
   return props.fuggler.types.map(t => {
     const count = store.activeSynergies ? (store.activeSynergies[t] || 0) : 0;
     const typeDef = FUGGLER_TYPES[t];
-    
+
     let level = 0;
     if (typeDef) {
-       if (count >= typeDef.breakpoints[0]) {
-         level = 1;
-       }
-       if (typeDef.breakpoints[1] && count >= typeDef.breakpoints[1]) {
-         level = 2;
-       }
-       if (typeDef.breakpoints[2] && count >= typeDef.breakpoints[2]) {
-         level = 3;
-       }
+      if (count >= typeDef.breakpoints[0]) {
+        level = 1;
+      }
+      if (typeDef.breakpoints[1] && count >= typeDef.breakpoints[1]) {
+        level = 2;
+      }
+      if (typeDef.breakpoints[2] && count >= typeDef.breakpoints[2]) {
+        level = 3;
+      }
     }
-    
+
     return {
       type: t,
       name: typeDef ? typeDef.name : t,
@@ -163,17 +163,14 @@ const synergiesList = computed(() => {
 </script>
 
 <template>
-  <div class="tooltip-wrapper" ref="reference" 
-       @dragover="onDragOver" 
-       @drop="onDrop"
-       @mouseenter="onMouseEnter" 
-       @mouseleave="onMouseLeave">
-    
+  <div class="tooltip-wrapper" ref="reference" @dragover="onDragOver" @drop="onDrop" @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave">
+
     <slot></slot> <!-- Permite a FugglerUnit renderizar su interior sin reemplazarlo -->
 
     <div v-if="fuggler.items && fuggler.items.length > 0" class="equipped-items-side">
-      <div v-for="item in fuggler.items" :key="item.instanceId"
-        class="equipped-item-big" :title="`${item.name}\n${item.description}`" @click.stop="unequipItem(item)">
+      <div v-for="item in fuggler.items" :key="item.instanceId" class="equipped-item-big"
+        :title="`${item.name}\n${item.description}`" @click.stop="unequipItem(item)">
         <img :src="item.img" :alt="item.name" />
         <span class="item-effect">{{ item.description }}</span>
       </div>
@@ -181,29 +178,35 @@ const synergiesList = computed(() => {
 
     <Teleport to="body">
       <div v-if="isHovered" class="fuggler-stats-hover" :style="hoverStyle">
-        
+
         <!-- Fila 1: Nombre con Evolución (A, A+, A++), Tier -->
         <div class="hover-header">
           <div class="name-synergy-group">
             <span class="fuggler-name">
               {{ fuggler.name }} {{ fuggler.stars === 3 ? '(A++)' : fuggler.stars === 2 ? '(A+)' : '(A)' }}
             </span>
-            <div class="role-badge" :style="{ backgroundColor: roleInfo.color }">
-              <span>{{ roleInfo.icon }}</span>
-              <span>{{ roleInfo.name }}</span>
-            </div>
+
           </div>
           <span class="fuggler-tier">Tier {{ fuggler.tier || 1 }}</span>
         </div>
 
         <!-- Fila 2: Sinergias (Solo Iconos) -->
         <div class="hover-synergies" v-if="synergiesList.length > 0">
-          <div v-for="syn in synergiesList" :key="syn.type" class="synergy-badge" :style="{
-             '--syn-color': syn.color,
-             'box-shadow': syn.level > 0 ? `0 0 ${syn.level * 6}px ${syn.color}` : 'none',
-             'border-color': syn.level > 0 ? syn.color : 'rgba(255,255,255,0.2)'
-          }">
-            <img v-if="syn.icon" :src="syn.icon" class="syn-icon" />
+          <div class="synergies-group">
+            <div v-for="syn in synergiesList" :key="syn.type" class="synergy-badge" :style="{
+              '--syn-color': syn.color,
+              'box-shadow': syn.level > 0
+                ? `0 0 ${syn.level * 6}px ${syn.color}`
+                : 'none',
+              'border-color': syn.level > 0
+                ? syn.color
+                : 'rgba(255,255,255,0.2)'
+            }">
+              <img v-if="syn.icon" :src="syn.icon" class="syn-icon" />
+            </div>
+          </div>
+          <div class="role-badge">
+            <img :src="roleInfo.img" class="role-icon" />
           </div>
         </div>
 
@@ -221,7 +224,8 @@ const synergiesList = computed(() => {
           </div>
           <div class="stat-col">
             <span class="stat-lbl">V.Atq</span>
-            <strong :class="{ buffed: computedStats.attackSpeed?.isBuffed }">{{ computedStats.attackSpeed?.value }}</strong>
+            <strong :class="{ buffed: computedStats.attackSpeed?.isBuffed }">{{ computedStats.attackSpeed?.value
+            }}</strong>
           </div>
           <div class="stat-col">
             <span class="stat-lbl">Armor</span>
@@ -238,7 +242,8 @@ const synergiesList = computed(() => {
         <!-- Fila 4: Coste -->
         <div class="hover-footer">
           <span class="gold-lbl">Precio de Venta</span>
-          <div class="gold-cost"><img src="../assets/HUD/OBJECTS/COIN.svg" alt="moneda">{{ store.getRealCost(fuggler) }}</div>
+          <div class="gold-cost"><img src="../assets/HUD/OBJECTS/COIN.svg" alt="moneda">{{ store.getRealCost(fuggler) }}
+          </div>
         </div>
 
         <!-- Fila 5: Objetos Equipados -->
@@ -247,10 +252,11 @@ const synergiesList = computed(() => {
           <div class="hover-items">
             <span class="items-title">Objetos Equipados</span>
             <div class="items-list">
-              <div v-for="item in fuggler.items" :key="'tt-'+item.instanceId" class="hover-item-row">
+              <div v-for="item in fuggler.items" :key="'tt-' + item.instanceId" class="hover-item-row">
                 <img :src="item.img" />
                 <div class="hover-item-text">
-                  <span class="hover-item-name" :class="{'text-gold': item.type === 'artifact'}">{{ item.name }}</span>
+                  <span class="hover-item-name" :class="{ 'text-gold': item.type === 'artifact' }">{{ item.name
+                    }}</span>
                   <span class="hover-item-desc">{{ item.description }}</span>
                 </div>
               </div>
@@ -264,6 +270,63 @@ const synergiesList = computed(() => {
 </template>
 
 <style scoped>
+.hover-synergies {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+
+.synergies-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* separación ENTRE sinergias */
+}
+
+.role-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-left: 40px;
+  flex-shrink: 0;
+}
+
+.role-icon {
+  width: 100px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+
+.synergy-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 45px;
+  height: 45px;
+
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  border-radius: 10px;
+
+  transition: all 0.2s ease;
+  backdrop-filter: blur(3px);
+}
+
+
+.syn-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+
+}
+
 .tooltip-wrapper {
   position: relative;
   width: 100%;
@@ -271,42 +334,73 @@ const synergiesList = computed(() => {
 }
 
 .equipped-items-side {
-  position: absolute; top: 50%; left: -60px; transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: 6px; z-index: 25;
+  position: absolute;
+  top: 50%;
+  left: -60px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 25;
 }
 
 .equipped-item-big {
-  width: 48px; height: 48px; border-radius: 8px;
-  border: 2px solid rgba(255, 215, 0, 0.9); background: rgba(0,0,0,0.95);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.6); position: relative;
-  transition: all 0.2s; padding: 3px;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 215, 0, 0.9);
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  position: relative;
+  transition: all 0.2s;
+  padding: 3px;
 }
 
 .equipped-item-big:hover {
-  transform: scale(1.2); border-color: #ffd700;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7); z-index: 30;
+  transform: scale(1.2);
+  border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+  z-index: 30;
 }
 
-.equipped-item-big:active { transform: scale(0.95); }
+.equipped-item-big:active {
+  transform: scale(0.95);
+}
 
 .equipped-item-big img {
-  width: 34px; height: 34px; object-fit: contain;
-  pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .item-effect {
-  position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
-  background: rgba(0,0,0,0.95); color: #4ade80; font-size: 9px;
-  padding: 2px 5px; border-radius: 3px; white-space: nowrap;
-  border: 1px solid rgba(74,222,128,0.5); pointer-events: none;
-  opacity: 0; transition: opacity 0.2s; z-index: 35;
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: #4ade80;
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  border: 1px solid rgba(74, 222, 128, 0.5);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 35;
 }
 
-.equipped-item-big:hover .item-effect { opacity: 1; }
-</style>
+.equipped-item-big:hover .item-effect {
+  opacity: 1;
+}
 
-<style>
 /* Estilos globales para el Teleport */
 .fuggler-stats-hover {
   font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -318,10 +412,10 @@ const synergiesList = computed(() => {
   border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
   z-index: 10000;
   pointer-events: none;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
   min-width: 300px;
 }
 
@@ -329,15 +423,17 @@ const synergiesList = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 6px;
 }
+
 .name-synergy-group {
   display: flex;
   align-items: baseline;
   gap: 6px;
   flex-wrap: wrap;
 }
+
 .fuggler-name {
   font-size: 20px;
   font-weight: 900;
@@ -345,23 +441,14 @@ const synergiesList = computed(() => {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-.role-badge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: bold;
-  color: #000;
-  padding: 2px 8px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
-  margin-left: 5px;
-}
+
+
+
 .fuggler-syn-inline {
   font-size: 16px;
   font-weight: bold;
 }
+
 .fuggler-tier {
   font-size: 16px;
   font-weight: bold;
@@ -371,61 +458,44 @@ const synergiesList = computed(() => {
   border-radius: 12px;
 }
 
-.hover-synergies {
-  display: flex;
-  gap: 10px;
-  margin-top: 4px;
-}
-.synergy-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.2);
-  padding: 4px 8px;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-.syn-icon {
-  width: 20px;
-  height: 20px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-}
-.syn-label {
-  font-size: 14px;
-  font-weight: bold;
-}
+
+
+
 
 .separator {
   border: none;
-  border-top: 1px solid rgba(255,255,255,0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
   margin: 2px 0;
 }
 
 .hover-stats-row {
   display: flex;
   justify-content: space-between;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   padding: 12px;
   border-radius: 8px;
   gap: 14px;
 }
+
 .stat-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
 }
+
 .stat-lbl {
   font-size: 13px;
   color: #a855f7;
   text-transform: uppercase;
   font-weight: bold;
 }
+
 .stat-col strong {
   font-size: 18px;
   color: #fff;
 }
+
 .stat-col strong.buffed {
   color: #10b981;
 }
@@ -438,19 +508,22 @@ const synergiesList = computed(() => {
   font-size: 16px;
   font-weight: bold;
 }
+
 .gold-lbl {
   color: #9ca3af;
 }
+
 .gold-cost {
-display: flex;
-align-items: center;
-gap: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   color: #fbbf24;
 }
+
 .gold-cost img {
-width: 35px;
-height: 25px;
-object-fit: contain;
+  width: 35px;
+  height: 25px;
+  object-fit: contain;
 }
 
 /* Items in tooltip */
@@ -459,44 +532,52 @@ object-fit: contain;
   flex-direction: column;
   gap: 8px;
 }
+
 .items-title {
   color: #9ca3af;
   font-size: 13px;
   font-weight: bold;
   text-transform: uppercase;
 }
+
 .items-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+
 .hover-item-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   padding: 6px;
   border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .hover-item-row img {
   width: 28px;
   height: 28px;
   object-fit: contain;
 }
+
 .hover-item-text {
   display: flex;
   flex-direction: column;
 }
+
 .hover-item-name {
   font-size: 12px;
   font-weight: bold;
   color: #fff;
 }
+
 .hover-item-desc {
   font-size: 11px;
   color: #4ade80;
 }
+
 .text-gold {
   color: #ffd700 !important;
 }
