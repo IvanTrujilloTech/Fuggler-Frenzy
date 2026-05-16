@@ -50,7 +50,7 @@ function onDragLeaveSlot(index) {
 function onDropSlot(event, targetItem, targetIndex) {
   event.preventDefault();
   onDragLeaveSlot(targetIndex);
-  
+
   const itemData = event.dataTransfer.getData("item");
   if (!itemData) return;
   const sourceItem = JSON.parse(itemData);
@@ -67,7 +67,7 @@ function onDropSlot(event, targetItem, targetIndex) {
       if (sourceIndex !== -1) {
         store.inventory[sourceIndex] = null;
       }
-      
+
       // Crear artefacto en target
       store.inventory[targetIndex] = {
         ...result,
@@ -94,29 +94,21 @@ function onDropSlot(event, targetItem, targetIndex) {
 <template>
   <div class="object-area">
     <div class="inventory-grid">
-      <div 
-        v-for="(item, index) in store.inventory" 
-        :key="index"
-        class="slot-wrapper"
-        @dragover="e => onDragOverSlot(e, item, index)"
-        @dragleave="onDragLeaveSlot(index)"
-        @drop="e => onDropSlot(e, item, index)"
-      >
+      <div v-for="(item, index) in store.inventory" :key="index" class="slot-wrapper"
+        @dragover="e => onDragOverSlot(e, item, index)" @dragleave="onDragLeaveSlot(index)"
+        @drop="e => onDropSlot(e, item, index)">
         <!-- Slot Vacío -->
         <div v-if="!item" class="object-slot empty"></div>
-        
+
         <!-- Slot Ocupado -->
-        <div v-else 
-             class="object-slot full"
-             draggable="true"
-             @dragstart="e => onDragStart(e, item, index)"
-             @dragend="onDragEnd">
+        <div v-else class="object-slot full" draggable="true" @dragstart="e => onDragStart(e, item, index)"
+          @dragend="onDragEnd">
           <img :src="item.img" />
         </div>
 
         <!-- Tooltip Normal del Objeto (solo si no estamos combinando aquí) -->
         <div class="object-tooltip" v-if="item && (hoveredSlot !== index || !previewArtifact)">
-          <div class="tooltip-name" :class="{'text-gold': item.type === 'artifact'}">{{ item.name }}</div>
+          <div class="tooltip-name" :class="{ 'text-gold': item.type === 'artifact' }">{{ item.name }}</div>
           <div class="tooltip-desc">{{ item.description }}</div>
           <div v-if="item.lore" class="tooltip-lore">"{{ item.lore }}"</div>
         </div>
@@ -151,8 +143,8 @@ function onDropSlot(event, targetItem, targetIndex) {
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   max-height: 400px;
-  overflow: hidden;
-  background: rgba(0,0,0,0.2);
+  overflow: visible;
+  background: rgba(0, 0, 0, 0.2);
   padding: 8px;
   border-radius: 12px;
   border: 2px solid #2a251f;
@@ -185,7 +177,7 @@ function onDropSlot(event, targetItem, targetIndex) {
 
 .object-slot.full {
   cursor: grab;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   border: 2px dashed #a855f7;
 }
 
@@ -201,7 +193,8 @@ function onDropSlot(event, targetItem, targetIndex) {
 }
 
 /* Tooltips */
-.object-tooltip, .preview-tooltip {
+.object-tooltip,
+.preview-tooltip {
   position: absolute;
   left: calc(100% + 15px);
   top: 50%;
@@ -210,11 +203,11 @@ function onDropSlot(event, targetItem, targetIndex) {
   padding: 12px;
   border-radius: 8px;
   width: 220px;
-  z-index: 1000;
+  z-index: 9999999;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
 }
 
 .object-tooltip {
@@ -223,7 +216,7 @@ function onDropSlot(event, targetItem, targetIndex) {
 
 .preview-tooltip {
   border: 2px solid #ffd700;
-  opacity: 1; 
+  opacity: 1;
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 }
 
@@ -234,7 +227,7 @@ function onDropSlot(event, targetItem, targetIndex) {
 .tooltip-name {
   color: #fff;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   margin-bottom: 4px;
   text-transform: uppercase;
 }
@@ -245,15 +238,15 @@ function onDropSlot(event, targetItem, targetIndex) {
 
 .tooltip-desc {
   color: #4ade80;
-  font-size: 0.8rem;
+  font-size: 1rem;
   margin-bottom: 6px;
 }
 
 .tooltip-lore {
   color: #94a3b8;
-  font-size: 0.7rem;
+  font-size: 1rem;
   font-style: italic;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 4px;
 }
 
@@ -264,7 +257,7 @@ function onDropSlot(event, targetItem, targetIndex) {
   text-transform: uppercase;
   font-weight: bold;
   margin-bottom: 8px;
-  border-bottom: 1px dashed rgba(255,215,0,0.5);
+  border-bottom: 1px dashed rgba(255, 215, 0, 0.5);
   padding-bottom: 4px;
   text-align: center;
 }
@@ -279,7 +272,7 @@ function onDropSlot(event, targetItem, targetIndex) {
   width: 40px;
   height: 40px;
   object-fit: contain;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 4px;
   border: 1px solid #ffd700;
   padding: 2px;

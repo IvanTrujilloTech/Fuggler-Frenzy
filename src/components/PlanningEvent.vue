@@ -17,15 +17,10 @@ function pick(option) {
       <div class="planning-card">
         <h2 class="planning-title">EVENTO DE PLANIFICACIÓN</h2>
         <p class="planning-subtitle">¡Selecciona un contenedor para obtener un Fuggler y un objeto!</p>
-        
+
         <div class="container-wrapper">
-          <div
-            v-for="(option, index) in store.planningOptions"
-            :key="option.id"
-            class="planning-container"
-            :style="{ '--delay': index * 0.1 + 's' }"
-            @click="pick(option)"
-          >
+          <div v-for="(option, index) in store.planningOptions" :key="option.id" class="planning-container"
+            :style="{ '--delay': index * 0.1 + 's' }" @click="pick(option)">
             <div class="inner-container">
               <div class="unit-preview">
                 <img :src="option.fuggler.image" class="fuggler-img" />
@@ -37,7 +32,7 @@ function pick(option) {
                 <span class="object-name">{{ option.object.name || 'Objeto' }}</span>
               </div>
             </div>
-            <div class="selection-hover">ELEGIR</div>
+            <div class="selection-hover"></div>
           </div>
         </div>
 
@@ -54,9 +49,9 @@ function pick(option) {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.85);
+  width: 100%;
+  height: 100%;
+
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -66,7 +61,7 @@ function pick(option) {
 
 .planning-card {
   background: linear-gradient(135deg, #1e1e2e 0%, #11111b 100%);
-  border: 4px solid #a855f7;
+  border: 4px dashed #a855f7;
   border-radius: 20px;
   padding: 40px;
   max-width: 900px;
@@ -115,8 +110,15 @@ function pick(option) {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .planning-container:hover {
@@ -133,7 +135,8 @@ function pick(option) {
   gap: 15px;
 }
 
-.unit-preview, .item-preview {
+.unit-preview,
+.item-preview {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -144,14 +147,12 @@ function pick(option) {
   width: 120px;
   height: 120px;
   object-fit: contain;
-  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
 }
 
 .object-img {
   width: 60px;
   height: 60px;
   object-fit: contain;
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
 }
 
 .fuggler-name {
@@ -205,15 +206,25 @@ function pick(option) {
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Transitions */
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>
