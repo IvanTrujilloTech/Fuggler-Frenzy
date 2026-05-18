@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { FUGGLERS, FUGGLER_TYPES } from '../data/fugglerPedia'
+import { FUGGLERS, FUGGLER_TYPES, FUGGLER_ROLES } from '../data/fugglerPedia'
 import { ITEM_COMPONENTS, ARTIFACT_RECIPES } from '../data/items'
 import { useAudioStore } from '../stores/audioStore'
 import FugglerUnit from '../components/FugglerUnit.vue'
@@ -20,6 +20,45 @@ const SYNERGY_ICONS = {
   R: iconRadioactivos,
   I: iconInadaptados,
   C: iconCazadores,
+}
+
+const ROLES_LORE = {
+  TANQUE: {
+    lore: "Sacos de relleno denso y botones oxidados. Absorben los golpes como esponjas rancias para que sus compañeros no pierdan los dientes en el primer asalto.",
+    stats: [
+      { label: 'Vida', value: 5 },
+      { label: 'Daño', value: 1 },
+      { label: 'Armadura', value: 5 },
+      { label: 'Ataque', value: 1 }
+    ]
+  },
+  ASESINO: {
+    lore: "Ágiles, escurridizos y con las costuras sueltas. Se infiltran para arrancarles el HP de un bocado a los objetivos más blanditos antes de que puedan parpadear.",
+    stats: [
+      { label: 'Vida', value: 1 },
+      { label: 'Daño', value: 5 },
+      { label: 'Armadura', value: 1 },
+      { label: 'Ataque', value: 5 }
+    ]
+  },
+  LUCHADOR: {
+    lore: "Brutos de combate cuerpo a cuerpo. Aguantan y devuelven puñetazos de fieltro a partes iguales. Básicamente, los matones de callejón del basurero.",
+    stats: [
+      { label: 'Vida', value: 3 },
+      { label: 'Daño', value: 3 },
+      { label: 'Armadura', value: 3 },
+      { label: 'Ataque', value: 3 }
+    ]
+  },
+  HOSTIGADOR: {
+    lore: "Especialistas en la guerra sucia y prolongada. Molestan, debilitan y envenenan tirando basura y pelusas tóxicas mientras mantienen las distancias.",
+    stats: [
+      { label: 'Vida', value: 2 },
+      { label: 'Daño', value: 4 },
+      { label: 'Armadura', value: 2 },
+      { label: 'Ataque', value: 4 }
+    ]
+  }
 }
 
 const router = useRouter()
@@ -69,6 +108,12 @@ const fugglersByType = computed(() => {
           @click="activeTab = 'items'"
         >
           Objetos
+        </button>
+        <button 
+          :class="['tab-btn', { active: activeTab === 'roles' }]" 
+          @click="activeTab = 'roles'"
+        >
+          Roles
         </button>
       </div>
 
@@ -120,6 +165,39 @@ const fugglersByType = computed(() => {
             </div>
           </div>
         </div>
+
+        <!-- pestana de roles -->
+        <div v-if="activeTab === 'roles'" class="scroll-area flex-col">
+          <div class="type-section" v-for="(role, key) in FUGGLER_ROLES" :key="key">
+            <h2 class="type-title" :style="{ backgroundColor: role.color, color: '#000' }">
+              {{ role.name }}
+            </h2>
+            <div class="role-card">
+              <p class="role-lore">"{{ ROLES_LORE[key].lore }}"</p>
+              
+              <div class="role-stats-container">
+                <div class="stat-row" v-for="(stat, idx) in ROLES_LORE[key].stats" :key="idx">
+                  <span class="stat-label">{{ stat.label }}</span>
+                  <div class="stat-bars">
+                    <div 
+                      v-for="i in 5" 
+                      :key="i" 
+                      class="stat-bar" 
+                      :class="{ 'filled': stat.value >= i }"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fuggler-grid">
+                <div class="fuggler-slot is-hex" v-for="fuggler in FUGGLERS.filter(f => f.role === key)" :key="fuggler.id + '-role'">
+                  <FugglerUnit :fuggler="fuggler" :minimal="true" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
     
@@ -350,5 +428,69 @@ const fugglersByType = computed(() => {
 .flex-col {
   display: flex;
   flex-direction: column;
+}
+
+.role-card {
+  background: rgba(0,0,0,0.4);
+  padding: 15px;
+  border-radius: 8px;
+  border: 2px dashed #555;
+  margin-bottom: 15px;
+}
+
+.role-lore {
+  font-family: var(--title-font);
+  font-size: 1.2rem;
+  color: #bbb;
+  font-style: italic;
+  margin-bottom: 10px;
+  border-left: 4px solid var(--color-toxic);
+  padding-left: 15px;
+  letter-spacing: 1px;
+}
+
+.role-stats-container {
+  display: flex;
+  gap: 20px;
+  background: rgba(0,0,0,0.6);
+  padding: 12px 18px;
+  border-radius: 6px;
+  border: 1px dashed #444;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.stat-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 90px;
+}
+
+.stat-label {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.75rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-bars {
+  display: flex;
+  gap: 3px;
+}
+
+.stat-bar {
+  flex: 1;
+  height: 6px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 2px;
+}
+
+.stat-bar.filled {
+  background: var(--color-toxic);
+  box-shadow: 0 0 5px rgba(203, 240, 102, 0.4);
+  border-color: #000;
 }
 </style>
