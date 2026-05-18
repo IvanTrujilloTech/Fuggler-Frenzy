@@ -105,7 +105,7 @@ import imgLudopatia from '../assets/units/Ludopatia.png';
 import imgMcNugget from '../assets/units/McNugget.png';
 import imgMordisquitosFelpa from '../assets/units/MordisquitosFelpa.png';
 import imgMunchMunch from '../assets/units/MunchMunch.png';
-import imgMunchMunchRC from '../assets/units/MunchMunchRC.png';
+import imgMierdon from '../assets/units/mierdon.png';
 import imgOldTooth from '../assets/units/OldTooth.png';
 import imgPatriarcaColmillo from '../assets/units/PatriarcaColmillo.png';
 import imgResiduo0 from '../assets/units/Residuo0.png';
@@ -154,7 +154,7 @@ export const FUGGLERS = [
   createFuggler('c6', 'Sir Splodge-a-lot', ['B', 'I'], 1, 1, 'TANQUE', imgSirSplodge),
   createFuggler('c7', 'Indecisive Monster', ['B', 'C'], 1, 1, 'LUCHADOR', imgIndecisiveMonster),
   createFuggler('c8', 'Squidge', ['R', 'I'], 1, 1, 'HOSTIGADOR', imgSquidge),
-  createFuggler('c9', 'Munch Munch RC', ['R', 'C'], 1, 1, 'ASESINO', imgMunchMunchRC),
+  createFuggler('c9', 'Mierdón', ['R', 'C'], 1, 1, 'ASESINO', imgMierdon),
   createFuggler('c10', 'Vagabundo de Almacén', ['I', 'C'], 1, 1, 'LUCHADOR', imgVagabundo),
 
   // 15 raros (coste 2)
