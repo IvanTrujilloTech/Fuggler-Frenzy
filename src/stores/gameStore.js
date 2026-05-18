@@ -131,6 +131,25 @@ export const useGameStore = defineStore("game", {
       ];
     },
     getRandomFuggler() {
+      const probs = getShopProbabilities(this.round);
+      const roll = Math.random() * 100;
+      let tierSelected = 1;
+      let cumulative = 0;
+      
+      for (const [tier, p] of Object.entries(probs)) {
+        cumulative += p;
+        if (roll <= cumulative) {
+          tierSelected = parseInt(tier);
+          break;
+        }
+      }
+
+      const pool = FUGGLERS.filter((f) => f.tier === tierSelected);
+      if (pool.length > 0) {
+        return pool[Math.floor(Math.random() * pool.length)];
+      }
+      
+      // Fallback por si acaso
       return FUGGLERS[Math.floor(Math.random() * FUGGLERS.length)];
     },
 
