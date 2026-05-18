@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { FUGGLERS, FUGGLER_TYPES, FUGGLER_ROLES } from '../data/fugglerPedia'
-import { FUGGLERS, FUGGLER_TYPES, FUGGLER_ROLES } from '../data/fugglerPedia'
 import { ITEM_COMPONENTS, ARTIFACT_RECIPES } from '../data/items'
 import { useAudioStore } from '../stores/audioStore'
 import FugglerUnit from '../components/FugglerUnit.vue'
