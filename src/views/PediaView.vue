@@ -12,7 +12,6 @@ import iconBotones from '../assets/HUD/SINERGYS/BOTONES.svg'
 import iconRadioactivos from '../assets/HUD/SINERGYS/RADIOACTIVOS.svg'
 import iconInadaptados from '../assets/HUD/SINERGYS/INADAPTADOS.svg'
 import iconCazadores from '../assets/HUD/SINERGYS/CAZADORES.svg'
-import iconCoin from '../assets/HUD/OBJECTS/COIN.svg'
 
 const SYNERGY_ICONS = {
   D: iconDientudos,
@@ -104,12 +103,6 @@ const fugglersByType = computed(() => {
           @click="activeTab = 'items'"
         >
           Objetos
-        </button>
-        <button 
-          :class="['tab-btn', { active: activeTab === 'roles' }]" 
-          @click="activeTab = 'roles'"
-        >
-          Roles
         </button>
         <button 
           :class="['tab-btn', { active: activeTab === 'roles' }]" 
