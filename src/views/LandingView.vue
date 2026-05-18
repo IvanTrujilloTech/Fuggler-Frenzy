@@ -54,6 +54,10 @@ const startGame = () => {
     </div>
 
     <AudioSettings />
+    
+    <div class="version-footer">
+      v0.8.0 - Alpha
+    </div>
   </div>
 </template>
 
@@ -216,5 +220,18 @@ input:focus {
     min-height: 100vh;
     padding: 2rem 0;
   }
+}
+
+.version-footer {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.4);
+  font-family: var(--number-font), monospace;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  pointer-events: none;
+  z-index: 20;
 }
 </style>
