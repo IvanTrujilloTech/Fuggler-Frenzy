@@ -308,6 +308,35 @@ const fugglersByType = computed(() => {
   flex-grow: 1;
 }
 
+/* Estilos de scrollbar personalizados para navegadores WebKit (Chrome, Safari, Edge) */
+.scroll-area::-webkit-scrollbar {
+  width: 20px;
+}
+
+.scroll-area::-webkit-scrollbar-track {
+  background: repeating-linear-gradient(
+    -45deg,
+    #bada55,
+    #bada55 12px,
+    #000000 12px,
+    #000000 24px
+  );
+  border-left: 3px solid #000;
+  box-shadow: inset 2px 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.scroll-area::-webkit-scrollbar-thumb {
+  background: #8a0303; /* Color de sangre/retro para contraste */
+  border: 3px solid #000;
+  border-radius: 10px;
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.4);
+}
+
+.scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #a80505;
+  cursor: pointer;
+}
+
 .type-section {
   background: rgba(0,0,0,0.3);
   padding: 20px;
