@@ -41,7 +41,7 @@ export const FUGGLER_ROLES = {
 
 // Utilidades para definir estadisticas base por rol y tier
 const getStatsByRole = (role, tier) => {
-  const multipliers = { 1: 1, 2: 1.4, 3: 2.0, 4: 3.0 };
+  const multipliers = { 1: 1, 2: 1.4, 3: 2.0, 4: 2.6 };
   const mult = multipliers[tier] || 1;
 
   switch (role) {
@@ -158,8 +158,7 @@ export const FUGGLERS = [
   createFuggler('c10', 'Vagabundo de Almacén', ['I', 'C'], 1, 1, 'LUCHADOR', imgVagabundo),
 
   // 15 raros (coste 2)
-  createFuggler('r1', 'Ibai', ['D', 'B'], 2, 2, 'TANQUE', imgIbai, { hp: 1200 }),
-  // Corregido para que customStats se mezcle bien
+  createFuggler('r1', 'Ibai', ['D', 'B'], 2, 2, 'TANQUE', imgIbai),
   createFuggler('r2', 'Ludopatia', ['D', 'R'], 2, 2, 'HOSTIGADOR', imgLudopatia),
   createFuggler('r3', 'McNugget', ['D', 'I'], 2, 2, 'LUCHADOR', imgMcNugget),
   createFuggler('r4', 'Atomic Fuggler', ['D', 'C'], 2, 2, 'ASESINO', imgatomicfuggler),
