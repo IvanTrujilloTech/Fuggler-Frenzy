@@ -212,6 +212,13 @@ export const useMultiplayerStore = defineStore('multiplayer', {
 
     async startGame() {
       if (!this.isHost || !this.roomId) return
+      
+      const playerCount = Object.keys(this.players).length
+      if (![2, 4, 6, 8].includes(playerCount)) {
+        this.error = "No se puede iniciar la partida. Solo se permiten salas con un número par de jugadores (2, 4, 6 u 8)."
+        return
+      }
+
       const stateRef = ref(db, `rooms/${this.roomId}/gameState`)
       await update(stateRef, { status: 'PLANNING', round: 1 })
     },

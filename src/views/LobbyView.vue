@@ -5,6 +5,7 @@ import { useMultiplayerStore } from '../stores/multiplayerStore'
 import { useGameStore } from '../stores/gameStore'
 import { useAudioStore } from '../stores/audioStore'
 import AudioSettings from '../components/AudioSettings.vue'
+import imgCaution from '../assets/HUD/caution.webp'
 
 const router = useRouter()
 const multiplayerStore = useMultiplayerStore()
@@ -109,10 +110,18 @@ onMounted(async () => {
           </ul>
         </div>
 
+        <div v-if="![2, 4, 6, 8].includes(Object.keys(multiplayerStore.players).length)" class="lobby-warning">
+          <img :src="imgCaution" alt="Caution" class="warning-icon" />
+          <p>
+            Se requiere un número par de jugadores <strong>(2, 4, 6 u 8)</strong> en la lobby para poder iniciar. 
+            Esto evita que algún jugador se quede sin contrincante en la fase de pelea.
+          </p>
+        </div>
+
         <button 
           class="start-btn" 
           @click="handleStartGame" 
-          :disabled="Object.keys(multiplayerStore.players).length < 2"
+          :disabled="![2, 4, 6, 8].includes(Object.keys(multiplayerStore.players).length)"
         >
           ¡EMPEZAR JUEGO!
         </button>
@@ -337,6 +346,40 @@ input {
   font-style: italic;
   margin-top: 10px;
   animation: pulse 1.5s infinite;
+}
+
+.lobby-warning {
+  background: rgba(239, 68, 68, 0.12);
+  border: 2px dashed var(--color-stitch);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+}
+
+.warning-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  animation: pulse-warn 2s infinite;
+}
+
+.lobby-warning p {
+  color: #ff8888;
+  margin: 0;
+  font-size: 0.95rem;
+  font-family: 'Patrick Hand', cursive;
+  line-height: 1.4;
+}
+
+@keyframes pulse-warn {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
 }
 
 .error-msg { color: #ff4444; margin-top: 1rem; font-weight: bold; }
